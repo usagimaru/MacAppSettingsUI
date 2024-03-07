@@ -9,7 +9,7 @@
         <!--Settings Tab View Controller-->
         <scene sceneID="NRj-rq-jKJ">
             <objects>
-                <tabViewController tabStyle="toolbar" id="Tuz-IA-hRD" customClass="SettingsTabViewController" customModule="MacAppSettingsUI" customModuleProvider="target" sceneMemberID="viewController">
+                <tabViewController tabStyle="toolbar" id="Tuz-IA-hRD" customClass="SettingsTabViewController" customModule="MacAppSettingsUI" sceneMemberID="viewController">
                     <tabView key="tabView" type="noTabsNoBorder" id="Bel-PP-Typ">
                         <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
                         <autoresizingMask key="autoresizingMask"/>

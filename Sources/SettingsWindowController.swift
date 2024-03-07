@@ -22,7 +22,7 @@ open class SettingsWindowController: NSWindowController {
 	}
 	
 	public class func windowController(with panes: [SettingsPaneViewController]? = nil) -> Self {
-		let wc = NSStoryboard(name: Self.storyboardName, bundle: nil).instantiateController(withIdentifier: "\(Self.self)") as! Self
+		let wc = NSStoryboard(name: Self.storyboardName, bundle: Bundle(identifier: "MacAppSettingsUI")).instantiateController(withIdentifier: "\(Self.self)") as! Self
 		
 		panes?.forEach({
 			wc.tabViewController?.add(pane: $0)
