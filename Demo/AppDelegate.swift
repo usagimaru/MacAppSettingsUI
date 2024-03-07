@@ -73,3 +73,15 @@ class ViewSettingsPaneViewController: SettingsPaneViewController {}
 class ExtensionsSettingsPaneViewController: SettingsPaneViewController {}
 
 class AdvancedSettingsPaneViewController: SettingsPaneViewController {}
+
+class DemoViewController: NSViewController {
+	
+	override func viewDidLoad() {
+		super.viewDidLoad()
+		
+		DispatchQueue.main.async {
+			self.view.window?.isMovableByWindowBackground = true
+		}
+	}
+	
+}

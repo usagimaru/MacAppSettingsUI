@@ -17,15 +17,27 @@ open class SettingsWindowController: NSWindowController {
 	
 	private var isFirst: Bool = true
 	
-	public var tabViewController: SettingsTabViewController? {
-		contentViewController as? SettingsTabViewController
+	public var tabViewController: SettingsTabViewController! { didSet {
+		tabViewController.windowController = self
+	}}
+	
+	open override func windowTitle(forDocumentDisplayName displayName: String) -> String {
+		"Settings"
+	}
+	
+	open override func synchronizeWindowTitleWithDocumentName() {
+		
 	}
 	
 	public class func windowController(with panes: [SettingsPaneViewController]? = nil) -> Self {
-		let wc = NSStoryboard(name: Self.storyboardName, bundle: Bundle(identifier: "MacAppSettingsUI")).instantiateController(withIdentifier: "\(Self.self)") as! Self
+		let tabViewController = SettingsTabViewController()
+		let wc = Self.init()
+		let window = NSWindow.settingsWindow(contentViewController: tabViewController)
+		wc.window = window
+		wc.tabViewController = tabViewController
 		
 		panes?.forEach({
-			wc.tabViewController?.add(pane: $0)
+			tabViewController.add(pane: $0)
 		})
 		
 		return wc
@@ -53,4 +65,30 @@ open class SettingsWindowController: NSWindowController {
 		}
 	}
 
+}
+
+public extension NSWindow {
+	
+	class func settingsWindow(contentViewController: NSTabViewController) -> Self {
+		// Set Toolbar style to TabViewController
+		contentViewController.tabStyle = .toolbar
+		
+		let window = Self(contentViewController: contentViewController)
+		
+		// The macOS settings/preferences window is generally styled to apply basically only with a close button. The minimize button should be disabled.
+		// However, depending on a contents of a pane, resizing can be enabled as in Xcode.
+		window.styleMask = [
+			.titled,
+			.closable,
+		]
+		
+		window.titlebarSeparatorStyle = .automatic
+		// Disable full-screen and enable traditional zoom button
+		window.collectionBehavior = .fullScreenAuxiliary
+		// Not need it
+		//window.toolbarStyle = .preference
+		
+		return window
+	}
+	
 }

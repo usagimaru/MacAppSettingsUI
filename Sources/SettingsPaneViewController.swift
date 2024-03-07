@@ -11,8 +11,15 @@ open class SettingsPaneViewController: NSViewController {
 	
 	open weak var tabViewController: SettingsTabViewController?
 	
-	/// Pass to NSTabViewItem.label
-	@IBInspectable open var tabName: String?
+	/// The alias for `title`. Pass to NSTabViewItem.label
+	@IBInspectable open var tabName: String? {
+		get {
+			title
+		}
+		set {
+			title = newValue
+		}
+	}
 	
 	/// Pass to NSTabViewItem.image
 	@IBInspectable open var tabImage: NSImage?
@@ -27,10 +34,10 @@ open class SettingsPaneViewController: NSViewController {
 	// MARK: -
 	
 	public convenience init(tabViewController: SettingsTabViewController? = nil,
-					 tabName: String? = nil,
-					 tabImage: NSImage? = nil,
-					 tabIdentifier: String? = nil,
-					 isResizableView: Bool = false) {
+							tabName: String? = nil,
+							tabImage: NSImage? = nil,
+							tabIdentifier: String? = nil,
+							isResizableView: Bool = false) {
 		self.init()
 		self.tabViewController = tabViewController
 		self.tabName = tabName

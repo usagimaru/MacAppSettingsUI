@@ -16,7 +16,6 @@ public extension NSTabViewItem {
 open class SettingsTabViewController: NSTabViewController {
 	
 	open weak var windowController: SettingsWindowController?
-	open var defaultWindowTitle: String = "Settings"
 	
 	private lazy var tabViewSizes: [NSTabViewItem: NSSize] = [:]
 	
@@ -31,7 +30,6 @@ open class SettingsTabViewController: NSTabViewController {
 		super.viewWillAppear()
 		
 		resizeWindowToFit()
-		setWindowTitle(with: tabView.tabViewItem(at: 0))
 	}
 	
 	
@@ -78,7 +76,9 @@ open class SettingsTabViewController: NSTabViewController {
 			view.layoutSubtreeIfNeeded()
 			let size = view.frame.size
 			tabViewSizes[tabViewItem] = size
-			setWindowTitle(with: tabViewItem)
+			
+			// The NSViewController’s title is set as window title automatically so not need update window title manually
+			//view.window?.title = tabViewItem.label
 		}
 	}
 	
@@ -95,10 +95,6 @@ open class SettingsTabViewController: NSTabViewController {
 				view.window?.styleMask.remove(.resizable)
 			}
 		}
-	}
-	
-	private func setWindowTitle(with tabViewItem: NSTabViewItem?) {
-		view.window?.title = tabViewItem?.label ?? defaultWindowTitle
 	}
 	
 	//  参考：https://gist.github.com/ThatsJustCheesy/8148106fa7269326162d473408d3f75a
