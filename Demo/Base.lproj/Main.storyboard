@@ -1,0 +1,453 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="22505" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="ZJH-HF-2gP">
+    <dependencies>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="22505"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Window Controller-->
+        <scene sceneID="eWv-HR-tDF">
+            <objects>
+                <windowController id="ZJH-HF-2gP" sceneMemberID="viewController">
+                    <window key="window" title="Settings UI Demo" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" frameAutosaveName="" animationBehavior="default" titlebarAppearsTransparent="YES" id="2xx-Ud-cDj">
+                        <windowStyleMask key="styleMask" titled="YES"/>
+                        <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
+                        <rect key="contentRect" x="425" y="462" width="480" height="270"/>
+                        <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1415"/>
+                        <view key="contentView" id="4uv-b8-Rc0">
+                            <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
+                            <autoresizingMask key="autoresizingMask"/>
+                        </view>
+                        <connections>
+                            <outlet property="delegate" destination="ZJH-HF-2gP" id="hmI-eQ-X45"/>
+                        </connections>
+                    </window>
+                    <connections>
+                        <segue destination="idT-cN-2Kx" kind="relationship" relationship="window.shadowedContentViewController" id="s40-L5-izO"/>
+                    </connections>
+                </windowController>
+                <customObject id="A3f-dN-ONW" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1" y="-235"/>
+        </scene>
+        <!--Demo View Controller-->
+        <scene sceneID="1eI-zM-wsk">
+            <objects>
+                <viewController id="idT-cN-2Kx" customClass="DemoViewController" customModule="MacAppSettingsUI" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" id="Q6l-YB-ze4">
+                        <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="e3W-fr-jRo">
+                                <rect key="frame" x="175" y="118" width="131" height="32"/>
+                                <buttonCell key="cell" type="push" title="Open Settings…" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="9pb-zj-sQw">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="openSettings:" target="nz4-s4-BZC" id="3xx-Zs-EUh"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="e3W-fr-jRo" firstAttribute="centerX" secondItem="Q6l-YB-ze4" secondAttribute="centerX" id="7Cr-G9-Ksb"/>
+                            <constraint firstItem="e3W-fr-jRo" firstAttribute="centerY" secondItem="Q6l-YB-ze4" secondAttribute="centerY" id="A2B-0v-FOg"/>
+                        </constraints>
+                    </view>
+                </viewController>
+                <customObject id="nz4-s4-BZC" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="592" y="-235"/>
+        </scene>
+        <!--Application-->
+        <scene sceneID="JPo-4y-FX3">
+            <objects>
+                <application id="hnw-xV-0zn" sceneMemberID="viewController">
+                    <menu key="mainMenu" title="Main Menu" systemMenu="main" id="AYu-sK-qS6">
+                        <items>
+                            <menuItem title="MacAppSettingsUI" id="1Xt-HY-uBw">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <menu key="submenu" title="MacAppSettingsUI" systemMenu="apple" id="uQy-DD-JDr">
+                                    <items>
+                                        <menuItem title="About MacAppSettingsUI" id="5kV-Vb-QxS">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="orderFrontStandardAboutPanel:" target="Ady-hI-5gd" id="Exp-CZ-Vem"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="VOq-y0-SEH"/>
+                                        <menuItem title="Preferences…" keyEquivalent="," id="BOF-NM-1cW">
+                                            <connections>
+                                                <action selector="openSettings:" target="Ady-hI-5gd" id="zIC-GN-GL2"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="wFC-TO-SCJ"/>
+                                        <menuItem title="Services" id="NMo-om-nkz">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <menu key="submenu" title="Services" systemMenu="services" id="hz9-B4-Xy5"/>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="4je-JR-u6R"/>
+                                        <menuItem title="Hide MacAppSettingsUI" keyEquivalent="h" id="Olw-nP-bQN">
+                                            <connections>
+                                                <action selector="hide:" target="Ady-hI-5gd" id="PnN-Uc-m68"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Hide Others" keyEquivalent="h" id="Vdr-fp-XzO">
+                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                            <connections>
+                                                <action selector="hideOtherApplications:" target="Ady-hI-5gd" id="VT4-aY-XCT"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Show All" id="Kd2-mp-pUS">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="unhideAllApplications:" target="Ady-hI-5gd" id="Dhg-Le-xox"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="kCx-OE-vgT"/>
+                                        <menuItem title="Quit MacAppSettingsUI" keyEquivalent="q" id="4sb-4s-VLi">
+                                            <connections>
+                                                <action selector="terminate:" target="Ady-hI-5gd" id="Te7-pn-YzF"/>
+                                            </connections>
+                                        </menuItem>
+                                    </items>
+                                </menu>
+                            </menuItem>
+                            <menuItem title="File" id="dMs-cI-mzQ">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <menu key="submenu" title="File" id="bib-Uj-vzu">
+                                    <items>
+                                        <menuItem title="Close" keyEquivalent="w" id="DVo-aG-piG">
+                                            <connections>
+                                                <action selector="performClose:" target="Ady-hI-5gd" id="HmO-Ls-i7Q"/>
+                                            </connections>
+                                        </menuItem>
+                                    </items>
+                                </menu>
+                            </menuItem>
+                            <menuItem title="Edit" id="5QF-Oa-p0T">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <menu key="submenu" title="Edit" id="W48-6f-4Dl">
+                                    <items>
+                                        <menuItem title="Undo" keyEquivalent="z" id="dRJ-4n-Yzg">
+                                            <connections>
+                                                <action selector="undo:" target="Ady-hI-5gd" id="M6e-cu-g7V"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Redo" keyEquivalent="Z" id="6dh-zS-Vam">
+                                            <connections>
+                                                <action selector="redo:" target="Ady-hI-5gd" id="oIA-Rs-6OD"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="WRV-NI-Exz"/>
+                                        <menuItem title="Cut" keyEquivalent="x" id="uRl-iY-unG">
+                                            <connections>
+                                                <action selector="cut:" target="Ady-hI-5gd" id="YJe-68-I9s"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Copy" keyEquivalent="c" id="x3v-GG-iWU">
+                                            <connections>
+                                                <action selector="copy:" target="Ady-hI-5gd" id="G1f-GL-Joy"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Paste" keyEquivalent="v" id="gVA-U4-sdL">
+                                            <connections>
+                                                <action selector="paste:" target="Ady-hI-5gd" id="UvS-8e-Qdg"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Delete" id="pa3-QI-u2k">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="delete:" target="Ady-hI-5gd" id="0Mk-Ml-PaM"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="uyl-h8-XO2"/>
+                                        <menuItem title="Speech" id="xrE-MZ-jX0">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <menu key="submenu" title="Speech" id="3rS-ZA-NoH">
+                                                <items>
+                                                    <menuItem title="Start Speaking" id="Ynk-f8-cLZ">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="startSpeaking:" target="Ady-hI-5gd" id="654-Ng-kyl"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="Stop Speaking" id="Oyz-dy-DGm">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="stopSpeaking:" target="Ady-hI-5gd" id="dX8-6p-jy9"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                </items>
+                                            </menu>
+                                        </menuItem>
+                                    </items>
+                                </menu>
+                            </menuItem>
+                            <menuItem title="Window" id="aUF-d1-5bR">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <menu key="submenu" title="Window" systemMenu="window" id="Td7-aD-5lo">
+                                    <items>
+                                        <menuItem title="Minimize" keyEquivalent="m" id="OY7-WF-poV">
+                                            <connections>
+                                                <action selector="performMiniaturize:" target="Ady-hI-5gd" id="VwT-WD-YPe"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Zoom" id="R4o-n2-Eq4">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="performZoom:" target="Ady-hI-5gd" id="DIl-cC-cCs"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="eu3-7i-yIM"/>
+                                        <menuItem title="Bring All to Front" id="LE2-aR-0XJ">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="arrangeInFront:" target="Ady-hI-5gd" id="DRN-fu-gQh"/>
+                                            </connections>
+                                        </menuItem>
+                                    </items>
+                                </menu>
+                            </menuItem>
+                            <menuItem title="Help" id="wpr-3q-Mcd">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <menu key="submenu" title="Help" systemMenu="help" id="F2S-fz-NVQ">
+                                    <items>
+                                        <menuItem title="MacAppSettingsUI Help" keyEquivalent="?" id="FKE-Sm-Kum">
+                                            <connections>
+                                                <action selector="showHelp:" target="Ady-hI-5gd" id="y7X-2Q-9no"/>
+                                            </connections>
+                                        </menuItem>
+                                    </items>
+                                </menu>
+                            </menuItem>
+                        </items>
+                    </menu>
+                    <connections>
+                        <outlet property="delegate" destination="Voe-Tx-rLC" id="PrD-fu-P6m"/>
+                    </connections>
+                </application>
+                <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="MacAppSettingsUI" customModuleProvider="target"/>
+                <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
+                <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-656" y="-395"/>
+        </scene>
+        <!--General Settings Pane View Controller-->
+        <scene sceneID="uuV-za-wa0">
+            <objects>
+                <viewController storyboardIdentifier="GeneralSettingsPaneViewController" id="eei-X9-zTZ" customClass="GeneralSettingsPaneViewController" customModule="MacAppSettingsUI" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" id="jgR-zA-Rqx">
+                        <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <box boxType="custom" borderType="none" borderWidth="0.0" title="Box" titlePosition="noTitle" transparent="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Be5-qn-xll">
+                                <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
+                                <view key="contentView" id="GYx-oL-b6n">
+                                    <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <subviews>
+                                        <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="zXi-V3-UdO">
+                                            <rect key="frame" x="198" y="142" width="55" height="16"/>
+                                            <textFieldCell key="cell" lineBreakMode="clipping" title="General" id="N6F-rk-3Rw">
+                                                <font key="font" metaFont="systemBold"/>
+                                                <color key="textColor" name="tertiaryLabelColor" catalog="System" colorSpace="catalog"/>
+                                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                            </textFieldCell>
+                                        </textField>
+                                    </subviews>
+                                    <constraints>
+                                        <constraint firstItem="zXi-V3-UdO" firstAttribute="centerX" secondItem="GYx-oL-b6n" secondAttribute="centerX" id="fL4-Ih-XTM"/>
+                                        <constraint firstItem="zXi-V3-UdO" firstAttribute="centerY" secondItem="GYx-oL-b6n" secondAttribute="centerY" id="jGT-Yb-UYv"/>
+                                    </constraints>
+                                </view>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="450" id="76S-Yh-ghb"/>
+                                    <constraint firstAttribute="height" constant="300" id="irQ-HB-Et0"/>
+                                </constraints>
+                            </box>
+                        </subviews>
+                        <constraints>
+                            <constraint firstAttribute="bottom" secondItem="Be5-qn-xll" secondAttribute="bottom" id="Csj-GY-2M2"/>
+                            <constraint firstItem="Be5-qn-xll" firstAttribute="top" secondItem="jgR-zA-Rqx" secondAttribute="top" id="Kz2-Qm-60p"/>
+                            <constraint firstItem="Be5-qn-xll" firstAttribute="leading" secondItem="jgR-zA-Rqx" secondAttribute="leading" id="bI0-Mr-OdN"/>
+                            <constraint firstAttribute="trailing" secondItem="Be5-qn-xll" secondAttribute="trailing" id="qTS-MT-iyb"/>
+                        </constraints>
+                    </view>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="tabName" value="General"/>
+                        <userDefinedRuntimeAttribute type="string" keyPath="tabIdentifier" value="General"/>
+                        <userDefinedRuntimeAttribute type="image" keyPath="tabImage" value="gearshape" catalog="system"/>
+                    </userDefinedRuntimeAttributes>
+                </viewController>
+                <customObject id="5ZX-Uh-TWS" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-24" y="330"/>
+        </scene>
+        <!--View Settings Pane View Controller-->
+        <scene sceneID="hXC-LI-n2A">
+            <objects>
+                <viewController storyboardIdentifier="ViewSettingsPaneViewController" id="E5I-MC-dkL" customClass="ViewSettingsPaneViewController" customModule="MacAppSettingsUI" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" id="fXN-mv-Tjp">
+                        <rect key="frame" x="0.0" y="0.0" width="450" height="200"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <box boxType="custom" borderType="none" borderWidth="0.0" title="Box" titlePosition="noTitle" transparent="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wak-yd-ESX">
+                                <rect key="frame" x="0.0" y="0.0" width="450" height="200"/>
+                                <view key="contentView" id="Aas-wh-4bz">
+                                    <rect key="frame" x="0.0" y="0.0" width="450" height="200"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <subviews>
+                                        <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="zt2-mq-2q5">
+                                            <rect key="frame" x="207" y="92" width="36" height="16"/>
+                                            <textFieldCell key="cell" lineBreakMode="clipping" title="View" id="ZbZ-Pl-2eB">
+                                                <font key="font" metaFont="systemBold"/>
+                                                <color key="textColor" name="tertiaryLabelColor" catalog="System" colorSpace="catalog"/>
+                                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                            </textFieldCell>
+                                        </textField>
+                                    </subviews>
+                                    <constraints>
+                                        <constraint firstItem="zt2-mq-2q5" firstAttribute="centerY" secondItem="Aas-wh-4bz" secondAttribute="centerY" id="T2O-hi-mTg"/>
+                                        <constraint firstItem="zt2-mq-2q5" firstAttribute="centerX" secondItem="Aas-wh-4bz" secondAttribute="centerX" id="pO2-sp-u5y"/>
+                                    </constraints>
+                                </view>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="200" id="kuN-EX-mqk"/>
+                                    <constraint firstAttribute="width" constant="450" id="oRS-7H-9ZF"/>
+                                </constraints>
+                            </box>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="wak-yd-ESX" firstAttribute="top" secondItem="fXN-mv-Tjp" secondAttribute="top" id="7KL-Bt-hB5"/>
+                            <constraint firstAttribute="trailing" secondItem="wak-yd-ESX" secondAttribute="trailing" id="kx3-sY-w6E"/>
+                            <constraint firstAttribute="bottom" secondItem="wak-yd-ESX" secondAttribute="bottom" id="m0L-oi-sxo"/>
+                            <constraint firstItem="wak-yd-ESX" firstAttribute="leading" secondItem="fXN-mv-Tjp" secondAttribute="leading" id="rpC-fP-AhO"/>
+                        </constraints>
+                    </view>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="image" keyPath="tabImage" value="eyeglasses" catalog="system"/>
+                        <userDefinedRuntimeAttribute type="string" keyPath="tabName" value="View"/>
+                        <userDefinedRuntimeAttribute type="string" keyPath="tabIdentifier" value="View"/>
+                    </userDefinedRuntimeAttributes>
+                </viewController>
+                <customObject id="pjA-3s-MRF" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="512" y="280"/>
+        </scene>
+        <!--Extensions Settings Pane View Controller-->
+        <scene sceneID="NRl-qh-LHs">
+            <objects>
+                <viewController storyboardIdentifier="ExtensionsSettingsPaneViewController" id="Ez7-e3-MYj" customClass="ExtensionsSettingsPaneViewController" customModule="MacAppSettingsUI" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" id="JIq-bB-dZb">
+                        <rect key="frame" x="0.0" y="0.0" width="300" height="400"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <box boxType="custom" borderType="none" borderWidth="0.0" title="Box" titlePosition="noTitle" transparent="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2pV-8p-4YW">
+                                <rect key="frame" x="0.0" y="0.0" width="300" height="400"/>
+                                <view key="contentView" id="YDV-i8-qKb">
+                                    <rect key="frame" x="0.0" y="0.0" width="300" height="400"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <subviews>
+                                        <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="miP-3p-OHM">
+                                            <rect key="frame" x="111" y="184" width="78" height="32"/>
+                                            <textFieldCell key="cell" lineBreakMode="clipping" id="yly-wh-PE6">
+                                                <font key="font" metaFont="systemBold"/>
+                                                <string key="title">Extensions
+(Resizable)</string>
+                                                <color key="textColor" name="tertiaryLabelColor" catalog="System" colorSpace="catalog"/>
+                                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                            </textFieldCell>
+                                        </textField>
+                                    </subviews>
+                                    <constraints>
+                                        <constraint firstItem="miP-3p-OHM" firstAttribute="centerX" secondItem="YDV-i8-qKb" secondAttribute="centerX" id="Vfq-7P-Tqz"/>
+                                        <constraint firstItem="miP-3p-OHM" firstAttribute="centerY" secondItem="YDV-i8-qKb" secondAttribute="centerY" id="dni-45-DZK"/>
+                                    </constraints>
+                                </view>
+                                <constraints>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="300" id="BTj-87-3Hc"/>
+                                    <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="400" id="GYw-7g-KrD"/>
+                                    <constraint firstAttribute="width" relation="lessThanOrEqual" constant="600" id="d3I-mK-7uX"/>
+                                    <constraint firstAttribute="height" relation="lessThanOrEqual" constant="700" id="s1q-xh-DWa"/>
+                                </constraints>
+                            </box>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="2pV-8p-4YW" firstAttribute="leading" secondItem="JIq-bB-dZb" secondAttribute="leading" id="PMf-IS-Q8l"/>
+                            <constraint firstAttribute="trailing" secondItem="2pV-8p-4YW" secondAttribute="trailing" id="k12-s5-re2"/>
+                            <constraint firstItem="2pV-8p-4YW" firstAttribute="top" secondItem="JIq-bB-dZb" secondAttribute="top" id="olZ-Sa-bQt"/>
+                            <constraint firstAttribute="bottom" secondItem="2pV-8p-4YW" secondAttribute="bottom" id="pr6-rC-tD4"/>
+                        </constraints>
+                    </view>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="boolean" keyPath="isResizableView" value="YES"/>
+                        <userDefinedRuntimeAttribute type="image" keyPath="tabImage" value="puzzlepiece.extension" catalog="system"/>
+                        <userDefinedRuntimeAttribute type="string" keyPath="tabName" value="Extensions"/>
+                        <userDefinedRuntimeAttribute type="string" keyPath="tabIdentifier" value="Extensions"/>
+                    </userDefinedRuntimeAttributes>
+                </viewController>
+                <customObject id="Wfw-05-drV" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-99" y="870"/>
+        </scene>
+        <!--Advanced Settings Pane View Controller-->
+        <scene sceneID="dnO-s9-YBk">
+            <objects>
+                <viewController storyboardIdentifier="AdvancedSettingsPaneViewController" id="KrI-14-2wn" customClass="AdvancedSettingsPaneViewController" customModule="MacAppSettingsUI" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" id="OaP-aE-W3n">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="150"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <box boxType="custom" borderType="none" borderWidth="0.0" title="Box" titlePosition="noTitle" transparent="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Bds-2Y-ZDL">
+                                <rect key="frame" x="0.0" y="0.0" width="600" height="150"/>
+                                <view key="contentView" id="Rzj-go-KAq">
+                                    <rect key="frame" x="0.0" y="0.0" width="600" height="150"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <subviews>
+                                        <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="jpD-5J-dXp">
+                                            <rect key="frame" x="266" y="67" width="69" height="16"/>
+                                            <textFieldCell key="cell" lineBreakMode="clipping" title="Advanced" id="KQ0-Va-YCY">
+                                                <font key="font" metaFont="systemBold"/>
+                                                <color key="textColor" name="tertiaryLabelColor" catalog="System" colorSpace="catalog"/>
+                                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                            </textFieldCell>
+                                        </textField>
+                                    </subviews>
+                                    <constraints>
+                                        <constraint firstItem="jpD-5J-dXp" firstAttribute="centerX" secondItem="Rzj-go-KAq" secondAttribute="centerX" id="gzl-E3-p8E"/>
+                                        <constraint firstItem="jpD-5J-dXp" firstAttribute="centerY" secondItem="Rzj-go-KAq" secondAttribute="centerY" id="upD-aq-bQR"/>
+                                    </constraints>
+                                </view>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="600" id="bTx-f6-UDr"/>
+                                    <constraint firstAttribute="height" constant="150" id="pFT-Ju-r84"/>
+                                </constraints>
+                            </box>
+                        </subviews>
+                        <constraints>
+                            <constraint firstAttribute="bottom" secondItem="Bds-2Y-ZDL" secondAttribute="bottom" id="kYR-F0-Am5"/>
+                            <constraint firstAttribute="trailing" secondItem="Bds-2Y-ZDL" secondAttribute="trailing" id="oI0-z6-ukA"/>
+                            <constraint firstItem="Bds-2Y-ZDL" firstAttribute="top" secondItem="OaP-aE-W3n" secondAttribute="top" id="pLo-kU-oWL"/>
+                            <constraint firstItem="Bds-2Y-ZDL" firstAttribute="leading" secondItem="OaP-aE-W3n" secondAttribute="leading" id="zRP-c6-JSJ"/>
+                        </constraints>
+                    </view>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="image" keyPath="tabImage" value="gearshape.2" catalog="system"/>
+                        <userDefinedRuntimeAttribute type="string" keyPath="tabName" value="Advanced"/>
+                        <userDefinedRuntimeAttribute type="string" keyPath="tabIdentifier" value="Advanced"/>
+                    </userDefinedRuntimeAttributes>
+                </viewController>
+                <customObject id="okD-2h-D5p" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="512" y="745"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="eyeglasses" catalog="system" width="23" height="10"/>
+        <image name="gearshape" catalog="system" width="16" height="16"/>
+        <image name="gearshape.2" catalog="system" width="20" height="16"/>
+        <image name="puzzlepiece.extension" catalog="system" width="19" height="15"/>
+    </resources>
+</document>
