@@ -21,7 +21,7 @@ open class SettingsWindowController: NSWindowController {
 		contentViewController as? SettingsTabViewController
 	}
 	
-	class func windowController(with panes: [SettingsPaneViewController]? = nil) -> Self {
+	public class func windowController(with panes: [SettingsPaneViewController]? = nil) -> Self {
 		let wc = NSStoryboard(name: Self.storyboardName, bundle: nil).instantiateController(withIdentifier: "\(Self.self)") as! Self
 		
 		panes?.forEach({

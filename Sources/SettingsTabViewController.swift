@@ -37,13 +37,13 @@ open class SettingsTabViewController: NSTabViewController {
 	
 	// MARK: -
 	
-	func set(panes: [SettingsPaneViewController]) {
+	open func set(panes: [SettingsPaneViewController]) {
 		panes.forEach {
 			add(pane: $0)
 		}
 	}
 	
-	func add(pane: SettingsPaneViewController) {
+	open func add(pane: SettingsPaneViewController) {
 		pane.tabViewController = self
 		let item = NSTabViewItem(viewController: pane)
 		item.label = pane.tabName ?? ""
@@ -52,7 +52,7 @@ open class SettingsTabViewController: NSTabViewController {
 		addTabViewItem(item)
 	}
 	
-	func insert(pane: SettingsPaneViewController, at index: Int) {
+	open func insert(pane: SettingsPaneViewController, at index: Int) {
 		pane.tabViewController = self
 		let item = NSTabViewItem(viewController: pane)
 		item.label = pane.tabName ?? ""
@@ -61,7 +61,7 @@ open class SettingsTabViewController: NSTabViewController {
 		insertTabViewItem(item, at: index)
 	}
 	
-	func insert(tabViewItem: NSTabViewItem, at index: Int) {
+	open func insert(tabViewItem: NSTabViewItem, at index: Int) {
 		if let vc = tabViewItem.viewController as? SettingsPaneViewController {
 			vc.tabViewController = self
 		}
@@ -103,7 +103,7 @@ open class SettingsTabViewController: NSTabViewController {
 	
 	//  参考：https://gist.github.com/ThatsJustCheesy/8148106fa7269326162d473408d3f75a
 	
-	private func resizeWindowToFit(tabViewItem: NSTabViewItem, animated: Bool) {
+	public func resizeWindowToFit(tabViewItem: NSTabViewItem, animated: Bool) {
 		guard let size = tabViewSizes[tabViewItem], let window = view.window else {
 			return
 		}
@@ -129,7 +129,7 @@ open class SettingsTabViewController: NSTabViewController {
 		}
 	}
 	
-	private func resizeWindowToFit() {
+	public func resizeWindowToFit() {
 		resizeWindowToFit(tabViewItem: tabView.tabViewItem(at: 0), animated: false)
 	}
 	

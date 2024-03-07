@@ -26,7 +26,7 @@ open class SettingsPaneViewController: NSViewController {
 	
 	// MARK: -
 	
-	convenience init(tabViewController: SettingsTabViewController? = nil,
+	public convenience init(tabViewController: SettingsTabViewController? = nil,
 					 tabName: String? = nil,
 					 tabImage: NSImage? = nil,
 					 tabIdentifier: String? = nil,
