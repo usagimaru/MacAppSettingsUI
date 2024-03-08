@@ -23,6 +23,7 @@ open class SettingsWindowController: NSWindowController {
 		tabViewController.windowController = self
 	}}
 	
+	/// Initializer
 	public class func windowController(with panes: [SettingsPaneViewController]? = nil) -> Self {
 		let tabViewController = SettingsTabViewController()
 		let wc = Self.init()
@@ -36,6 +37,44 @@ open class SettingsWindowController: NSWindowController {
 		
 		return wc
 	}
+	
+	/// Insert `General` pane to the first position
+	@discardableResult public func addGeneralPane(tabName: String? = "General",
+												  localizeKeyForTabName: String?,
+												  tabIdentifier: String = "General",
+												  isResizableView: Bool)
+	-> SettingsPaneViewController {
+		
+		let pane = SettingsPaneViewController(tabName: tabName,
+											  localizeKeyForTabName: localizeKeyForTabName,
+											  tabImage: NSImage(systemSymbolName: "gearshape", accessibilityDescription: nil),
+											  tabIdentifier: tabIdentifier,
+											  isResizableView: isResizableView)
+		tabViewController.insert(pane: pane, at: 0)
+		tabViewController.selectedTabViewItemIndex = 0
+		
+		return pane
+	}
+	
+	/// Insert `Advanced` pane to the last position
+	@discardableResult public func addAdvancedPane(tabName: String? = "Advanced",
+												   localizeKeyForTabName: String?,
+												   tabIdentifier: String = "Advanced",
+												   isResizableView: Bool)
+	-> SettingsPaneViewController {
+		
+		let pane = SettingsPaneViewController(tabName: tabName,
+											  localizeKeyForTabName: localizeKeyForTabName,
+											  tabImage: NSImage(systemSymbolName: "gearshape.2", accessibilityDescription: nil),
+											  tabIdentifier: tabIdentifier,
+											  isResizableView: isResizableView)
+		tabViewController.add(pane: pane)
+		
+		return pane
+	}
+	
+	
+	// MARK: -
 	
 	private func initialSetup() {
 		tabViewController?.windowController = self

@@ -25,6 +25,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 	func applicationDidFinishLaunching(_ aNotification: Notification) {
 		// Prepare setting panes
 		settingsWindowController = .windowController(with: [
+			
 			// Make pane from storyboard file
 			GeneralSettingsPaneViewController.fromStoryboard(),
 			ViewSettingsPaneViewController.fromStoryboard(),
@@ -32,20 +33,30 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 			AdvancedSettingsPaneViewController.fromStoryboard(),
 			
 			// Make pane programatically
-			SettingsPaneViewController(tabName: NSLocalizedString("Developer", comment: ""),
+			SettingsPaneViewController(tabName: "Developer",
+									   localizeKeyForTabName: "Developer",
 									   tabImage: NSImage(systemSymbolName: "wrench.and.screwdriver", accessibilityDescription: nil),
 									   tabIdentifier: "Developer",
 									   isResizableView: true)
 		])
 		
+		// --------------------------------------
+		// Optional:
+		
+		// You can also use these builder methods for `General` and `Advanced` panes.
+		
+		// settingsWindowController.addGeneralPane(localizeKeyForTabName: "General", isResizableView: false)
+		// let advancedPane = settingsWindowController.addAdvancedPane(localizeKeyForTabName: "Advanced", isResizableView: true)
+		
+		
 		// Starting with macOS Ventura (ver. 13), Apple began using the name `Settings` instead of `Preferences` in U.S. English.
+		// You should not realistically care about `defaultWindowTitle` property,
+		// as there can be no situation where there are zero tabs in the settings window.
 		if #available(macOS 13, *) {
-			let defaultWindowTitle = NSLocalizedString("Settings", comment: "")
-			settingsWindowController.tabViewController.defaultWindowTitle = defaultWindowTitle
+			settingsWindowController.tabViewController.defaultWindowTitle = NSLocalizedString("Settings", comment: "")
 		}
 		else {
-			let defaultWindowTitle = NSLocalizedString("Preferences", comment: "")
-			settingsWindowController.tabViewController.defaultWindowTitle = defaultWindowTitle
+			settingsWindowController.tabViewController.defaultWindowTitle = NSLocalizedString("Preferences", comment: "")
 		}
 	}
 	
@@ -84,13 +95,18 @@ extension SettingsPaneViewController {
 	
 	class func fromStoryboard(tabViewController: SettingsTabViewController? = nil,
 							  tabName: String? = nil,
+							  localizeKeyForTabName: String? = nil,
 							  tabImage: NSImage? = nil,
 							  tabIdentifier: String? = nil,
 							  isResizableView: Bool? = nil) -> Self {
 		let vc = NSStoryboard(name: "Main", bundle: nil).instantiateController(withIdentifier: "\(Self.self)") as! Self
 		vc.tabViewController = tabViewController
+		
 		if let tabName {
 			vc.tabName = tabName
+		}
+		if let localizeKeyForTabName {
+			vc.localizeKeyForTabName = localizeKeyForTabName
 		}
 		if let tabImage {
 			vc.tabImage = tabImage
@@ -100,10 +116,6 @@ extension SettingsPaneViewController {
 		}
 		if let isResizableView {
 			vc.isResizableView = isResizableView
-		}
-		
-		if let tabName = vc.tabName {
-			vc.tabName = NSLocalizedString(tabName, comment: "")
 		}
 		
 		return vc

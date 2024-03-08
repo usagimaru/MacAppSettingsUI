@@ -237,6 +237,7 @@
         <!--General Settings Pane View Controller-->
         <scene sceneID="uuV-za-wa0">
             <objects>
+                <customObject id="5ZX-Uh-TWS" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
                 <viewController storyboardIdentifier="GeneralSettingsPaneViewController" id="eei-X9-zTZ" customClass="GeneralSettingsPaneViewController" customModule="MacAppSettingsUI" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="jgR-zA-Rqx">
                         <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
@@ -276,12 +277,11 @@
                         </constraints>
                     </view>
                     <userDefinedRuntimeAttributes>
-                        <userDefinedRuntimeAttribute type="string" keyPath="tabName" value="General"/>
                         <userDefinedRuntimeAttribute type="string" keyPath="tabIdentifier" value="General"/>
                         <userDefinedRuntimeAttribute type="image" keyPath="tabImage" value="gearshape" catalog="system"/>
+                        <userDefinedRuntimeAttribute type="string" keyPath="localizeKeyForTabName" value="General"/>
                     </userDefinedRuntimeAttributes>
                 </viewController>
-                <customObject id="5ZX-Uh-TWS" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-24" y="330"/>
         </scene>
@@ -328,8 +328,8 @@
                     </view>
                     <userDefinedRuntimeAttributes>
                         <userDefinedRuntimeAttribute type="image" keyPath="tabImage" value="eyeglasses" catalog="system"/>
-                        <userDefinedRuntimeAttribute type="string" keyPath="tabName" value="View"/>
                         <userDefinedRuntimeAttribute type="string" keyPath="tabIdentifier" value="View"/>
+                        <userDefinedRuntimeAttribute type="string" keyPath="localizeKeyForTabName" value="View"/>
                     </userDefinedRuntimeAttributes>
                 </viewController>
                 <customObject id="pjA-3s-MRF" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
@@ -384,8 +384,8 @@
                     <userDefinedRuntimeAttributes>
                         <userDefinedRuntimeAttribute type="boolean" keyPath="isResizableView" value="YES"/>
                         <userDefinedRuntimeAttribute type="image" keyPath="tabImage" value="puzzlepiece.extension" catalog="system"/>
-                        <userDefinedRuntimeAttribute type="string" keyPath="tabName" value="Extensions"/>
                         <userDefinedRuntimeAttribute type="string" keyPath="tabIdentifier" value="Extensions"/>
+                        <userDefinedRuntimeAttribute type="string" keyPath="localizeKeyForTabName" value="Extensions"/>
                     </userDefinedRuntimeAttributes>
                 </viewController>
                 <customObject id="Wfw-05-drV" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
@@ -395,6 +395,7 @@
         <!--Advanced Settings Pane View Controller-->
         <scene sceneID="dnO-s9-YBk">
             <objects>
+                <customObject id="okD-2h-D5p" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
                 <viewController storyboardIdentifier="AdvancedSettingsPaneViewController" id="KrI-14-2wn" customClass="AdvancedSettingsPaneViewController" customModule="MacAppSettingsUI" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="OaP-aE-W3n">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="150"/>
@@ -435,11 +436,10 @@
                     </view>
                     <userDefinedRuntimeAttributes>
                         <userDefinedRuntimeAttribute type="image" keyPath="tabImage" value="gearshape.2" catalog="system"/>
-                        <userDefinedRuntimeAttribute type="string" keyPath="tabName" value="Advanced"/>
                         <userDefinedRuntimeAttribute type="string" keyPath="tabIdentifier" value="Advanced"/>
+                        <userDefinedRuntimeAttribute type="string" keyPath="localizeKeyForTabName" value="Advanced"/>
                     </userDefinedRuntimeAttributes>
                 </viewController>
-                <customObject id="okD-2h-D5p" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="512" y="745"/>
         </scene>

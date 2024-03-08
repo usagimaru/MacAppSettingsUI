@@ -18,12 +18,18 @@ open class SettingsTabViewController: NSTabViewController {
 	open weak var windowController: SettingsWindowController?
 	
 	/// This is the standard window title when none of the tabs exist. Localize if necessary.
+	/// You should not realistically care about this property, as there can be no situation where there are zero tabs in the settings window.
 	open var defaultWindowTitle: String = "Settings"
 	
 	/// If set to true, disables animation
 	open var disablesAnimationOfTabSwitching: Bool = false
 	
-	/// The safe version of `selectedTabViewItemIndex`
+	/// If set to true, use pane’s `tabName` to set tab name
+	open var disablesLocalizationWithTabNameLocalizeKey: Bool = false { didSet {
+		updateTabNames()
+	}}
+	
+	/// The safe version of `selectedTabViewItemIndex`. (Only getter)
 	public var selectedTabIndex: Int? {
 		// When there is no TabViewItem in NSTabViewController, `selectedTabViewItemIndex` returns -1. This spec does not appear to be documented.
 		if !tabViewItems.isEmpty && 0..<tabViewItems.count ~= selectedTabViewItemIndex {
@@ -32,6 +38,7 @@ open class SettingsTabViewController: NSTabViewController {
 		return nil
 	}
 	
+	/// Get the selected tab if it exist. (Only getter)
 	public var selectedTabViewItem: NSTabViewItem? {
 		if let selectedTabIndex {
 			return tabViewItems[selectedTabIndex]
@@ -75,20 +82,23 @@ open class SettingsTabViewController: NSTabViewController {
 	
 	open func add(pane: SettingsPaneViewController) {
 		pane.tabViewController = self
-		let item = NSTabViewItem(viewController: pane)
-		item.label = pane.tabName ?? ""
-		item.image = pane.tabImage
-		item.identifier = pane.tabIdentifier
+		let item = makeTabViewItem(from: pane)
 		addTabViewItem(item)
 	}
 	
 	open func insert(pane: SettingsPaneViewController, at index: Int) {
 		pane.tabViewController = self
+		let item = makeTabViewItem(from: pane)
+		insertTabViewItem(item, at: index)
+	}
+	
+	private func makeTabViewItem(from pane: SettingsPaneViewController) -> NSTabViewItem {
 		let item = NSTabViewItem(viewController: pane)
-		item.label = pane.tabName ?? ""
+		updateTabName(of: item)
 		item.image = pane.tabImage
 		item.identifier = pane.tabIdentifier
-		insertTabViewItem(item, at: index)
+		
+		return item
 	}
 	
 	open func insert(tabViewItem: NSTabViewItem, at index: Int) {
@@ -189,6 +199,23 @@ open class SettingsTabViewController: NSTabViewController {
 	/// Set default window behavior (It does not include the resizable attribute)
 	private func setDefaultWindowBehavior() {
 		view.window?.styleMask.remove(.resizable)
+	}
+	
+	private func updateTabName(of item: NSTabViewItem) {
+		if let pane = item.settingsPaneViewController {
+			if let localizeKey = pane.localizeKeyForTabName, !localizeKey.isEmpty && !disablesLocalizationWithTabNameLocalizeKey {
+				item.label = NSLocalizedString(localizeKey, comment: "")
+			}
+			else {
+				item.label = pane.tabName ?? ""
+			}
+		}
+	}
+	
+	private func updateTabNames() {
+		tabViewItems.forEach { item in
+			updateTabName(of: item)
+		}
 	}
 	
 }
