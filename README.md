@@ -2,7 +2,29 @@
 
 A package for make easier implementing a structure of settings / preferences UI for macOS AppKit-based apps.
 
-<img src="./screenshot.jpg" width=562>
+<img src="./Guide/screenshot.jpg" width=562>
+
+## Design
+
+### Tab switching with animation
+
+<img src="./Guide/anim.gif" width=275>
+
+### Basically only close button, but zoom button optional
+
+<img src="./Guide/close.jpg" width=189>
+
+Basically only the close button works in a setting window, but depending on the pane, the zoom button can also be enabled. 
+
+
+### We can also use the Escape key
+
+I have provided an option to close the settings window with the Escape key.
+
+
+### Set active tab name as a window title automatically
+
+<img src="./Guide/title.jpg" width=354>
 
 
 ## Core Classes and Files
@@ -35,23 +57,23 @@ var settingsWindowController: SettingsWindowController!
 ---
 
 settingsWindowController = .windowController(with: [
-			SettingsPaneViewController(tabName: "General",
-									   tabImage: NSImage(systemSymbolName: "gearshape", accessibilityDescription: nil),
-									   tabIdentifier: "general",
-									   isResizableView: false),
-			SettingsPaneViewController(tabName: "View",
-									   tabImage: NSImage(systemSymbolName: "eyeglasses", accessibilityDescription: nil),
-									   tabIdentifier: "view",
-									   isResizableView: true),
-			SettingsPaneViewController(tabName: "Extensions",
-									   tabImage: NSImage(systemSymbolName: "puzzlepiece.extension", accessibilityDescription: nil),
-									   tabIdentifier: "extensions",
-									   isResizableView: false),
-			SettingsPaneViewController(tabName: "Advanced",
-									   tabImage: NSImage(systemSymbolName: "gearshape.2", accessibilityDescription: nil),
-									   tabIdentifier: "advanced",
-									   isResizableView: false),
-		])
+	SettingsPaneViewController(tabName: "General",
+							   tabImage: NSImage(systemSymbolName: "gearshape", accessibilityDescription: nil),
+							   tabIdentifier: "general",
+							   isResizableView: false),
+	SettingsPaneViewController(tabName: "View",
+							   tabImage: NSImage(systemSymbolName: "eyeglasses", accessibilityDescription: nil),
+							   tabIdentifier: "view",
+							   isResizableView: true),
+	SettingsPaneViewController(tabName: "Extensions",
+							   tabImage: NSImage(systemSymbolName: "puzzlepiece.extension", accessibilityDescription: nil),
+							   tabIdentifier: "extensions",
+							   isResizableView: false),
+	SettingsPaneViewController(tabName: "Advanced",
+							   tabImage: NSImage(systemSymbolName: "gearshape.2", accessibilityDescription: nil),
+							   tabIdentifier: "advanced",
+							   isResizableView: false),
+])
 ```
 
 ### 2. Set panes to a SettingsTabViewController instance
@@ -70,8 +92,10 @@ To remove any pane, use NSTabViewController’s methods.
 There are properties of tab item in SettingsPaneViewController.
 
 - `tabName`
+	- Alias of `NSViewController.title`.
 - `tabImage`
 - `tabIdentifier`
+	- Should set to a unique name.
 
 ## Control window resizing on a per-pane
 
@@ -82,5 +106,5 @@ There is a property in SettingsPaneViewController. Set true to allow window resi
 
 ## License
 
-See [LICENSE] for details.
+See [LICENSE](./LICENSE) for details.
 

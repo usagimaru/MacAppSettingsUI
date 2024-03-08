@@ -26,7 +26,7 @@ let package = Package(
 			path: "Sources",
 			exclude: [
 				"Demo",
-				"screenshot.jpg"
+				"Guide"
 			]),
 	],
 	swiftLanguageVersions: [.v5]
