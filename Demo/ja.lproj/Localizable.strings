@@ -1,0 +1,19 @@
+/* 
+  Localizable.strings
+  Demo
+
+  Created by usagimaru on 2024/03/09.
+  
+*/
+
+"Preferences…" = "環境設定…";
+"Settings…" = "設定…";
+
+"Preferences" = "環境設定";
+"Settings" = "設定";
+
+"General" = "一般";
+"View" = "表示";
+"Extensions" = "機能拡張";
+"Advanced" = "詳細";
+"Developer" = "デベロッパ";

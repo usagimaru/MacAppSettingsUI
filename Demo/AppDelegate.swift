@@ -16,6 +16,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
 	private var settingsWindowController: SettingsWindowController!
 	
+	func applicationWillFinishLaunching(_ notification: Notification) {
+		// Localize the menu bar
+		// `applicationDidFinishLaunching(_:)` is too late
+		localizeMainMenuTitles()
+	}
 
 	func applicationDidFinishLaunching(_ aNotification: Notification) {
 		// Prepare setting panes
@@ -27,15 +32,50 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 			AdvancedSettingsPaneViewController.fromStoryboard(),
 			
 			// Make pane programatically
-			SettingsPaneViewController(tabName: "Developer",
+			SettingsPaneViewController(tabName: NSLocalizedString("Developer", comment: ""),
 									   tabImage: NSImage(systemSymbolName: "wrench.and.screwdriver", accessibilityDescription: nil),
 									   tabIdentifier: "Developer",
 									   isResizableView: true)
 		])
+		
+		// Starting with macOS Ventura (ver. 13), Apple began using the name `Settings` instead of `Preferences` in U.S. English.
+		if #available(macOS 13, *) {
+			let defaultWindowTitle = NSLocalizedString("Settings", comment: "")
+			settingsWindowController.tabViewController.defaultWindowTitle = defaultWindowTitle
+		}
+		else {
+			let defaultWindowTitle = NSLocalizedString("Preferences", comment: "")
+			settingsWindowController.tabViewController.defaultWindowTitle = defaultWindowTitle
+		}
 	}
 	
 	@IBAction func openSettings(_ sender: Any) {
 		settingsWindowController.showWindow(sender)
+	}
+	
+	/// Localize menu items in the menu bar
+	private func localizeMainMenuTitles() {
+		guard let mainMenuItems = NSApp.mainMenu?.items else {return}
+		
+		func setLocalizedTitle(to menuItems: [NSMenuItem], isRoot: Bool) {
+			for menuItem in menuItems {
+				if menuItem.isSeparatorItem {continue}
+				
+				let newTitle = NSLocalizedString(menuItem.title, comment: "")
+				menuItem.title = newTitle
+				
+				// Change the submenu’s title when it is the root
+				if isRoot {
+					menuItem.submenu?.title = newTitle
+				}
+				
+				if let submenuItems = menuItem.submenu?.items {
+					setLocalizedTitle(to: submenuItems, isRoot: false)
+				}
+			}
+		}
+		
+		setLocalizedTitle(to: mainMenuItems, isRoot: true)
 	}
 
 }
@@ -61,6 +101,11 @@ extension SettingsPaneViewController {
 		if let isResizableView {
 			vc.isResizableView = isResizableView
 		}
+		
+		if let tabName = vc.tabName {
+			vc.tabName = NSLocalizedString(tabName, comment: "")
+		}
+		
 		return vc
 	}
 	

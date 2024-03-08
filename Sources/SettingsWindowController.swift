@@ -16,25 +16,19 @@ open class SettingsWindowController: NSWindowController {
 	open var closesWindowWithEscapeKey: Bool = true
 	
 	private var isFirst: Bool = true
+	private var observationForNSWorkspace: NSObjectProtocol?
+	private var observationForNSApplication: NSObjectProtocol?
 	
 	public var tabViewController: SettingsTabViewController! { didSet {
 		tabViewController.windowController = self
 	}}
 	
-	open override func windowTitle(forDocumentDisplayName displayName: String) -> String {
-		"Settings"
-	}
-	
-	open override func synchronizeWindowTitleWithDocumentName() {
-		
-	}
-	
 	public class func windowController(with panes: [SettingsPaneViewController]? = nil) -> Self {
 		let tabViewController = SettingsTabViewController()
 		let wc = Self.init()
-		let window = NSWindow.settingsWindow(contentViewController: tabViewController)
-		wc.window = window
+		wc.window = NSWindow.settingsWindow(contentViewController: tabViewController)
 		wc.tabViewController = tabViewController
+		wc.initialSetup()
 		
 		panes?.forEach({
 			tabViewController.add(pane: $0)
@@ -43,10 +37,45 @@ open class SettingsWindowController: NSWindowController {
 		return wc
 	}
 	
+	private func initialSetup() {
+		tabViewController?.windowController = self
+		
+		if let observationForNSWorkspace {
+			NSWorkspace.shared.notificationCenter.removeObserver(observationForNSWorkspace)
+		}
+		if let observationForNSApplication {
+			NotificationCenter.default.removeObserver(observationForNSApplication)
+		}
+		
+		// This is called when the "Display" accessibility settings are changed.
+		observationForNSWorkspace = NSWorkspace.shared.notificationCenter
+			.addObserver(forName: NSWorkspace.accessibilityDisplayOptionsDidChangeNotification,
+						 object: nil,
+						 queue: .main) { notif in
+				self.setupBehaviors()
+			}
+		
+		// If window restoration is enabled, `windowDidLoad()` and `showWindow(_:)` are not called by the system.
+		// This is done to grab the first displaying of windows under the window restoration process.
+		observationForNSApplication = NotificationCenter.default
+			.addObserver(forName: NSApplication.didFinishRestoringWindowsNotification,
+						 object: NSApp,
+						 queue: .main,
+						 using: { notif in
+				self.setupBehaviors()
+			})
+	}
+	
+	private func setupBehaviors() {
+		// Disable the full screen zoom button.
+		window?.collectionBehavior = .fullScreenAuxiliary
+		// Reflects “Reduce Motion” of System Settings
+		tabViewController?.disablesAnimationOfTabSwitching = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
+	}
+	
 	open override func windowDidLoad() {
 		super.windowDidLoad()
-		tabViewController?.windowController = self
-		window?.collectionBehavior = .fullScreenAuxiliary
+		initialSetup()
 	}
 	
 	open override func showWindow(_ sender: Any?) {
@@ -56,6 +85,8 @@ open class SettingsWindowController: NSWindowController {
 			window?.center()
 			isFirst = false
 		}
+		
+		setupBehaviors()
 	}
 	
 	/// Close window to press Escape key

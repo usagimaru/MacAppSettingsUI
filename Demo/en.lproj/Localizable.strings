@@ -1,0 +1,19 @@
+/* 
+  Localizable.strings
+  Demo
+
+  Created by usagimaru on 2024/03/09.
+  
+*/
+
+"Preferences…" = "Preferences…";
+"Settings…" = "Settings…";
+
+"Preferences" = "Preferences";
+"Settings" = "Settings";
+
+"General" = "General";
+"View" = "View";
+"Extensions" = "Extensions";
+"Advanced" = "Advanced";
+"Developer" = "Developer";
