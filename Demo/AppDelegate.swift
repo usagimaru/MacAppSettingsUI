@@ -14,7 +14,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		NSApp.delegate as! Self
 	}
 
-	private var settingsWindowController: SettingsWindowController!
+	private(set) var settingsWindowController: SettingsWindowController!
+	
+	
+	// MARK: -
 	
 	func applicationWillFinishLaunching(_ notification: Notification) {
 		// Localize the menu bar
@@ -24,7 +27,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
 	func applicationDidFinishLaunching(_ aNotification: Notification) {
 		// Prepare setting panes
-		settingsWindowController = .windowController(with: [
+		settingsWindowController = .init(with: [
 			
 			// Make pane from storyboard file
 			GeneralSettingsPaneViewController.fromStoryboard(),
@@ -133,12 +136,29 @@ class AdvancedSettingsPaneViewController: SettingsPaneViewController {}
 
 class DemoViewController: NSViewController {
 	
+	@IBOutlet var centerAlways: NSButton!
+	
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		
 		DispatchQueue.main.async {
 			self.view.window?.isMovableByWindowBackground = true
 		}
+	}
+	
+	override func viewDidAppear() {
+		super.viewDidAppear()
+		DispatchQueue.main.async {
+			AppDelegate.shared.settingsWindowController.centersWindowPositionAlways = self.centerAlways.state == .on
+		}
+	}
+	
+	@IBAction func toggleCenterAlways(_ sender: NSButton) {
+		AppDelegate.shared.settingsWindowController.centersWindowPositionAlways = sender.state == .on
+	}
+	
+	@IBAction func removeAutosaveFrame(_ sender: Any) {
+		AppDelegate.shared.settingsWindowController.removeAutosavedWindowFrame()
 	}
 	
 }

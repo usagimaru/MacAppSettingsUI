@@ -8,42 +8,55 @@ import Cocoa
 
 open class SettingsWindowController: NSWindowController {
 	
-	public static var storyboardName: String = "Settings"
+	public struct Keys {
+		/// UserDefaults key for `savesLastWindowFrame`
+		static let lastWindowFrame = "\(SettingsWindowController.self).lastFrame"
+	}
 	
 	/// Set window position to center of the screen
-	open var centersWindowPositionAlways: Bool = false
+	open var centersWindowPositionAlways: Bool!
 	/// Do not want to close window with Escape key, set this flag to false
-	open var closesWindowWithEscapeKey: Bool = true
-	
-	private var isFirst: Bool = true
-	private var observationForNSWorkspace: NSObjectProtocol?
-	private var observationForNSApplication: NSObjectProtocol?
+	open var closesWindowWithEscapeKey: Bool!
 	
 	public var tabViewController: SettingsTabViewController! { didSet {
 		tabViewController.windowController = self
 	}}
 	
+	public override var shouldCascadeWindows: Bool {
+		get { false }
+		set { super.shouldCascadeWindows = false }
+	}
+	
+	private var observationForNSWorkspace: NSObjectProtocol?
+	private var observationForNSApplication: NSObjectProtocol?
+	
+	
+	// MARK: -
+	
 	/// Initializer
-	public class func windowController(with panes: [SettingsPaneViewController]? = nil) -> Self {
-		let tabViewController = SettingsTabViewController()
-		let wc = Self.init()
-		wc.window = NSWindow.settingsWindow(contentViewController: tabViewController)
-		wc.tabViewController = tabViewController
-		wc.initialSetup()
+	required convenience public init(with panes: [SettingsPaneViewController]? = nil,
+									 centersWindowPositionAlways: Bool = false,
+									 closesWindowWithEscapeKey: Bool = true) {
+		
+		self.init()
+		
+		self.centersWindowPositionAlways = centersWindowPositionAlways
+		self.closesWindowWithEscapeKey = closesWindowWithEscapeKey
+		
+		tabViewController = SettingsTabViewController()
+		window = NSWindow.settingsWindow(contentViewController: tabViewController)
+		initialSetup()
 		
 		panes?.forEach({
 			tabViewController.add(pane: $0)
 		})
-		
-		return wc
 	}
 	
 	/// Insert `General` pane to the first position
 	@discardableResult public func addGeneralPane(tabName: String? = "General",
 												  localizeKeyForTabName: String?,
 												  tabIdentifier: String = "General",
-												  isResizableView: Bool)
-	-> SettingsPaneViewController {
+												  isResizableView: Bool) -> SettingsPaneViewController {
 		
 		let pane = SettingsPaneViewController(tabName: tabName,
 											  localizeKeyForTabName: localizeKeyForTabName,
@@ -60,8 +73,7 @@ open class SettingsWindowController: NSWindowController {
 	@discardableResult public func addAdvancedPane(tabName: String? = "Advanced",
 												   localizeKeyForTabName: String?,
 												   tabIdentifier: String = "Advanced",
-												   isResizableView: Bool)
-	-> SettingsPaneViewController {
+												   isResizableView: Bool) -> SettingsPaneViewController {
 		
 		let pane = SettingsPaneViewController(tabName: tabName,
 											  localizeKeyForTabName: localizeKeyForTabName,
@@ -77,7 +89,10 @@ open class SettingsWindowController: NSWindowController {
 	// MARK: -
 	
 	private func initialSetup() {
-		tabViewController?.windowController = self
+		// When if use `windowFrameAutosaveName`, We have to disable `shouldCascadeWindows`
+		// https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/WinPanel/Tasks/SavingWindowPosition.html
+		shouldCascadeWindows = false
+		windowFrameAutosaveName = Keys.lastWindowFrame
 		
 		if let observationForNSWorkspace {
 			NSWorkspace.shared.notificationCenter.removeObserver(observationForNSWorkspace)
@@ -94,7 +109,7 @@ open class SettingsWindowController: NSWindowController {
 				self.setupBehaviors()
 			}
 		
-		// If window restoration is enabled, `windowDidLoad()` and `showWindow(_:)` are not called by the system.
+		// If window restoration is enabled, `showWindow(_:)` are not called by the system.
 		// This is done to grab the first displaying of windows under the window restoration process.
 		observationForNSApplication = NotificationCenter.default
 			.addObserver(forName: NSApplication.didFinishRestoringWindowsNotification,
@@ -112,17 +127,17 @@ open class SettingsWindowController: NSWindowController {
 		tabViewController?.disablesAnimationOfTabSwitching = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
 	}
 	
-	open override func windowDidLoad() {
-		super.windowDidLoad()
-		initialSetup()
-	}
+	
+	// MARK: -
+	
+	// `windowWillLoad()`, `windowDidLoad()` and `loadWindow()` are not called by the system because this class is not owned by any nib / storyboard file.
 	
 	open override func showWindow(_ sender: Any?) {
 		super.showWindow(sender)
 		
-		if isFirst || centersWindowPositionAlways {
+		// Try to restore the window frame with an autosave name. If that fails, set the window position to center.
+		if centersWindowPositionAlways || window?.setFrameUsingName(windowFrameAutosaveName) == false {
 			window?.center()
-			isFirst = false
 		}
 		
 		setupBehaviors()
@@ -133,6 +148,13 @@ open class SettingsWindowController: NSWindowController {
 		if closesWindowWithEscapeKey {
 			close()
 		}
+	}
+	
+	
+	// MARK: -
+	
+	func removeAutosavedWindowFrame() {
+		NSWindow.removeFrame(usingName: Keys.lastWindowFrame)
 	}
 
 }

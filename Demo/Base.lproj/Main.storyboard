@@ -36,29 +36,60 @@
             <objects>
                 <viewController id="idT-cN-2Kx" customClass="DemoViewController" customModule="MacAppSettingsUI" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="Q6l-YB-ze4">
-                        <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
+                        <rect key="frame" x="0.0" y="0.0" width="526" height="270"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="e3W-fr-jRo">
-                                <rect key="frame" x="175" y="118" width="131" height="32"/>
+                                <rect key="frame" x="198" y="118" width="131" height="32"/>
                                 <buttonCell key="cell" type="push" title="Open Settings…" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="9pb-zj-sQw">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
+                                    <string key="keyEquivalent" base64-UTF8="YES">
+DQ
+</string>
                                 </buttonCell>
                                 <connections>
                                     <action selector="openSettings:" target="nz4-s4-BZC" id="3xx-Zs-EUh"/>
                                 </connections>
                             </button>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="564-J6-Rn0">
+                                <rect key="frame" x="330" y="13" width="183" height="32"/>
+                                <buttonCell key="cell" type="push" title="Remove Autosave Frame" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="z8p-uV-4fz">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="removeAutosaveFrame:" target="idT-cN-2Kx" id="YNu-Zv-1Si"/>
+                                </connections>
+                            </button>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="C4Y-jS-9Uq">
+                                <rect key="frame" x="18" y="22" width="111" height="18"/>
+                                <buttonCell key="cell" type="check" title="Center always" bezelStyle="regularSquare" imagePosition="left" inset="2" id="5AY-cW-xgE">
+                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="toggleCenterAlways:" target="idT-cN-2Kx" id="n7Z-k7-BD1"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <constraints>
                             <constraint firstItem="e3W-fr-jRo" firstAttribute="centerX" secondItem="Q6l-YB-ze4" secondAttribute="centerX" id="7Cr-G9-Ksb"/>
+                            <constraint firstItem="564-J6-Rn0" firstAttribute="firstBaseline" secondItem="C4Y-jS-9Uq" secondAttribute="firstBaseline" id="7Gg-tv-eVn"/>
                             <constraint firstItem="e3W-fr-jRo" firstAttribute="centerY" secondItem="Q6l-YB-ze4" secondAttribute="centerY" id="A2B-0v-FOg"/>
+                            <constraint firstItem="C4Y-jS-9Uq" firstAttribute="leading" secondItem="Q6l-YB-ze4" secondAttribute="leading" constant="20" symbolic="YES" id="CNF-ls-4sc"/>
+                            <constraint firstAttribute="trailing" secondItem="564-J6-Rn0" secondAttribute="trailing" constant="20" symbolic="YES" id="UHR-Nd-xbN"/>
+                            <constraint firstItem="564-J6-Rn0" firstAttribute="leading" secondItem="C4Y-jS-9Uq" secondAttribute="trailing" constant="208" id="Ulu-U1-3qu"/>
+                            <constraint firstAttribute="bottom" secondItem="564-J6-Rn0" secondAttribute="bottom" constant="20" symbolic="YES" id="xbr-Y2-Dsi"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="centerAlways" destination="C4Y-jS-9Uq" id="onm-xW-eAy"/>
+                    </connections>
                 </viewController>
                 <customObject id="nz4-s4-BZC" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="592" y="-235"/>
+            <point key="canvasLocation" x="614" y="-235"/>
         </scene>
         <!--Application-->
         <scene sceneID="JPo-4y-FX3">
