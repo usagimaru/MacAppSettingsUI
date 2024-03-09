@@ -34,7 +34,7 @@ open class SettingsWindowController: NSWindowController {
 	// MARK: -
 	
 	/// Initializer
-	required convenience public init(with panes: [SettingsPaneViewController]? = nil,
+	required convenience public init(with panes: [SettingsPaneViewController],
 									 centersWindowPositionAlways: Bool = false,
 									 closesWindowWithEscapeKey: Bool = true) {
 		
@@ -47,7 +47,7 @@ open class SettingsWindowController: NSWindowController {
 		window = NSWindow.settingsWindow(contentViewController: tabViewController)
 		initialSetup()
 		
-		panes?.forEach({
+		panes.forEach({
 			tabViewController.add(pane: $0)
 		})
 	}
