@@ -34,7 +34,7 @@
         <!--Demo View Controller-->
         <scene sceneID="1eI-zM-wsk">
             <objects>
-                <viewController id="idT-cN-2Kx" customClass="DemoViewController" customModule="MacAppSettingsUI" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="idT-cN-2Kx" customClass="DemoViewController" customModule="MacAppSettingsUI_Demo" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="Q6l-YB-ze4">
                         <rect key="frame" x="0.0" y="0.0" width="526" height="270"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -97,11 +97,11 @@ DQ
                 <application id="hnw-xV-0zn" sceneMemberID="viewController">
                     <menu key="mainMenu" title="Main Menu" systemMenu="main" id="AYu-sK-qS6">
                         <items>
-                            <menuItem title="MacAppSettingsUI" id="1Xt-HY-uBw">
+                            <menuItem title="MacAppSettingsUI-Demo" id="1Xt-HY-uBw">
                                 <modifierMask key="keyEquivalentModifierMask"/>
-                                <menu key="submenu" title="MacAppSettingsUI" systemMenu="apple" id="uQy-DD-JDr">
+                                <menu key="submenu" title="MacAppSettingsUI-Demo" systemMenu="apple" id="uQy-DD-JDr">
                                     <items>
-                                        <menuItem title="About MacAppSettingsUI" id="5kV-Vb-QxS">
+                                        <menuItem title="About MacAppSettingsUI-Demo" id="5kV-Vb-QxS">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="orderFrontStandardAboutPanel:" target="Ady-hI-5gd" id="Exp-CZ-Vem"/>
@@ -119,7 +119,7 @@ DQ
                                             <menu key="submenu" title="Services" systemMenu="services" id="hz9-B4-Xy5"/>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="4je-JR-u6R"/>
-                                        <menuItem title="Hide MacAppSettingsUI" keyEquivalent="h" id="Olw-nP-bQN">
+                                        <menuItem title="Hide MacAppSettingsUI-Demo" keyEquivalent="h" id="Olw-nP-bQN">
                                             <connections>
                                                 <action selector="hide:" target="Ady-hI-5gd" id="PnN-Uc-m68"/>
                                             </connections>
@@ -137,7 +137,7 @@ DQ
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="kCx-OE-vgT"/>
-                                        <menuItem title="Quit MacAppSettingsUI" keyEquivalent="q" id="4sb-4s-VLi">
+                                        <menuItem title="Quit MacAppSettingsUI-Demo" keyEquivalent="q" id="4sb-4s-VLi">
                                             <connections>
                                                 <action selector="terminate:" target="Ady-hI-5gd" id="Te7-pn-YzF"/>
                                             </connections>
@@ -245,7 +245,7 @@ DQ
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Help" systemMenu="help" id="F2S-fz-NVQ">
                                     <items>
-                                        <menuItem title="MacAppSettingsUI Help" keyEquivalent="?" id="FKE-Sm-Kum">
+                                        <menuItem title="MacAppSettingsUI-Demo Help" keyEquivalent="?" id="FKE-Sm-Kum">
                                             <connections>
                                                 <action selector="showHelp:" target="Ady-hI-5gd" id="y7X-2Q-9no"/>
                                             </connections>
@@ -259,7 +259,7 @@ DQ
                         <outlet property="delegate" destination="Voe-Tx-rLC" id="PrD-fu-P6m"/>
                     </connections>
                 </application>
-                <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="MacAppSettingsUI" customModuleProvider="target"/>
+                <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="MacAppSettingsUI_Demo" customModuleProvider="target"/>
                 <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -269,7 +269,7 @@ DQ
         <scene sceneID="uuV-za-wa0">
             <objects>
                 <customObject id="5ZX-Uh-TWS" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
-                <viewController storyboardIdentifier="GeneralSettingsPaneViewController" id="eei-X9-zTZ" customClass="GeneralSettingsPaneViewController" customModule="MacAppSettingsUI" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="GeneralSettingsPaneViewController" id="eei-X9-zTZ" customClass="GeneralSettingsPaneViewController" customModule="MacAppSettingsUI_Demo" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="jgR-zA-Rqx">
                         <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -319,7 +319,7 @@ DQ
         <!--View Settings Pane View Controller-->
         <scene sceneID="hXC-LI-n2A">
             <objects>
-                <viewController storyboardIdentifier="ViewSettingsPaneViewController" id="E5I-MC-dkL" customClass="ViewSettingsPaneViewController" customModule="MacAppSettingsUI" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="ViewSettingsPaneViewController" id="E5I-MC-dkL" customClass="ViewSettingsPaneViewController" customModule="MacAppSettingsUI_Demo" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="fXN-mv-Tjp">
                         <rect key="frame" x="0.0" y="0.0" width="450" height="200"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -370,7 +370,7 @@ DQ
         <!--Extensions Settings Pane View Controller-->
         <scene sceneID="NRl-qh-LHs">
             <objects>
-                <viewController storyboardIdentifier="ExtensionsSettingsPaneViewController" id="Ez7-e3-MYj" customClass="ExtensionsSettingsPaneViewController" customModule="MacAppSettingsUI" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="ExtensionsSettingsPaneViewController" id="Ez7-e3-MYj" customClass="ExtensionsSettingsPaneViewController" customModule="MacAppSettingsUI_Demo" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="JIq-bB-dZb">
                         <rect key="frame" x="0.0" y="0.0" width="300" height="400"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -427,7 +427,7 @@ DQ
         <scene sceneID="dnO-s9-YBk">
             <objects>
                 <customObject id="okD-2h-D5p" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
-                <viewController storyboardIdentifier="AdvancedSettingsPaneViewController" id="KrI-14-2wn" customClass="AdvancedSettingsPaneViewController" customModule="MacAppSettingsUI" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="AdvancedSettingsPaneViewController" id="KrI-14-2wn" customClass="AdvancedSettingsPaneViewController" customModule="MacAppSettingsUI_Demo" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="OaP-aE-W3n">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="150"/>
                         <autoresizingMask key="autoresizingMask"/>

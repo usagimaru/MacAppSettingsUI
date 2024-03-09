@@ -17,7 +17,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		5159E0F52B99A72900F3E575 /* MacAppSettingsUI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacAppSettingsUI.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		5159E0F52B99A72900F3E575 /* MacAppSettingsUI-Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MacAppSettingsUI-Demo.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5159E0F82B99A72900F3E575 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		5159E0FC2B99A72A00F3E575 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5159E0FF2B99A72A00F3E575 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -51,7 +51,7 @@
 		5159E0F62B99A72900F3E575 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				5159E0F52B99A72900F3E575 /* MacAppSettingsUI.app */,
+				5159E0F52B99A72900F3E575 /* MacAppSettingsUI-Demo.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -80,9 +80,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		5159E0F42B99A72900F3E575 /* MacAppSettingsUI */ = {
+		5159E0F42B99A72900F3E575 /* MacAppSettingsUI-Demo */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 5159E1042B99A72A00F3E575 /* Build configuration list for PBXNativeTarget "MacAppSettingsUI" */;
+			buildConfigurationList = 5159E1042B99A72A00F3E575 /* Build configuration list for PBXNativeTarget "MacAppSettingsUI-Demo" */;
 			buildPhases = (
 				5159E0F12B99A72900F3E575 /* Sources */,
 				5159E0F22B99A72900F3E575 /* Frameworks */,
@@ -92,9 +92,9 @@
 			);
 			dependencies = (
 			);
-			name = MacAppSettingsUI;
+			name = "MacAppSettingsUI-Demo";
 			productName = MacAppSettingsUI;
-			productReference = 5159E0F52B99A72900F3E575 /* MacAppSettingsUI.app */;
+			productReference = 5159E0F52B99A72900F3E575 /* MacAppSettingsUI-Demo.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -112,7 +112,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 5159E0F02B99A72900F3E575 /* Build configuration list for PBXProject "Demo" */;
+			buildConfigurationList = 5159E0F02B99A72900F3E575 /* Build configuration list for PBXProject "MacAppSettingsUI-Demo" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -126,7 +126,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				5159E0F42B99A72900F3E575 /* MacAppSettingsUI */,
+				5159E0F42B99A72900F3E575 /* MacAppSettingsUI-Demo */,
 			);
 		};
 /* End PBXProject section */
@@ -312,7 +312,7 @@
 				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2022–2024 usagimaru.";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -342,7 +342,7 @@
 				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2022–2024 usagimaru.";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -362,7 +362,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		5159E0F02B99A72900F3E575 /* Build configuration list for PBXProject "Demo" */ = {
+		5159E0F02B99A72900F3E575 /* Build configuration list for PBXProject "MacAppSettingsUI-Demo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				5159E1022B99A72A00F3E575 /* Debug */,
@@ -371,7 +371,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		5159E1042B99A72A00F3E575 /* Build configuration list for PBXNativeTarget "MacAppSettingsUI" */ = {
+		5159E1042B99A72A00F3E575 /* Build configuration list for PBXNativeTarget "MacAppSettingsUI-Demo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				5159E1052B99A72A00F3E575 /* Debug */,
