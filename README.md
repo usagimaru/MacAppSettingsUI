@@ -27,6 +27,11 @@ I have provided an option to close the settings window with the Escape key.
 <img src="./Guide/title.jpg" width=354>
 
 
+### Window frame is restorable
+
+The settings Window supports autosave via UserDefaults. The last window position can be restored automatically.
+
+
 ## Core Classes and Files
 
 ### `SettingsPaneViewController`
@@ -37,9 +42,6 @@ WindowController for Settings window. You do not need to edit.
 
 ### `SettingsTabViewController`
 WindowController’s contentViewController. You do not need to edit.
-
-### `Settings.storyboard`
-UI structure. You do not need to edit.
 
 
 ## Install
@@ -56,7 +58,7 @@ var settingsWindowController: SettingsWindowController!
 
 ---
 
-settingsWindowController = .windowController(with: [
+settingsWindowController = .init(with: [
 	SettingsPaneViewController(tabName: "General",
 							   tabImage: NSImage(systemSymbolName: "gearshape", accessibilityDescription: nil),
 							   tabIdentifier: "general",
