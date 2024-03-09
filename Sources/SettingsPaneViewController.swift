@@ -1,6 +1,5 @@
 //
 //  SettingsPaneViewController.swift
-//  MacAppSettingsUI
 //
 //  Created by usagimaru on 2024/03/07.
 //
