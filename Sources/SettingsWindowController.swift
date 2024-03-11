@@ -88,6 +88,11 @@ open class SettingsWindowController: NSWindowController {
 	
 	// MARK: -
 	
+	open override func windowDidLoad() {
+		super.windowDidLoad()
+		// This implementation does not use nib, so `windowDidLoad()` may not be called
+	}
+	
 	private func initialSetup() {
 		// When if use `windowFrameAutosaveName`, We have to disable `shouldCascadeWindows`
 		// https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/WinPanel/Tasks/SavingWindowPosition.html
