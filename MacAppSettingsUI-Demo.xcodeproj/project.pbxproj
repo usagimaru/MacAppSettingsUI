@@ -15,6 +15,7 @@
 		5159E11D2B9A580800F3E575 /* SettingsPaneViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5159E1192B9A580800F3E575 /* SettingsPaneViewController.swift */; };
 		5159E1422B9B717100F3E575 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5159E1442B9B717100F3E575 /* Localizable.strings */; };
 		51904F992B9C6D01007A8750 /* Auxiliaries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51904F982B9C6D01007A8750 /* Auxiliaries.swift */; };
+		51904F9D2B9EC39A007A8750 /* SettingsWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51904F9C2B9EC39A007A8750 /* SettingsWindow.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 		5159E1432B9B717100F3E575 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		5159E1452B9B717A00F3E575 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		51904F982B9C6D01007A8750 /* Auxiliaries.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Auxiliaries.swift; sourceTree = "<group>"; };
+		51904F9C2B9EC39A007A8750 /* SettingsWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsWindow.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,6 +76,7 @@
 			isa = PBXGroup;
 			children = (
 				5159E1182B9A580800F3E575 /* SettingsWindowController.swift */,
+				51904F9C2B9EC39A007A8750 /* SettingsWindow.swift */,
 				5159E1172B9A580800F3E575 /* SettingsTabViewController.swift */,
 				5159E1192B9A580800F3E575 /* SettingsPaneViewController.swift */,
 			);
@@ -156,6 +159,7 @@
 				5159E11D2B9A580800F3E575 /* SettingsPaneViewController.swift in Sources */,
 				5159E0F92B99A72900F3E575 /* AppDelegate.swift in Sources */,
 				5159E11C2B9A580800F3E575 /* SettingsWindowController.swift in Sources */,
+				51904F9D2B9EC39A007A8750 /* SettingsWindow.swift in Sources */,
 				51904F992B9C6D01007A8750 /* Auxiliaries.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

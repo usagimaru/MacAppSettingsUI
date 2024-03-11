@@ -57,6 +57,9 @@ open class SettingsTabViewController: NSTabViewController {
 		// Do not automatically set the active pane’s title to window title
 		// To delay window title refresh time and to manually control
 		canPropagateSelectedChildViewControllerTitle = false
+		
+		// Set tab style as `toolbar`
+		tabStyle = .toolbar
 	}
 	
 	open override func viewWillAppear() {

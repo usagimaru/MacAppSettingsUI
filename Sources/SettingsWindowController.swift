@@ -44,7 +44,7 @@ open class SettingsWindowController: NSWindowController {
 		self.closesWindowWithEscapeKey = closesWindowWithEscapeKey
 		
 		tabViewController = SettingsTabViewController()
-		window = NSWindow.settingsWindow(contentViewController: tabViewController)
+		window = SettingsWindow(contentViewController: tabViewController)
 		initialSetup()
 		
 		panes.forEach({
@@ -94,6 +94,19 @@ open class SettingsWindowController: NSWindowController {
 		shouldCascadeWindows = false
 		windowFrameAutosaveName = Keys.lastWindowFrame
 		
+		// The macOS settings/preferences window is generally styled to apply basically only with a close button. The minimize button should be disabled.
+		// However, depending on a contents of a pane, resizing can be enabled as in Xcode.
+		window?.styleMask = [
+			.titled,
+			.closable,
+		]
+		
+		window?.titlebarSeparatorStyle = .automatic
+		// Disable full-screen and enable traditional zoom button
+		window?.collectionBehavior = .fullScreenAuxiliary
+		// Not need it
+		window?.toolbarStyle = .preference
+		
 		if let observationForNSWorkspace {
 			NSWorkspace.shared.notificationCenter.removeObserver(observationForNSWorkspace)
 		}
@@ -109,7 +122,7 @@ open class SettingsWindowController: NSWindowController {
 				self.setupBehaviors()
 			}
 		
-		// If window restoration is enabled, `showWindow(_:)` are not called by the system.
+		// If window restoration is enabled, `showWindow(_:)` is not called by the system.
 		// This is done to grab the first displaying of windows under the window restoration process.
 		observationForNSApplication = NotificationCenter.default
 			.addObserver(forName: NSApplication.didFinishRestoringWindowsNotification,
@@ -130,7 +143,12 @@ open class SettingsWindowController: NSWindowController {
 	
 	// MARK: -
 	
-	// `windowWillLoad()`, `windowDidLoad()` and `loadWindow()` are not called by the system because this class is not owned by any nib / storyboard file.
+	// This implementation does not use nib,
+	// so `windowWillLoad()`, `windowDidLoad()` and `loadWindow()` are not called by the system
+	
+	open override func windowDidLoad() {
+		super.windowDidLoad()
+	}
 	
 	open override func showWindow(_ sender: Any?) {
 		super.showWindow(sender)
@@ -153,34 +171,8 @@ open class SettingsWindowController: NSWindowController {
 	
 	// MARK: -
 	
-	func removeAutosavedWindowFrame() {
+	public func removeAutosavedWindowFrame() {
 		NSWindow.removeFrame(usingName: Keys.lastWindowFrame)
 	}
 
-}
-
-public extension NSWindow {
-	
-	class func settingsWindow(contentViewController: NSTabViewController) -> Self {
-		// Set Toolbar style to TabViewController
-		contentViewController.tabStyle = .toolbar
-		
-		let window = Self(contentViewController: contentViewController)
-		
-		// The macOS settings/preferences window is generally styled to apply basically only with a close button. The minimize button should be disabled.
-		// However, depending on a contents of a pane, resizing can be enabled as in Xcode.
-		window.styleMask = [
-			.titled,
-			.closable,
-		]
-		
-		window.titlebarSeparatorStyle = .automatic
-		// Disable full-screen and enable traditional zoom button
-		window.collectionBehavior = .fullScreenAuxiliary
-		// Not need it
-		//window.toolbarStyle = .preference
-		
-		return window
-	}
-	
 }
