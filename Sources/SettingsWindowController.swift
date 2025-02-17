@@ -23,6 +23,8 @@ open class SettingsWindowController: NSWindowController {
 	}}
 	
 	public override var shouldCascadeWindows: Bool {
+		// When if use `windowFrameAutosaveName`, We have to disable `shouldCascadeWindows`
+		// https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/WinPanel/Tasks/SavingWindowPosition.html
 		get { false }
 		set { super.shouldCascadeWindows = false }
 	}
@@ -50,6 +52,15 @@ open class SettingsWindowController: NSWindowController {
 		panes.forEach({
 			tabViewController.add(pane: $0)
 		})
+	}
+	
+	deinit {
+		if let observationForNSWorkspace {
+			NSWorkspace.shared.notificationCenter.removeObserver(observationForNSWorkspace)
+		}
+		if let observationForNSApplication {
+			NotificationCenter.default.removeObserver(observationForNSApplication)
+		}
 	}
 	
 	/// Insert `General` pane to the first position
@@ -89,8 +100,6 @@ open class SettingsWindowController: NSWindowController {
 	// MARK: -
 	
 	private func initialSetup() {
-		// When if use `windowFrameAutosaveName`, We have to disable `shouldCascadeWindows`
-		// https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/WinPanel/Tasks/SavingWindowPosition.html
 		shouldCascadeWindows = false
 		windowFrameAutosaveName = Keys.lastWindowFrame
 		
@@ -102,9 +111,6 @@ open class SettingsWindowController: NSWindowController {
 		]
 		
 		window?.titlebarSeparatorStyle = .automatic
-		// Disable full-screen and enable traditional zoom button
-		window?.collectionBehavior = .fullScreenAuxiliary
-		// Not need it
 		window?.toolbarStyle = .preference
 		
 		if let observationForNSWorkspace {
@@ -119,7 +125,7 @@ open class SettingsWindowController: NSWindowController {
 			.addObserver(forName: NSWorkspace.accessibilityDisplayOptionsDidChangeNotification,
 						 object: nil,
 						 queue: .main) { notif in
-				self.setupBehaviors()
+				self.resetBehaviors()
 			}
 		
 		// If window restoration is enabled, `showWindow(_:)` is not called by the system.
@@ -129,14 +135,14 @@ open class SettingsWindowController: NSWindowController {
 						 object: NSApp,
 						 queue: .main,
 						 using: { notif in
-				self.setupBehaviors()
+				self.resetBehaviors()
 			})
 	}
 	
-	private func setupBehaviors() {
-		// Disable the full screen zoom button.
+	private func resetBehaviors() {
+		// Enable the traditional zoom button (green and plus icon) instead of the full screen button
 		window?.collectionBehavior = .fullScreenAuxiliary
-		// Reflects “Reduce Motion” of System Settings
+		// Reflects “Reduce Motion” setting on System Settings
 		tabViewController?.disablesAnimationOfTabSwitching = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
 	}
 	
@@ -158,7 +164,7 @@ open class SettingsWindowController: NSWindowController {
 			window?.center()
 		}
 		
-		setupBehaviors()
+		resetBehaviors()
 	}
 	
 	/// Close window to press Escape key

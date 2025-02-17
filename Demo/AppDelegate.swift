@@ -42,9 +42,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		// let advancedPane = settingsWindowController.addAdvancedPane(localizeKeyForTabName: "Advanced", isResizableView: true)
 		
 		
-		// Starting with macOS Ventura (ver. 13), Apple began using the name `Settings` instead of `Preferences` in U.S. English.
-		// You should not realistically care about `defaultWindowTitle` property,
-		// as there can be no situation where there are zero tabs in the settings window.
+		/*
+		 Notes about “Settings” and “Preferences”:
+		 
+		 Starting with macOS Ventura (version 13), Apple began using the label `Settings` instead of `Preferences` in U.S. English to describe a preferences UI.
+		 Therefore, all Mac apps must label preferences as “Settings”.
+		 
+		 If there is a “Preferences…” menu item in the Main Menu, the system automatically relabels it with “Settings…” in the runtime when the app is launched, so we no need to implement an extra program.
+		 Also we can disable this behavior through the “NSMenuShouldUpdateSettingsTitle” as Bool in the environment variables. (Not that we need to.)
+		 
+		 For labels outside of this mechanism on the Main Menu, developers will need to deal with them themselves.
+		 */
+		
+		// You should not realistically care about `defaultWindowTitle` property,　as there can be no situation where there are zero tabs in the settings window.
 		if #available(macOS 13, *) {
 			settingsWindowController.tabViewController.defaultWindowTitle = NSLocalizedString("Settings", comment: "")
 		}
