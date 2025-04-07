@@ -103,7 +103,7 @@ open class SettingsWindowController: NSWindowController {
 		shouldCascadeWindows = false
 		windowFrameAutosaveName = Keys.lastWindowFrame
 		
-		// The macOS settings/preferences window is generally styled to apply basically only with a close button. The minimize button should be disabled.
+		// The macOS settings/preferences window is generally styled to apply basically only with a close button. The minimize button should be disabled in the design.
 		// However, depending on a contents of a pane, resizing can be enabled as in Xcode.
 		window?.styleMask = [
 			.titled,

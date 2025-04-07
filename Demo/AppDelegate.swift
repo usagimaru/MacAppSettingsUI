@@ -19,13 +19,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		// Prepare setting panes
 		settingsWindowController = .init(with: [
 			
-			// Make a pane from storyboard file (Refer to auxiliary codes in Auxiliaries.swift and Main.storyboard)
+			// Case 1. Create panes with storyboard (Auxiliaries.swift and Main.storyboard for details).
 			GeneralSettingsPaneViewController.fromStoryboard(),
 			ViewSettingsPaneViewController.fromStoryboard(),
 			ExtensionsSettingsPaneViewController.fromStoryboard(),
 			AdvancedSettingsPaneViewController.fromStoryboard(),
 			
-			// Make a pane manually
+			// Case 2. You can also create panes manually.
 			SettingsPaneViewController(tabName: "Developer",
 									   localizeKeyForTabName: "Developer",
 									   tabImage: NSImage(systemSymbolName: "wrench.and.screwdriver", accessibilityDescription: nil),

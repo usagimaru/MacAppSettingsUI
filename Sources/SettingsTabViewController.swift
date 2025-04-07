@@ -134,7 +134,7 @@ open class SettingsTabViewController: NSTabViewController {
 		}
 	}
 	
-	// 参考：https://gist.github.com/ThatsJustCheesy/8148106fa7269326162d473408d3f75a
+	// Ref: https://gist.github.com/ThatsJustCheesy/8148106fa7269326162d473408d3f75a
 	
 	public func fitWindowSize(to tabViewItem: NSTabViewItem, animated: Bool) {
 		guard let size = tabViewSizes[tabViewItem], let window = view.window else {
@@ -187,6 +187,23 @@ open class SettingsTabViewController: NSTabViewController {
 	/// Reflect `NSTabViewItem.label` or `defaultWindowTitle` to the window
 	private func setWindowTitle(with tabViewItem: NSTabViewItem?) {
 		view.window?.title = tabViewItem?.label ?? defaultWindowTitle
+		
+		// Set window title on window menu
+		if let window = view.window {
+			let windowTitle: String
+			if let tabTitle = tabViewItem?.label {
+				windowTitle = "\(defaultWindowTitle) — \(tabTitle)"
+			}
+			else {
+				windowTitle = defaultWindowTitle
+			}
+			
+			NSApp.changeWindowsItem(window, title: windowTitle, filename: false)
+			
+			// Set Dock tile title.
+			// It makes little sense because minimization is basically disabled.
+			view.window?.miniwindowTitle = windowTitle
+		}
 	}
 	
 	/// Reflect the resizable attribute of the selected pane to the window

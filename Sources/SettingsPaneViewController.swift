@@ -12,12 +12,8 @@ open class SettingsPaneViewController: NSViewController {
 	
 	/// The alias for view contrller’s `title`. Pass to NSTabViewItem.label. If when use `tabNameLocalizeKey`, this property can be nil
 	@IBInspectable open var tabName: String? {
-		get {
-			title
-		}
-		set {
-			title = newValue
-		}
+		get { title }
+		set { title = newValue }
 	}
 	
 	/// Localization key for Tab name. Pass to NSTabViewItem.label
@@ -35,6 +31,14 @@ open class SettingsPaneViewController: NSViewController {
 	
 	// MARK: -
 	
+	/// Create View Controller Manually
+	/// - Parameters:
+	///   - tabViewController: Parent tab view controller if you will use it in the pane.
+	///   - tabName: Default tab name
+	///   - localizeKeyForTabName: Localization key for tab name
+	///   - tabImage: Tab image
+	///   - tabIdentifier: Unique tab identifier
+	///   - isResizableView: Flag for resizable attribute (Default: false)
 	public convenience init(tabViewController: SettingsTabViewController? = nil,
 							tabName: String? = nil,
 							localizeKeyForTabName: String? = nil,
