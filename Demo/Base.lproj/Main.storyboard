@@ -40,14 +40,17 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="e3W-fr-jRo">
-                                <rect key="frame" x="198" y="118" width="131" height="32"/>
-                                <buttonCell key="cell" type="push" title="Open Settings…" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="9pb-zj-sQw">
+                                <rect key="frame" x="199" y="115" width="129" height="40"/>
+                                <buttonCell key="cell" type="push" title="Open Settings…" bezelStyle="rounded" alignment="center" controlSize="large" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="9pb-zj-sQw">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
                                     <string key="keyEquivalent" base64-UTF8="YES">
 DQ
 </string>
                                 </buttonCell>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="titleLocalizable" value="Open Settings…"/>
+                                </userDefinedRuntimeAttributes>
                                 <connections>
                                     <action selector="openSettings:" target="nz4-s4-BZC" id="3xx-Zs-EUh"/>
                                 </connections>
@@ -58,16 +61,22 @@ DQ
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="titleLocalizable" value="Remove Autosave Frame"/>
+                                </userDefinedRuntimeAttributes>
                                 <connections>
                                     <action selector="removeAutosaveFrame:" target="idT-cN-2Kx" id="YNu-Zv-1Si"/>
                                 </connections>
                             </button>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="C4Y-jS-9Uq">
-                                <rect key="frame" x="18" y="22" width="111" height="18"/>
+                                <rect key="frame" x="203" y="94" width="111" height="18"/>
                                 <buttonCell key="cell" type="check" title="Center always" bezelStyle="regularSquare" imagePosition="left" inset="2" id="5AY-cW-xgE">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="titleLocalizable" value="Center always"/>
+                                </userDefinedRuntimeAttributes>
                                 <connections>
                                     <action selector="toggleCenterAlways:" target="idT-cN-2Kx" id="n7Z-k7-BD1"/>
                                 </connections>
@@ -75,11 +84,10 @@ DQ
                         </subviews>
                         <constraints>
                             <constraint firstItem="e3W-fr-jRo" firstAttribute="centerX" secondItem="Q6l-YB-ze4" secondAttribute="centerX" id="7Cr-G9-Ksb"/>
-                            <constraint firstItem="564-J6-Rn0" firstAttribute="firstBaseline" secondItem="C4Y-jS-9Uq" secondAttribute="firstBaseline" id="7Gg-tv-eVn"/>
                             <constraint firstItem="e3W-fr-jRo" firstAttribute="centerY" secondItem="Q6l-YB-ze4" secondAttribute="centerY" id="A2B-0v-FOg"/>
-                            <constraint firstItem="C4Y-jS-9Uq" firstAttribute="leading" secondItem="Q6l-YB-ze4" secondAttribute="leading" constant="20" symbolic="YES" id="CNF-ls-4sc"/>
+                            <constraint firstItem="C4Y-jS-9Uq" firstAttribute="leading" secondItem="e3W-fr-jRo" secondAttribute="leading" id="FSz-ir-YHu"/>
+                            <constraint firstItem="C4Y-jS-9Uq" firstAttribute="top" secondItem="e3W-fr-jRo" secondAttribute="bottom" constant="10" id="NVq-vW-huW"/>
                             <constraint firstAttribute="trailing" secondItem="564-J6-Rn0" secondAttribute="trailing" constant="20" symbolic="YES" id="UHR-Nd-xbN"/>
-                            <constraint firstItem="564-J6-Rn0" firstAttribute="leading" secondItem="C4Y-jS-9Uq" secondAttribute="trailing" constant="208" id="Ulu-U1-3qu"/>
                             <constraint firstAttribute="bottom" secondItem="564-J6-Rn0" secondAttribute="bottom" constant="20" symbolic="YES" id="xbr-Y2-Dsi"/>
                         </constraints>
                     </view>

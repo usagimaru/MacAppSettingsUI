@@ -17,8 +17,7 @@ open class SettingsTabViewController: NSTabViewController {
 	
 	open weak var windowController: SettingsWindowController?
 	
-	/// This is the standard window title when none of the tabs exist. Localize if necessary.
-	/// You should not realistically care about this property, as there can be no situation where there are zero tabs in the settings window.
+	/// The standard window title. It’s used for the title on the window menu. Localize if necessary.
 	open var defaultWindowTitle: String = "Settings"
 	
 	/// If set to true, disables animation
@@ -71,7 +70,7 @@ open class SettingsTabViewController: NSTabViewController {
 		}
 		
 		fitWindowSizeToSelectedTabViewItem()
-		setWindowTitle(with: selectedTabViewItem)
+		updateWindowTitleWithCurrentTab()
 	}
 	
 	
@@ -184,6 +183,11 @@ open class SettingsTabViewController: NSTabViewController {
 		}
 	}
 	
+	/// Update window title on title bar, window menu item on the menu bar and Dock tile title
+	public func updateWindowTitleWithCurrentTab() {
+		setWindowTitle(with: selectedTabViewItem)
+	}
+	
 	/// Reflect `NSTabViewItem.label` or `defaultWindowTitle` to the window
 	private func setWindowTitle(with tabViewItem: NSTabViewItem?) {
 		view.window?.title = tabViewItem?.label ?? defaultWindowTitle
@@ -198,7 +202,13 @@ open class SettingsTabViewController: NSTabViewController {
 				windowTitle = defaultWindowTitle
 			}
 			
-			NSApp.changeWindowsItem(window, title: windowTitle, filename: false)
+			// Change the title of the window menu item on Window menu if it is visible
+			if window.isVisible {
+				NSApp.changeWindowsItem(window, title: windowTitle, filename: false)
+			}
+			else {
+				NSApp.removeWindowsItem(window)
+			}
 			
 			// Set Dock tile title.
 			// It makes little sense because minimization is basically disabled.

@@ -125,3 +125,25 @@ class DemoViewController: NSViewController {
 	}
 	
 }
+
+extension NSButton {
+	
+	@IBInspectable var titleLocalizable: String {
+		get {
+			self.titleLocalizable
+		}
+		set {
+			title = NSLocalizedString(newValue, comment: "")
+		}
+	}
+	
+	@IBInspectable var altTitleLocalizable: String {
+		get {
+			self.altTitleLocalizable
+		}
+		set {
+			alternateTitle = NSLocalizedString(newValue, comment: "")
+		}
+	}
+	
+}

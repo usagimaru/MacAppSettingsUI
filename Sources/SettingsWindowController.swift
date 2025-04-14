@@ -18,6 +18,17 @@ open class SettingsWindowController: NSWindowController {
 	/// Do not want to close window with Escape key, set this flag to false
 	open var closesWindowWithEscapeKey: Bool!
 	
+	/// Get the window menu item for this window
+	open var windowMenuItem: NSMenuItem? {
+		NSApp.windowsMenu?.items.filter {
+			window != nil
+			&& ($0.target as? NSWindow) == window
+			&& $0.action == #selector(NSWindow.makeKeyAndOrderFront(_:))
+		}.first
+		
+		// Note: This NSMenuItem is `NSWindowRepresentingMenuItem` under private.
+	}
+	
 	public var tabViewController: SettingsTabViewController! { didSet {
 		tabViewController.windowController = self
 	}}
@@ -144,6 +155,11 @@ open class SettingsWindowController: NSWindowController {
 		window?.collectionBehavior = .fullScreenAuxiliary
 		// Reflects “Reduce Motion” setting on System Settings
 		tabViewController?.disablesAnimationOfTabSwitching = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
+		
+		if window?.isVisible == true {
+			// Update window title (also window menu item title, Dock tile title)
+			tabViewController.updateWindowTitleWithCurrentTab()
+		}
 	}
 	
 	

@@ -54,7 +54,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		 For labels outside of this mechanism on the Main Menu, developers will need to deal with them themselves.
 		 */
 		
-		// You should not realistically care about `defaultWindowTitle` property,　as there can be no situation where there are zero tabs in the settings window.
+		// `defaultWindowTitle` is used for the title on the window menu.
 		if #available(macOS 13, *) {
 			settingsWindowController.tabViewController.defaultWindowTitle = NSLocalizedString("Settings", comment: "")
 		}

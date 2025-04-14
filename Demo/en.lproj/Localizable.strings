@@ -6,6 +6,12 @@
   
 */
 
+"File" = "File";
+"Edit" = "Edit";
+"View" = "View";
+"Window" = "Window";
+"Help" = "Help";
+
 "Preferences…" = "Preferences…";
 "Settings…" = "Settings…";
 
@@ -17,3 +23,7 @@
 "Extensions" = "Extensions";
 "Advanced" = "Advanced";
 "Developer" = "Developer";
+
+"Open Settings…" = "Open Settings…";
+"Center always" = "Center always";
+"Remove Autosave Frame" = "Remove Autosave Frame";

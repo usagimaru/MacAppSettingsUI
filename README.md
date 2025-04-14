@@ -6,41 +6,60 @@ A package for make easier implementing a structure of settings / preferences UI 
 
 ## Design
 
-### Tab switching with animation
+### Preferences-Style Toolbar with Animation
+
+The window has preferences-styled toolbar and native switching animation. It also supports “Reduce Motion” feature of accessibility.
 
 <img src="./Guide/anim.gif" width=275>
 
-### Basically only close button, but zoom button optional
 
-<img src="./Guide/close.jpg" width=189>
+### Window Title
 
-Basically only the close button works in a setting window, but depending on the pane, the zoom button can also be enabled. 
+Set active pane name as a window title automatically when panes is switched.
 
-
-### We can also use the Escape key
-
-I have provided an option to close the settings window with the Escape key.
+<img src="./Guide/title.jpg" width=350>
 
 
-### Set active tab name as a window title automatically
+### Window Title with Active Pane Name on Window Menu
 
-<img src="./Guide/title.jpg" width=354>
+Display window title with pane name on the Window menu automatically.
 
-
-### Window frame is restorable
-
-The settings Window supports autosave via UserDefaults. The last window position can be restored automatically.
+<img src="./Guide/windowmenu.jpg" width= 350>
 
 
-## Core Classes and Files
+### Only Close Button
 
-### `SettingsPaneViewController`
+Basically, the window only has a close button, but a zoom button is optional for per-pane.
+
+<img src="./Guide/close.jpg" width=190>
+
+
+### Press Escape Key to Close
+
+We can use the Escape key or “cancelOperation” (`⌘.`) action to close the window.
+
+<img src="./Guide/escapekey.png" width=190>
+
+
+### Restorable Window Frame
+
+The settings Window supports autosave frame via UserDefaults. The last window position can be restored automatically.
+
+
+### Designed for Ventura and Later
+
+On before macOS Ventura, Settings was Preferences. This module can automatically change names.
+
+
+## Core Files
+
+- `SettingsPaneViewController`
 The base view controller for setting pane. You can use this class to customize your own.
 
-### `SettingsWindowController`
+- `SettingsWindowController`
 WindowController for Settings window. You do not need to edit.
 
-### `SettingsTabViewController`
+- `SettingsTabViewController`
 WindowController’s contentViewController. You do not need to edit.
 
 
@@ -89,7 +108,7 @@ func insert(tabViewItem: NSTabViewItem, at index: Int)
 
 To remove any pane, use NSTabViewController’s methods.
 
-## Tab Appearance
+## Appearance of Tabs
 
 There are properties of tab item in SettingsPaneViewController.
 
@@ -109,4 +128,3 @@ There is a property in SettingsPaneViewController. Set true to allow window resi
 ## License
 
 See [LICENSE](./LICENSE) for details.
-
