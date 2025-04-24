@@ -4,18 +4,18 @@ A package for make easier implementing a structure of settings / preferences UI 
 
 <img src="./Guide/screenshot.jpg" width=562>
 
-## Design
+## Design and Features
 
 ### Preferences-Style Toolbar with Animation
 
-The window has preferences-styled toolbar and native switching animation. It also supports “Reduce Motion” feature of accessibility.
+The window has preferences-style toolbar and native switching animation. It also supports “Reduce Motion” feature of accessibility.
 
 <img src="./Guide/anim.gif" width=275>
 
 
 ### Window Title
 
-Set active pane name as a window title automatically when panes is switched.
+Set active pane name as a window title automatically when panes are switched.
 
 <img src="./Guide/title.jpg" width=350>
 
@@ -36,7 +36,7 @@ Basically, the window only has a close button, but a zoom button is optional for
 
 ### Press Escape Key to Close
 
-We can use the Escape key or “cancelOperation” (`⌘.`) action to close the window.
+We can use the Escape key `⎋` or `⌘.` action to close the window.
 
 <img src="./Guide/escapekey.png" width=190>
 
@@ -46,9 +46,13 @@ We can use the Escape key or “cancelOperation” (`⌘.`) action to close the 
 The settings Window supports autosave frame via UserDefaults. The last window position can be restored automatically.
 
 
-### Designed for Ventura and Later
+### Supported for Renamed “Settings”
 
-On before macOS Ventura, Settings was Preferences. This module can automatically change names.
+On before macOS Ventura, “Settings” was “Preferences”. This module can also support renamed “Settings” after Ventura.
+
+More details of this design (Japanese):
+[macOS Venturaからの新しい“Settings”表記と、旧“Preferences”表記からの移行]
+(https://zenn.dev/usagimaru/articles/de5012155f4916)
 
 
 ## Core Files

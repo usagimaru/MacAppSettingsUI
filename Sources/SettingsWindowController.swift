@@ -185,6 +185,8 @@ open class SettingsWindowController: NSWindowController {
 	
 	/// Close window to press Escape key
 	@objc open func cancel(_ sender: Any?) {
+		// We can use the hidden method `cancel(_:)` to close the window with Escape key or Cmd-PERIOD pressing
+		// Ref: https://web.archive.org/web/20120114031052/http://developer.apple.com/library/mac/documentation/Cocoa/Reference/ApplicationKit/Classes/NSResponder_Class/Reference/Reference.html#//apple_ref/occ/instm/NSResponder/cancelOperation:
 		if closesWindowWithEscapeKey {
 			close()
 		}
@@ -196,5 +198,5 @@ open class SettingsWindowController: NSWindowController {
 	public func removeAutosavedWindowFrame() {
 		NSWindow.removeFrame(usingName: Keys.lastWindowFrame)
 	}
-
+	
 }
