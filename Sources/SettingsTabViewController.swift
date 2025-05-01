@@ -116,6 +116,13 @@ open class SettingsTabViewController: NSTabViewController {
 		}
 	}
 	
+	open func insert(tabViewItem: NSTabViewItem, at index: Int) {
+		if let vc = tabViewItem.viewController as? SettingsPaneViewController {
+			vc.tabViewController = self
+		}
+		insertTabViewItem(tabViewItem, at: index)
+	}
+	
 	private func makeTabViewItem(from pane: SettingsPaneViewController) -> NSTabViewItem {
 		let item = NSTabViewItem(viewController: pane)
 		updateTabName(of: item)
@@ -125,17 +132,11 @@ open class SettingsTabViewController: NSTabViewController {
 		return item
 	}
 	
-	open func insert(tabViewItem: NSTabViewItem, at index: Int) {
-		if let vc = tabViewItem.viewController as? SettingsPaneViewController {
-			vc.tabViewController = self
-		}
-		insertTabViewItem(tabViewItem, at: index)
-	}
-	
 	
 	// MARK: - Tab View and Transition
 	
 	open override func tabView(_ tabView: NSTabView, shouldSelect tabViewItem: NSTabViewItem?) -> Bool {
+		// Block toolbar interactions during transitions
 		if window?.isWindowResizing == true {
 			return false
 		}
@@ -162,14 +163,16 @@ open class SettingsTabViewController: NSTabViewController {
 			return
 		}
 		
-		// Transition views A -> B
+		// [Transition views A -> B with a blank view]
+		// We need to insert a blank view during view transitions in order to correctly display implicit animations of an window frame and a toolbar.
+		// Apparently mysterious artifacts on animations are related to the Auto Layout system.
 		
-		// 1. First, replace current view (A) with blank view
+		// 1. Set the blank view instead of current view (A)
 		superview.replaceSubview(fromViewController.view, with: blankView)
 		
-		// 2. Do window resizing process
+		// 2. Do window resizing process and animate
 		fitWindowSize(to: selectedTabViewItem, animateIfPossible: true) {
-			// 3. The resize animation completed then, replace blank view with the view (B)
+			// 3. The resize animation completed then, re-replace the blank view with the view (B)
 			superview.replaceSubview(self.blankView, with: toViewController.view)
 			
 			// 4. Reset window title and behavior

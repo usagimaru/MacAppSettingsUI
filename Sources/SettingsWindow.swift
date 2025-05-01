@@ -83,9 +83,9 @@ open class SettingsWindow: NSWindow {
 	///   - animateIfPossible: true: Animate resizing if possible
 	///   - completion: Completion callback
 	open func setWindowSize(_  size: NSSize,
-							  customEasingFunction: CAMediaTimingFunction? = nil,
-							  animateIfPossible: Bool,
-							  completion: (() -> ())? = nil)
+							customEasingFunction: CAMediaTimingFunction? = nil,
+							animateIfPossible: Bool,
+							completion: (() -> ())? = nil)
 	{
 		// Based on: https://gist.github.com/ThatsJustCheesy/8148106fa7269326162d473408d3f75a
 		

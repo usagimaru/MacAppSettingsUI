@@ -57,14 +57,17 @@ More details of this design (Japanese):
 
 ## Core Files
 
-- `SettingsPaneViewController`
-The base view controller for setting pane. You can use this class to customize your own.
+- `SettingsWindow`
+Window for Settings window.
 
 - `SettingsWindowController`
-WindowController for Settings window. You do not need to edit.
+WindowController for Settings window.
 
 - `SettingsTabViewController`
-WindowController’s contentViewController. You do not need to edit.
+WindowController’s contentViewController.
+
+- `SettingsPaneViewController`
+The base view controller for setting pane. You can use this class to customize your own.
 
 
 ## Install
@@ -74,14 +77,14 @@ Use SwiftPM.
 ## Usage
 To set panes of settings window, there are two ways of them.
 
-### 1. Set panes as an array when initializing SettingsWindowController
+### A. Initialize SettingsWindowController with the panes as an array
 
 ```swift
-var settingsWindowController: SettingsWindowController!
+// First, initialize the SettingsWindowController instance
+let settingsWindowController = SettingsWindowController(with: [/*panes*/])
 
----
-
-settingsWindowController = .init(with: [
+// …like this:
+let settingsWindowController = SettingsWindowController(with: [
 	SettingsPaneViewController(tabName: "General",
 							   tabImage: NSImage(systemSymbolName: "gearshape", accessibilityDescription: nil),
 							   tabIdentifier: "general",
@@ -99,34 +102,46 @@ settingsWindowController = .init(with: [
 							   tabIdentifier: "advanced",
 							   isResizableView: false),
 ])
+
+// That’s all. Then you can show the settings window.
+settingsWindowController.showWindow(nil)
+
 ```
 
-### 2. Set panes to a SettingsTabViewController instance
+### B. Set panes to a SettingsTabViewController instance
 
 ```swift
 func set(panes: [SettingsPaneViewController])
-func add(pane: SettingsPaneViewController)
-func insert(pane: SettingsPaneViewController, at index: Int)
+func add(panes: [SettingsPaneViewController])
+func insert(panes: [SettingsPaneViewController], at index: Int)
 func insert(tabViewItem: NSTabViewItem, at index: Int)
 ```
 
 To remove any pane, use NSTabViewController’s methods.
 
+
 ## Appearance of Tabs
 
-There are properties of tab item in SettingsPaneViewController.
+There are properties of tab item in `SettingsPaneViewController`.
 
-- `tabName`
-	- Alias of `NSViewController.title`.
-- `tabImage`
-- `tabIdentifier`
-	- Should set to a unique name.
+### `tabName`
+Default tab name, alias of `NSViewController.title`.
 
-## Control window resizing on a per-pane
+### `tabImage`
+Icon for a tab.
 
-There is a property in SettingsPaneViewController. Set true to allow window resizing only while the pane is active. The default value is false. Check the Demo implementation and `Main` Storyboard file.
+### `tabIdentifier`
+Should set to a unique name.
 
-- `isResizableView`
+### `localizeKeyForTabName`
+This key is used for localizing tab name process automatically.
+
+If you use this, SettingsTabViewController replaces `tabName` with the localized tab name. You can disable this feature with using a property `disablesLocalizationWithTabNameLocalizeKey` on SettingsTabViewController.
+
+
+## Controling window resizing behavior on a per-pane
+
+SettingsPaneViewController has the property `isResizableView`; setting true to allow window resizing only while the pane is active. The default value is false. Check the Demo implementation and `Main` Storyboard file.
 
 
 ## License
