@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="23504" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="ZJH-HF-2gP">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="23727" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="ZJH-HF-2gP">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="23504"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="23727"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -40,7 +40,7 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="e3W-fr-jRo">
-                                <rect key="frame" x="199" y="115" width="129" height="40"/>
+                                <rect key="frame" x="199" y="135" width="129" height="40"/>
                                 <buttonCell key="cell" type="push" title="Open Settings…" bezelStyle="rounded" alignment="center" controlSize="large" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="9pb-zj-sQw">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -69,7 +69,7 @@ DQ
                                 </connections>
                             </button>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="C4Y-jS-9Uq">
-                                <rect key="frame" x="203" y="94" width="111" height="18"/>
+                                <rect key="frame" x="203" y="114" width="111" height="18"/>
                                 <buttonCell key="cell" type="check" title="Center always" bezelStyle="regularSquare" imagePosition="left" inset="2" id="5AY-cW-xgE">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -81,18 +81,34 @@ DQ
                                     <action selector="toggleCenterAlways:" target="idT-cN-2Kx" id="n7Z-k7-BD1"/>
                                 </connections>
                             </button>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="sdG-sO-oWY">
+                                <rect key="frame" x="203" y="92" width="87" height="18"/>
+                                <buttonCell key="cell" type="check" title="Animation" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="Ymz-e2-Sh1">
+                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="titleLocalizable" value="Animation"/>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="toggleAnimation:" target="idT-cN-2Kx" id="HrS-rc-SWV"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <constraints>
                             <constraint firstItem="e3W-fr-jRo" firstAttribute="centerX" secondItem="Q6l-YB-ze4" secondAttribute="centerX" id="7Cr-G9-Ksb"/>
-                            <constraint firstItem="e3W-fr-jRo" firstAttribute="centerY" secondItem="Q6l-YB-ze4" secondAttribute="centerY" id="A2B-0v-FOg"/>
+                            <constraint firstItem="e3W-fr-jRo" firstAttribute="centerY" secondItem="Q6l-YB-ze4" secondAttribute="centerY" constant="-20" id="A2B-0v-FOg"/>
                             <constraint firstItem="C4Y-jS-9Uq" firstAttribute="leading" secondItem="e3W-fr-jRo" secondAttribute="leading" id="FSz-ir-YHu"/>
                             <constraint firstItem="C4Y-jS-9Uq" firstAttribute="top" secondItem="e3W-fr-jRo" secondAttribute="bottom" constant="10" id="NVq-vW-huW"/>
+                            <constraint firstItem="sdG-sO-oWY" firstAttribute="leading" secondItem="C4Y-jS-9Uq" secondAttribute="leading" id="NxK-ue-6Wd"/>
                             <constraint firstAttribute="trailing" secondItem="564-J6-Rn0" secondAttribute="trailing" constant="20" symbolic="YES" id="UHR-Nd-xbN"/>
+                            <constraint firstItem="sdG-sO-oWY" firstAttribute="top" secondItem="C4Y-jS-9Uq" secondAttribute="bottom" constant="6" symbolic="YES" id="k4L-fU-EHS"/>
                             <constraint firstAttribute="bottom" secondItem="564-J6-Rn0" secondAttribute="bottom" constant="20" symbolic="YES" id="xbr-Y2-Dsi"/>
                         </constraints>
                     </view>
                     <connections>
                         <outlet property="centerAlways" destination="C4Y-jS-9Uq" id="onm-xW-eAy"/>
+                        <outlet property="enablesAnimation" destination="sdG-sO-oWY" id="qLi-tR-4Sj"/>
                     </connections>
                 </viewController>
                 <customObject id="nz4-s4-BZC" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
@@ -468,18 +484,18 @@ DQ
             <objects>
                 <customObject id="okD-2h-D5p" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
                 <viewController storyboardIdentifier="AdvancedSettingsPaneViewController" id="KrI-14-2wn" customClass="AdvancedSettingsPaneViewController" customModule="MacAppSettingsUI_Demo" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" id="OaP-aE-W3n">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="150"/>
+                    <view key="view" misplaced="YES" id="OaP-aE-W3n">
+                        <rect key="frame" x="0.0" y="0.0" width="800" height="300"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <box boxType="custom" borderType="none" borderWidth="0.0" title="Box" titlePosition="noTitle" transparent="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Bds-2Y-ZDL">
-                                <rect key="frame" x="0.0" y="0.0" width="600" height="150"/>
+                                <rect key="frame" x="0.0" y="0.0" width="800" height="300"/>
                                 <view key="contentView" id="Rzj-go-KAq">
-                                    <rect key="frame" x="0.0" y="0.0" width="600" height="150"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="800" height="300"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="jpD-5J-dXp">
-                                            <rect key="frame" x="266" y="67" width="69" height="16"/>
+                                            <rect key="frame" x="366" y="142" width="69" height="16"/>
                                             <textFieldCell key="cell" lineBreakMode="clipping" title="Advanced" id="KQ0-Va-YCY">
                                                 <font key="font" metaFont="systemBold"/>
                                                 <color key="textColor" name="tertiaryLabelColor" catalog="System" colorSpace="catalog"/>
@@ -493,8 +509,8 @@ DQ
                                     </constraints>
                                 </view>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="600" id="bTx-f6-UDr"/>
-                                    <constraint firstAttribute="height" constant="150" id="pFT-Ju-r84"/>
+                                    <constraint firstAttribute="width" constant="800" id="bTx-f6-UDr"/>
+                                    <constraint firstAttribute="height" constant="300" id="pFT-Ju-r84"/>
                                 </constraints>
                             </box>
                         </subviews>
@@ -512,7 +528,7 @@ DQ
                     </userDefinedRuntimeAttributes>
                 </viewController>
             </objects>
-            <point key="canvasLocation" x="512" y="745"/>
+            <point key="canvasLocation" x="591" y="820"/>
         </scene>
     </scenes>
     <resources>

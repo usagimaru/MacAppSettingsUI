@@ -57,6 +57,65 @@ extension AppDelegate {
 
 // MARK: -
 
+class DemoViewController: NSViewController {
+	
+	@IBOutlet var centerAlways: NSButton!
+	@IBOutlet var enablesAnimation: NSButton!
+	
+	override func viewDidLoad() {
+		super.viewDidLoad()
+		
+		DispatchQueue.main.async {
+			self.view.window?.isMovableByWindowBackground = true
+		}
+	}
+	
+	override func viewDidAppear() {
+		super.viewDidAppear()
+		DispatchQueue.main.async {
+			AppDelegate.shared.settingsWindowController.centersWindowPositionAlways = self.centerAlways.state == .on
+		}
+	}
+	
+	@IBAction func toggleCenterAlways(_ sender: NSButton) {
+		AppDelegate.shared.settingsWindowController.centersWindowPositionAlways = sender.state == .on
+	}
+	
+	@IBAction func toggleAnimation(_ sender: NSButton) {
+		AppDelegate.shared.settingsWindowController.settingsWindow.fittingAnimationEnabled = sender.state == .on
+	}
+	
+	@IBAction func removeAutosaveFrame(_ sender: Any) {
+		AppDelegate.shared.settingsWindowController.removeAutosavedWindowFrame()
+	}
+	
+}
+
+extension NSButton {
+	
+	@IBInspectable var titleLocalizable: String {
+		get {
+			self.titleLocalizable
+		}
+		set {
+			title = NSLocalizedString(newValue, comment: "")
+		}
+	}
+	
+	@IBInspectable var altTitleLocalizable: String {
+		get {
+			self.altTitleLocalizable
+		}
+		set {
+			alternateTitle = NSLocalizedString(newValue, comment: "")
+		}
+	}
+	
+}
+
+
+// MARK: -
+
 extension SettingsPaneViewController {
 	
 	class func fromStoryboard(tabViewController: SettingsTabViewController? = nil,
@@ -97,53 +156,50 @@ class ExtensionsSettingsPaneViewController: SettingsPaneViewController {}
 
 class AdvancedSettingsPaneViewController: SettingsPaneViewController {}
 
-class DemoViewController: NSViewController {
+class DeveloperSettingsPaneViewController: SettingsPaneViewController {
 	
-	@IBOutlet var centerAlways: NSButton!
-	
-	override func viewDidLoad() {
-		super.viewDidLoad()
+	override func loadView() {
+		// Setup the custom content view
 		
-		DispatchQueue.main.async {
-			self.view.window?.isMovableByWindowBackground = true
-		}
-	}
-	
-	override func viewDidAppear() {
-		super.viewDidAppear()
-		DispatchQueue.main.async {
-			AppDelegate.shared.settingsWindowController.centersWindowPositionAlways = self.centerAlways.state == .on
-		}
-	}
-	
-	@IBAction func toggleCenterAlways(_ sender: NSButton) {
-		AppDelegate.shared.settingsWindowController.centersWindowPositionAlways = sender.state == .on
-	}
-	
-	@IBAction func removeAutosaveFrame(_ sender: Any) {
-		AppDelegate.shared.settingsWindowController.removeAutosavedWindowFrame()
+		view = NSView(frame: NSMakeRect(0, 0, 400, 280))
+		
+		let label = NSTextField(labelWithString: "\(self.tabName ?? "")\n(Resizable)")
+		label.alignment = .center
+		label.font = .boldSystemFont(ofSize: NSFont.systemFontSize)
+		label.textColor = .tertiaryLabelColor
+		label.translatesAutoresizingMaskIntoConstraints = false
+		view.addSubview(label)
+		
+		NSLayoutConstraint.activate([
+			label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+			label.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+			view.widthAnchor.constraint(greaterThanOrEqualToConstant: 350),
+			view.heightAnchor.constraint(greaterThanOrEqualToConstant: 280),
+			view.widthAnchor.constraint(lessThanOrEqualToConstant: 600),
+			view.heightAnchor.constraint(lessThanOrEqualToConstant: 700),
+		])
 	}
 	
 }
 
-extension NSButton {
+class UpdateSettingsPaneViewController: SettingsPaneViewController {
 	
-	@IBInspectable var titleLocalizable: String {
-		get {
-			self.titleLocalizable
-		}
-		set {
-			title = NSLocalizedString(newValue, comment: "")
-		}
-	}
-	
-	@IBInspectable var altTitleLocalizable: String {
-		get {
-			self.altTitleLocalizable
-		}
-		set {
-			alternateTitle = NSLocalizedString(newValue, comment: "")
-		}
+	override func loadView() {
+		// Setup the custom content view
+		
+		view = NSView(frame: NSMakeRect(0, 0, 400, 380))
+		
+		let label = NSTextField(labelWithString: self.tabName ?? "")
+		label.alignment = .center
+		label.font = .boldSystemFont(ofSize: NSFont.systemFontSize)
+		label.textColor = .tertiaryLabelColor
+		label.translatesAutoresizingMaskIntoConstraints = false
+		view.addSubview(label)
+		
+		NSLayoutConstraint.activate([
+			label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+			label.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+		])
 	}
 	
 }

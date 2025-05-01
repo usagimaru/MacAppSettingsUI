@@ -22,8 +22,10 @@
 "View" = "表示";
 "Extensions" = "機能拡張";
 "Advanced" = "詳細";
+"Updates" = "アップデート";
 "Developer" = "デベロッパ";
 
-"Open Settings…" = "設定を開く…";
+"Open Settings…" = "設定を開く… ⌘,";
 "Center always" = "常に中央に表示";
+"Animation" = "アニメーション";
 "Remove Autosave Frame" = "自動保存されたフレームを削除";

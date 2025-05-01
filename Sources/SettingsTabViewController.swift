@@ -15,37 +15,55 @@ public extension NSTabViewItem {
 
 open class SettingsTabViewController: NSTabViewController {
 	
+	/// Reference to SettingsWindowController
 	open weak var windowController: SettingsWindowController?
 	
-	/// The standard window title. It’s used for the title on the window menu. Localize if necessary.
-	open var defaultWindowTitle: String = "Settings"
-	
-	/// If set to true, disables animation
-	open var disablesAnimationOfTabSwitching: Bool = false
+	/// Reference to SettingsWindow (getter)
+	open var window: SettingsWindow? {
+		(view.window as? SettingsWindow)
+	}
 	
 	/// If set to true, use pane’s `tabName` to set tab name
 	open var disablesLocalizationWithTabNameLocalizeKey: Bool = false { didSet {
 		updateTabNames()
 	}}
 	
-	/// The safe version of `selectedTabViewItemIndex`. (Only getter)
-	public var selectedTabIndex: Int? {
-		// When there is no TabViewItem in NSTabViewController, `selectedTabViewItemIndex` returns -1. This spec does not appear to be documented.
-		if !tabViewItems.isEmpty && 0..<tabViewItems.count ~= selectedTabViewItemIndex {
-			return selectedTabViewItemIndex
+	/// The safe version of `selectedTabViewItemIndex`
+	open var selectedTabIndex: Int? {
+		get {
+			// When there is no TabViewItem in NSTabViewController, `selectedTabViewItemIndex` returns -1. This spec does not appear to be documented.
+			if !tabViewItems.isEmpty && 0..<tabViewItems.count ~= selectedTabViewItemIndex {
+				return selectedTabViewItemIndex
+			}
+			return nil
 		}
-		return nil
+		set {
+			super.selectedTabViewItemIndex = newValue ?? 0
+			if let selectedTabViewItem {
+				selectTab(with: selectedTabViewItem, animateIfPossible: false)
+			}
+		}
 	}
 	
 	/// Get the selected tab if it exist. (Only getter)
-	public var selectedTabViewItem: NSTabViewItem? {
+	open var selectedTabViewItem: NSTabViewItem? {
 		if let selectedTabIndex {
 			return tabViewItems[selectedTabIndex]
 		}
 		return nil
 	}
 	
-	private var tabViewSizes: [NSTabViewItem: NSSize] = [:]
+	/// Get all panes
+	open var panes: [SettingsPaneViewController] {
+		tabViewItems.compactMap {
+			$0.settingsPaneViewController
+		}
+	}
+	
+	/// Blank view for transition
+	open var blankView = NSView()
+	
+	public private(set) var tabViewSizes: [NSTabViewItem: NSSize] = [:]
 	
 	
 	// MARK: -
@@ -64,34 +82,38 @@ open class SettingsTabViewController: NSTabViewController {
 	open override func viewWillAppear() {
 		super.viewWillAppear()
 		
-		// If a TabViewItem exists but is not selected, select #0. (Just in case)
-		if selectedTabViewItem == nil && !tabViewItems.isEmpty {
-			selectedTabViewItemIndex = 0
+		if let selectedTabViewItem {
+			selectTab(with: selectedTabViewItem, animateIfPossible: false)
 		}
 		
-		fitWindowSizeToSelectedTabViewItem()
-		updateWindowTitleWithCurrentTab()
+		// If a TabViewItem exists but is not selected, select #0. (Just in case)
+		if !tabViewItems.isEmpty && selectedTabViewItem == nil {
+			selectedTabViewItemIndex = 0
+		}
 	}
 	
 	
 	// MARK: -
 	
 	open func set(panes: [SettingsPaneViewController]) {
+		add(panes: panes)
+		selectedTabIndex = 0
+	}
+	
+	open func add(panes: [SettingsPaneViewController]) {
 		panes.forEach {
-			add(pane: $0)
+			$0.tabViewController = self
+			let item = makeTabViewItem(from: $0)
+			addTabViewItem(item)
 		}
 	}
 	
-	open func add(pane: SettingsPaneViewController) {
-		pane.tabViewController = self
-		let item = makeTabViewItem(from: pane)
-		addTabViewItem(item)
-	}
-	
-	open func insert(pane: SettingsPaneViewController, at index: Int) {
-		pane.tabViewController = self
-		let item = makeTabViewItem(from: pane)
-		insertTabViewItem(item, at: index)
+	open func insert(panes: [SettingsPaneViewController], at index: Int) {
+		panes.reversed().forEach {
+			$0.tabViewController = self
+			let item = makeTabViewItem(from: $0)
+			insertTabViewItem(item, at: index)
+		}
 	}
 	
 	private func makeTabViewItem(from pane: SettingsPaneViewController) -> NSTabViewItem {
@@ -111,7 +133,14 @@ open class SettingsTabViewController: NSTabViewController {
 	}
 	
 	
-	// MARK: -
+	// MARK: - Tab View and Transition
+	
+	open override func tabView(_ tabView: NSTabView, shouldSelect tabViewItem: NSTabViewItem?) -> Bool {
+		if window?.isWindowResizing == true {
+			return false
+		}
+		return super.tabView(tabView, shouldSelect: tabViewItem)
+	}
 	
 	open override func tabView(_ tabView: NSTabView, willSelect tabViewItem: NSTabViewItem?) {
 		super.tabView(tabView, willSelect: tabViewItem)
@@ -122,115 +151,70 @@ open class SettingsTabViewController: NSTabViewController {
 			tabViewSizes[tabViewItem] = size
 		}
 		// Remove the resizable attribute from the window once
-		setDefaultWindowBehavior()
+		window?.resetWindowBehavior()
 	}
 	
-	open override func tabView(_ tabView: NSTabView, didSelect tabViewItem: NSTabViewItem?) {
-		super.tabView(tabView, didSelect: tabViewItem)
-		
-		if let tabViewItem {
-			fitWindowSize(to: tabViewItem, animated: true)
-		}
-	}
-	
-	// Ref: https://gist.github.com/ThatsJustCheesy/8148106fa7269326162d473408d3f75a
-	
-	public func fitWindowSize(to tabViewItem: NSTabViewItem, animated: Bool) {
-		guard let size = tabViewSizes[tabViewItem], let window = view.window else {
+	/// Control transition of this tab view controller
+	open override func transition(from fromViewController: NSViewController, to toViewController: NSViewController, options: NSViewController.TransitionOptions = [], completionHandler completion: (() -> Void)? = nil) {
+		guard let superview = fromViewController.view.superview,  let selectedTabViewItem
+		else {
+			completion?()
 			return
 		}
 		
-		let contentRect = NSRect(origin: .zero, size: size)
-		let contentFrame = window.frameRect(forContentRect: contentRect)
-		let toolbarHeight = window.frame.size.height - contentFrame.size.height
-		let newOrigin = NSPoint(x: window.frame.origin.x, y: window.frame.origin.y + toolbarHeight)
-		let newFrame = NSRect(origin: newOrigin, size: contentFrame.size)
+		// Transition views A -> B
 		
-		func postprocess() {
-			// The design intent is to refresh the window title after the pane is switched.
-			setWindowTitle(with: tabViewItem)
-			
-			// Reflect the resizable attribute
-			if let pane = tabViewItem.settingsPaneViewController {
-				setWindowBehavior(with: pane)
-			}
-		}
+		// 1. First, replace current view (A) with blank view
+		superview.replaceSubview(fromViewController.view, with: blankView)
 		
-		if animated && !disablesAnimationOfTabSwitching {
-			// It looks uncool when tab switching, so it is temporarily hidden until the animation is finished.
-			// Since the use of the `isHidden` attribute would affect the view frame, I adopted a policy of controlling the `alphaValue`.
-			self.view.alphaValue = 0
+		// 2. Do window resizing process
+		fitWindowSize(to: selectedTabViewItem, animateIfPossible: true) {
+			// 3. The resize animation completed then, replace blank view with the view (B)
+			superview.replaceSubview(self.blankView, with: toViewController.view)
 			
-			NSAnimationContext.runAnimationGroup { context in
-				context.duration = CATransaction.animationDuration()
-				window.animator().setFrame(newFrame, display: false)
-				
-			} completionHandler: {
-				self.view.alphaValue = 1
-				postprocess()
-			}
-		}
-		else {
-			window.setFrame(newFrame, display: false)
-			postprocess()
+			// 4. Reset window title and behavior
+			self.window?.setWindowTitle(with: selectedTabViewItem)
+			self.setWindowBehavior(with: selectedTabViewItem)
+			
+			completion?()
 		}
 	}
 	
-	/// Update window size to fit to the selected tab view item’s view frame
-	public func fitWindowSizeToSelectedTabViewItem() {
-		if let selectedTabViewItem {
-			fitWindowSize(to: selectedTabViewItem, animated: false)
+	/// Fit window size to specific tab view item
+	open func fitWindowSize(to tabViewItem: NSTabViewItem, animateIfPossible: Bool, completion: (() -> ())? = nil) {
+		guard let size = tabViewSizes[tabViewItem], let window else {
+			completion?()
+			return
 		}
+		
+		window.setWindowSize(size, animateIfPossible: animateIfPossible, completion: completion)
+	}
+	
+	
+	// MARK: -
+	
+	/// Select tab, fit window size and update window title
+	open func selectTab(with tabViewItem: NSTabViewItem, animateIfPossible: Bool) {
+		fitWindowSize(to: tabViewItem, animateIfPossible: animateIfPossible)
+		updateWindowTitleWithSelectedTab()
 	}
 	
 	/// Update window title on title bar, window menu item on the menu bar and Dock tile title
-	public func updateWindowTitleWithCurrentTab() {
-		setWindowTitle(with: selectedTabViewItem)
+	open func updateWindowTitleWithSelectedTab() {
+		window?.setWindowTitle(with: selectedTabViewItem)
 	}
 	
-	/// Reflect `NSTabViewItem.label` or `defaultWindowTitle` to the window
-	private func setWindowTitle(with tabViewItem: NSTabViewItem?) {
-		view.window?.title = tabViewItem?.label ?? defaultWindowTitle
-		
-		// Set window title on window menu
-		if let window = view.window {
-			let windowTitle: String
-			if let tabTitle = tabViewItem?.label {
-				windowTitle = "\(defaultWindowTitle) — \(tabTitle)"
-			}
-			else {
-				windowTitle = defaultWindowTitle
-			}
-			
-			// Change the title of the window menu item on Window menu if it is visible
-			if window.isVisible {
-				NSApp.changeWindowsItem(window, title: windowTitle, filename: false)
-			}
-			else {
-				NSApp.removeWindowsItem(window)
-			}
-			
-			// Set Dock tile title.
-			// It makes little sense because minimization is basically disabled.
-			view.window?.miniwindowTitle = windowTitle
-		}
-	}
-	
-	/// Reflect the resizable attribute of the selected pane to the window
-	private func setWindowBehavior(with pane: SettingsPaneViewController) {
-		if pane.isResizableView {
-			view.window?.styleMask.insert(.resizable)
+	/// Reflect the resizable attribute of the selected tab item to the window
+	private func setWindowBehavior(with tabViewItem: NSTabViewItem) {
+		if tabViewItem.settingsPaneViewController?.isResizableView == true {
+			window?.addResizableBehavior()
 		}
 		else {
-			setDefaultWindowBehavior()
+			window?.resetWindowBehavior()
 		}
 	}
 	
-	/// Set default window behavior (It does not include the resizable attribute)
-	private func setDefaultWindowBehavior() {
-		view.window?.styleMask.remove(.resizable)
-	}
-	
+	/// Update tab name with NSTabViewItem
 	private func updateTabName(of item: NSTabViewItem) {
 		if let pane = item.settingsPaneViewController {
 			if let localizeKey = pane.localizeKeyForTabName, !localizeKey.isEmpty && !disablesLocalizationWithTabNameLocalizeKey {
@@ -242,6 +226,7 @@ open class SettingsTabViewController: NSTabViewController {
 		}
 	}
 	
+	/// Update tab names
 	private func updateTabNames() {
 		tabViewItems.forEach { item in
 			updateTabName(of: item)

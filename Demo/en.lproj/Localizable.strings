@@ -22,8 +22,10 @@
 "View" = "View";
 "Extensions" = "Extensions";
 "Advanced" = "Advanced";
+"Updates" = "Updates";
 "Developer" = "Developer";
 
-"Open Settings…" = "Open Settings…";
+"Open Settings…" = "Open Settings… ⌘,";
 "Center always" = "Center always";
+"Animation" = "Animation";
 "Remove Autosave Frame" = "Remove Autosave Frame";

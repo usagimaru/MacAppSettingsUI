@@ -6,7 +6,7 @@
 
 import Cocoa
 
-open class SettingsWindowController: NSWindowController {
+public class SettingsWindowController: NSWindowController {
 	
 	public struct Keys {
 		/// UserDefaults key for `savesLastWindowFrame`
@@ -29,19 +29,20 @@ open class SettingsWindowController: NSWindowController {
 		// Note: This NSMenuItem is `NSWindowRepresentingMenuItem` under private.
 	}
 	
-	public var tabViewController: SettingsTabViewController! { didSet {
+	open var tabViewController: SettingsTabViewController! { didSet {
 		tabViewController.windowController = self
 	}}
 	
-	public override var shouldCascadeWindows: Bool {
+	open var settingsWindow: SettingsWindow {
+		window as! SettingsWindow
+	}
+	
+	open override var shouldCascadeWindows: Bool {
 		// When if use `windowFrameAutosaveName`, We have to disable `shouldCascadeWindows`
 		// https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/WinPanel/Tasks/SavingWindowPosition.html
 		get { false }
 		set { super.shouldCascadeWindows = false }
 	}
-	
-	private var observationForNSWorkspace: NSObjectProtocol?
-	private var observationForNSApplication: NSObjectProtocol?
 	
 	
 	// MARK: -
@@ -58,59 +59,22 @@ open class SettingsWindowController: NSWindowController {
 		
 		tabViewController = SettingsTabViewController()
 		window = SettingsWindow(contentViewController: tabViewController)
-		initialSetup()
+		initialWindowSetup()
 		
-		panes.forEach({
-			tabViewController.add(pane: $0)
-		})
+		tabViewController.set(panes: panes)
 	}
 	
+	private var obs_NSApplication: NSObjectProtocol?
 	deinit {
-		if let observationForNSWorkspace {
-			NSWorkspace.shared.notificationCenter.removeObserver(observationForNSWorkspace)
+		if let obs_NSApplication {
+			NotificationCenter.default.removeObserver(obs_NSApplication)
 		}
-		if let observationForNSApplication {
-			NotificationCenter.default.removeObserver(observationForNSApplication)
-		}
-	}
-	
-	/// Insert `General` pane to the first position
-	@discardableResult public func addGeneralPane(tabName: String? = "General",
-												  localizeKeyForTabName: String?,
-												  tabIdentifier: String = "General",
-												  isResizableView: Bool) -> SettingsPaneViewController {
-		
-		let pane = SettingsPaneViewController(tabName: tabName,
-											  localizeKeyForTabName: localizeKeyForTabName,
-											  tabImage: NSImage(systemSymbolName: "gearshape", accessibilityDescription: nil),
-											  tabIdentifier: tabIdentifier,
-											  isResizableView: isResizableView)
-		tabViewController.insert(pane: pane, at: 0)
-		tabViewController.selectedTabViewItemIndex = 0
-		
-		return pane
-	}
-	
-	/// Insert `Advanced` pane to the last position
-	@discardableResult public func addAdvancedPane(tabName: String? = "Advanced",
-												   localizeKeyForTabName: String?,
-												   tabIdentifier: String = "Advanced",
-												   isResizableView: Bool) -> SettingsPaneViewController {
-		
-		let pane = SettingsPaneViewController(tabName: tabName,
-											  localizeKeyForTabName: localizeKeyForTabName,
-											  tabImage: NSImage(systemSymbolName: "gearshape.2", accessibilityDescription: nil),
-											  tabIdentifier: tabIdentifier,
-											  isResizableView: isResizableView)
-		tabViewController.add(pane: pane)
-		
-		return pane
 	}
 	
 	
 	// MARK: -
 	
-	private func initialSetup() {
+	private func initialWindowSetup() {
 		shouldCascadeWindows = false
 		windowFrameAutosaveName = Keys.lastWindowFrame
 		
@@ -124,24 +88,13 @@ open class SettingsWindowController: NSWindowController {
 		window?.titlebarSeparatorStyle = .automatic
 		window?.toolbarStyle = .preference
 		
-		if let observationForNSWorkspace {
-			NSWorkspace.shared.notificationCenter.removeObserver(observationForNSWorkspace)
+		if let obs_NSApplication {
+			NotificationCenter.default.removeObserver(obs_NSApplication)
 		}
-		if let observationForNSApplication {
-			NotificationCenter.default.removeObserver(observationForNSApplication)
-		}
-		
-		// This is called when the "Display" accessibility settings are changed.
-		observationForNSWorkspace = NSWorkspace.shared.notificationCenter
-			.addObserver(forName: NSWorkspace.accessibilityDisplayOptionsDidChangeNotification,
-						 object: nil,
-						 queue: .main) { notif in
-				self.resetBehaviors()
-			}
 		
 		// If window restoration is enabled, `showWindow(_:)` is not called by the system.
 		// This is done to grab the first displaying of windows under the window restoration process.
-		observationForNSApplication = NotificationCenter.default
+		obs_NSApplication = NotificationCenter.default
 			.addObserver(forName: NSApplication.didFinishRestoringWindowsNotification,
 						 object: NSApp,
 						 queue: .main,
@@ -151,14 +104,10 @@ open class SettingsWindowController: NSWindowController {
 	}
 	
 	private func resetBehaviors() {
-		// Enable the traditional zoom button (green and plus icon) instead of the full screen button
-		window?.collectionBehavior = .fullScreenAuxiliary
-		// Reflects “Reduce Motion” setting on System Settings
-		tabViewController?.disablesAnimationOfTabSwitching = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
-		
 		if window?.isVisible == true {
 			// Update window title (also window menu item title, Dock tile title)
-			tabViewController.updateWindowTitleWithCurrentTab()
+			tabViewController.updateWindowTitleWithSelectedTab()
+			settingsWindow.setZoomButton()
 		}
 	}
 	
@@ -167,10 +116,6 @@ open class SettingsWindowController: NSWindowController {
 	
 	// This implementation does not use nib,
 	// so `windowWillLoad()`, `windowDidLoad()` and `loadWindow()` are not called by the system
-	
-	open override func windowDidLoad() {
-		super.windowDidLoad()
-	}
 	
 	open override func showWindow(_ sender: Any?) {
 		super.showWindow(sender)
@@ -184,7 +129,7 @@ open class SettingsWindowController: NSWindowController {
 	}
 	
 	/// Close window to press Escape key
-	@objc open func cancel(_ sender: Any?) {
+	@objc public func cancel(_ sender: Any?) {
 		// We can use the hidden method `cancel(_:)` to close the window with Escape key or Cmd-PERIOD pressing
 		// Ref: https://web.archive.org/web/20120114031052/http://developer.apple.com/library/mac/documentation/Cocoa/Reference/ApplicationKit/Classes/NSResponder_Class/Reference/Reference.html#//apple_ref/occ/instm/NSResponder/cancelOperation:
 		if closesWindowWithEscapeKey {
@@ -195,7 +140,7 @@ open class SettingsWindowController: NSWindowController {
 	
 	// MARK: -
 	
-	public func removeAutosavedWindowFrame() {
+	open func removeAutosavedWindowFrame() {
 		NSWindow.removeFrame(usingName: Keys.lastWindowFrame)
 	}
 	

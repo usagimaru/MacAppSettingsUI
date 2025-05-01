@@ -17,29 +17,41 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 	
 	func setupForSettingsWindow() {
 		// Prepare setting panes
+		
+		// Case 1. Create panes with storyboard (See Auxiliaries.swift and Main.storyboard for details).
 		settingsWindowController = .init(with: [
-			
-			// Case 1. Create panes with storyboard (Auxiliaries.swift and Main.storyboard for details).
 			GeneralSettingsPaneViewController.fromStoryboard(),
 			ViewSettingsPaneViewController.fromStoryboard(),
 			ExtensionsSettingsPaneViewController.fromStoryboard(),
 			AdvancedSettingsPaneViewController.fromStoryboard(),
-			
-			// Case 2. You can also create panes manually.
-			SettingsPaneViewController(tabName: "Developer",
-									   localizeKeyForTabName: "Developer",
-									   tabImage: NSImage(systemSymbolName: "wrench.and.screwdriver", accessibilityDescription: nil),
-									   tabIdentifier: "Developer",
-									   isResizableView: true)
 		])
 		
-		// --------------------------------------
-		// Optional:
 		
-		// You can also use these builder methods for `General` and `Advanced` panes.
+		// Case 2. You can also insert additional panes manually.
+		settingsWindowController.tabViewController.insert(panes: [
+			UpdateSettingsPaneViewController(tabName: "Updates",
+											 localizeKeyForTabName: "Updates",
+											 tabImage: NSImage(systemSymbolName: "arrow.trianglehead.2.clockwise.rotate.90", accessibilityDescription: nil),
+											 tabIdentifier: "Updates",
+											 isResizableView: false)
+		], at: settingsWindowController.tabViewController.panes.count-1)
 		
-		// settingsWindowController.addGeneralPane(localizeKeyForTabName: "General", isResizableView: false)
-		// let advancedPane = settingsWindowController.addAdvancedPane(localizeKeyForTabName: "Advanced", isResizableView: true)
+		settingsWindowController.tabViewController.add(panes: [
+			DeveloperSettingsPaneViewController(tabName: "Developer",
+												localizeKeyForTabName: "Developer",
+												tabImage: NSImage(systemSymbolName: "wrench.and.screwdriver", accessibilityDescription: nil),
+												tabIdentifier: "Developer",
+												isResizableView: true)
+		])
+		
+		
+		// `defaultWindowTitle` is used for the title on the window menu.
+		if #available(macOS 13, *) {
+			settingsWindowController.settingsWindow.defaultWindowTitle = NSLocalizedString("Settings", comment: "")
+		}
+		else {
+			settingsWindowController.settingsWindow.defaultWindowTitle = NSLocalizedString("Preferences", comment: "")
+		}
 		
 		
 		/*
@@ -53,14 +65,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		 
 		 For labels outside of this mechanism on the Main Menu, developers will need to deal with them themselves.
 		 */
-		
-		// `defaultWindowTitle` is used for the title on the window menu.
-		if #available(macOS 13, *) {
-			settingsWindowController.tabViewController.defaultWindowTitle = NSLocalizedString("Settings", comment: "")
-		}
-		else {
-			settingsWindowController.tabViewController.defaultWindowTitle = NSLocalizedString("Preferences", comment: "")
-		}
 	}
 	
 	// <<<====================================================
