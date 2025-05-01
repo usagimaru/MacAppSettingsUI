@@ -50,9 +50,7 @@ The settings Window supports autosave frame via UserDefaults. The last window po
 
 On before macOS Ventura, “Settings” was “Preferences”. This module can also support renamed “Settings” after Ventura.
 
-More details of this design (Japanese):
-[macOS Venturaからの新しい“Settings”表記と、旧“Preferences”表記からの移行]
-(https://zenn.dev/usagimaru/articles/de5012155f4916)
+More details of this design (Japanese): [macOS Venturaからの新しい“Settings”表記と、旧“Preferences”表記からの移行](https://zenn.dev/usagimaru/articles/de5012155f4916)
 
 
 ## Core Files
