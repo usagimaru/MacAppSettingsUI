@@ -484,7 +484,7 @@ DQ
             <objects>
                 <customObject id="okD-2h-D5p" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
                 <viewController storyboardIdentifier="AdvancedSettingsPaneViewController" id="KrI-14-2wn" customClass="AdvancedSettingsPaneViewController" customModule="MacAppSettingsUI_Demo" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" misplaced="YES" id="OaP-aE-W3n">
+                    <view key="view" id="OaP-aE-W3n">
                         <rect key="frame" x="0.0" y="0.0" width="800" height="300"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
