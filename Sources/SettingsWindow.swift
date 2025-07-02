@@ -123,14 +123,27 @@ open class SettingsWindow: NSWindow {
 	
 	// MARK: -
 	
+	/// Disable some default menu items
+	func disablingSelectorForMenuValidation() -> [Selector] {
+		[
+			#selector(NSSplitViewController.toggleSidebar(_:)),
+			#selector(toggleFullScreen(_:)),
+			#selector(selectPreviousTab(_:)),
+			#selector(moveTabToNewWindow(_:)),
+			#selector(mergeAllWindows(_:)),
+			#selector(toggleTabBar(_:)),
+			#selector(toggleTabOverview(_:)),
+			#selector(toggleToolbarShown(_:)),
+			#selector(runToolbarCustomizationPalette(_:)),
+		]
+	}
+	
 	open override func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
+		if let action = menuItem.action, disablingSelectorForMenuValidation().contains(action) {
+			return false
+		}
+		
 		switch menuItem.action {
-			case
-				#selector(toggleToolbarShown(_:)),
-				#selector(runToolbarCustomizationPalette(_:)):
-				// Disable `toggleToolbarShown(_:)` menu item and toolbar customization
-				return false
-				
 			case _:
 				return true
 		}
