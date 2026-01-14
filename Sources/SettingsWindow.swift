@@ -14,6 +14,9 @@ open class SettingsWindow: NSWindow {
 	/// If set to false, disables fitting animation
 	open var fittingAnimationEnabled: Bool = true
 	
+	/// Set the custom timing function if you want. nil is default.
+	open var animationTimingFunctionForResizing: CAMediaTimingFunction?
+	
 	/// Get “Reduce Motion” accessibility setting
 	open var reduceMotionIfNeeded: Bool {
 		NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
@@ -79,11 +82,9 @@ open class SettingsWindow: NSWindow {
 	/// Set fitting size to window
 	/// - Parameters:
 	///   - size: Window size
-	///   - customEasingFunction: Set custom easing function if you want. Override `animationResizeTime(_:)` if you want to change the duration too.
 	///   - animateIfPossible: true: Animate resizing if possible
 	///   - completion: Completion callback
 	open func setWindowSize(_  size: NSSize,
-							customEasingFunction: CAMediaTimingFunction? = nil,
 							animateIfPossible: Bool,
 							completion: (() -> ())? = nil)
 	{
@@ -105,8 +106,9 @@ open class SettingsWindow: NSWindow {
 			NSAnimationContext.runAnimationGroup { ctx in
 				ctx.allowsImplicitAnimation = true
 				ctx.duration = animationResizeTime(newFrame)
-				if let customEasingFunction {
-					ctx.timingFunction = customEasingFunction
+				
+				if let function = animationTimingFunctionForResizing {
+					ctx.timingFunction = function
 				}
 				
 				setFrame(newFrame, display: true)
@@ -118,6 +120,11 @@ open class SettingsWindow: NSWindow {
 			setFrame(newFrame, display: true)
 			postprocess()
 		}
+	}
+	
+	/// Return default animation duration or your custom duration.
+	open override func animationResizeTime(_ newFrame: NSRect) -> TimeInterval {
+		super.animationResizeTime(newFrame)
 	}
 	
 	
