@@ -53,19 +53,30 @@ On before macOS Ventura, “Settings” was “Preferences”. This module can a
 More details of this design (Japanese): [macOS Venturaからの新しい“Settings”表記と、旧“Preferences”表記からの移行](https://zenn.dev/usagimaru/articles/de5012155f4916)
 
 
+### Layout Guide (experimental)
+
+I have prepared a simple layout guide and a wireframing feature to help you build the standard setting layout. Please check the “Developer” tab on the demo app, `DeveloperSettingsPaneViewController` and `SettingsPaneContainerView`.
+
+<img src="./Guide/layoutguide.jpg" width=762>
+
 ## Core Files
 
-- `SettingsWindow`
+### `SettingsWindow`
 Window for Settings window.
 
-- `SettingsWindowController`
+### `SettingsWindowController`
 WindowController for Settings window.
 
-- `SettingsTabViewController`
+### `SettingsTabViewController`
 WindowController’s contentViewController.
 
-- `SettingsPaneViewController`
+### `SettingsPaneViewController`
 The base view controller for setting pane. You can use this class to customize your own.
+
+### `SettingsPaneContainerView`
+This is a convenient container view for layouts. It is disabled by default; if you wish to use it, first enable it using the `setContentContainerView(maximumWidth:)` method of the `SettingsPaneViewController`. Then add any contents to this container view.
+
+Please check the “Developer” tab on the demo app, `DeveloperSettingsPaneViewController` and `SettingsPaneContainerView`.
 
 
 ## Install
