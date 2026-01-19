@@ -8,6 +8,7 @@ import Cocoa
 
 open class SettingsPaneViewController: NSViewController {
 	
+	open var contentContainerView: SettingsPaneContainerView?
 	open weak var tabViewController: SettingsTabViewController?
 	
 	/// The alias for view contrller’s `title`. Pass to NSTabViewItem.label. If when use `tabNameLocalizeKey`, this property can be nil
@@ -52,6 +53,21 @@ open class SettingsPaneViewController: NSViewController {
 		self.tabImage = tabImage
 		self.tabIdentifier = tabIdentifier
 		self.isResizableView = isResizableView
+	}
+	
+	/// Prepare container view if you want
+	@discardableResult
+	open func setContentContainerView(maximumWidth: CGFloat) -> SettingsPaneContainerView {
+		if let contentContainerView {
+			contentContainerView.removeFromSuperview()
+		}
+		
+		let containerView = SettingsPaneContainerView()
+		view.addSubview(containerView)
+		containerView.setMaximumWidth(maximumWidth)
+		contentContainerView = containerView
+		
+		return containerView
 	}
 	
 }
