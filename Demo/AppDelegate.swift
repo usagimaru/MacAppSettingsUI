@@ -10,7 +10,7 @@ import Cocoa
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
 	
-	// MARK: - Setup the Setting Window
+	// MARK: - Setup the Setting Window (demo)
 	// ====================================================>>>
 
 	private(set) var settingsWindowController: SettingsWindowController!
@@ -18,7 +18,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 	func setupForSettingsWindow() {
 		// Prepare setting panes
 		
-		// Case 1. Create panes with storyboard (See Auxiliaries.swift and Main.storyboard for details).
+		// Case 1. Create panes with storyboard (See `DemoViewControllers.swift` and Main.storyboard for details).
+		//   “General”, “Appearance”, “Extensions”, “Advanced”
 		settingsWindowController = .init(with: [
 			GeneralSettingsPaneViewController.fromStoryboard(),
 			ViewSettingsPaneViewController.fromStoryboard(),
@@ -28,17 +29,30 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		
 		
 		// Case 2. You can also insert additional panes manually.
+		
+		let tabName_updates: String
+		let tabName_developer: String
+		
+		if #available(macOS 12, *) {
+			tabName_updates = String(localized: "Updates")
+			tabName_developer = String(localized: "Developer")
+		}
+		else {
+			tabName_updates = NSLocalizedString("Updates", comment: "")
+			tabName_developer = NSLocalizedString("Developer", comment: "")
+		}
+		
+		//   Insert “Updates” tab to "Extensions [HERE] Advanced"
 		settingsWindowController.tabViewController.insert(panes: [
-			UpdateSettingsPaneViewController(tabName: "Updates",
-											 localizeKeyForTabName: "Updates",
+			UpdateSettingsPaneViewController(tabName: tabName_updates,
 											 tabImage: NSImage(systemSymbolName: "arrow.trianglehead.2.clockwise.rotate.90", accessibilityDescription: nil),
 											 tabIdentifier: "Updates",
 											 isResizableView: false)
 		], at: settingsWindowController.tabViewController.panes.count-1)
 		
+		//   Insert “Developer” tab to the last
 		settingsWindowController.tabViewController.add(panes: [
-			DeveloperSettingsPaneViewController(tabName: "Developer",
-												localizeKeyForTabName: "Developer",
+			DeveloperSettingsPaneViewController(tabName: tabName_developer,
 												tabImage: NSImage(systemSymbolName: "wrench.and.screwdriver", accessibilityDescription: nil),
 												tabIdentifier: "Developer",
 												isResizableView: true)
@@ -69,4 +83,51 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 	
 	// <<<====================================================
 
+}
+
+extension AppDelegate {
+	
+	static var shared: AppDelegate {
+		NSApp.delegate as! Self
+	}
+	
+	func applicationWillFinishLaunching(_ notification: Notification) {
+		// Localize the menu bar
+		// `applicationDidFinishLaunching(_:)` is too late
+		localizeMainMenuTitles()
+	}
+	
+	func applicationDidFinishLaunching(_ aNotification: Notification) {
+		setupForSettingsWindow()
+	}
+	
+	@IBAction func openSettings(_ sender: Any) {
+		settingsWindowController.showWindow(sender)
+	}
+	
+	/// Localize menu items in the menu bar
+	private func localizeMainMenuTitles() {
+		guard let mainMenuItems = NSApp.mainMenu?.items else {return}
+		
+		func setLocalizedTitle(to menuItems: [NSMenuItem], isRoot: Bool) {
+			for menuItem in menuItems {
+				if menuItem.isSeparatorItem {continue}
+				
+				let newTitle = NSLocalizedString(menuItem.title, comment: "")
+				menuItem.title = newTitle
+				
+				// Change the submenu’s title when it is the root
+				if isRoot {
+					menuItem.submenu?.title = newTitle
+				}
+				
+				if let submenuItems = menuItem.submenu?.items {
+					setLocalizedTitle(to: submenuItems, isRoot: false)
+				}
+			}
+		}
+		
+		setLocalizedTitle(to: mainMenuItems, isRoot: true)
+	}
+	
 }

@@ -57,7 +57,7 @@ More details of this design (Japanese): [macOS Venturaからの新しい“Setti
 
 I have prepared a simple layout guide and a wireframing feature to help you build the standard setting layout. Please check the “Developer” tab on the demo app, `DeveloperSettingsPaneViewController` and `SettingsPaneContainerView`.
 
-<img src="./Guide/layoutguide.jpg" width=762>
+<img src="./Guide/layoutguide.jpg" width=692>
 
 ## Core Files
 
@@ -74,9 +74,12 @@ WindowController’s contentViewController.
 The base view controller for setting pane. You can use this class to customize your own.
 
 ### `SettingsPaneContainerView`
-This is a convenient container view for layouts. It is disabled by default; if you wish to use it, first enable it using the `setContentContainerView(maximumWidth:)` method of the `SettingsPaneViewController`. Then add any contents to this container view.
+This is a convenient container view for layouts. It is disabled by default; if you wish to use it, first enable it using the `setContentContainerView(maximumWidth: labelLayoutGuideWidth:)` method of the `SettingsPaneLayoutGuide`. Then add any contents to this container view.
 
-Please check the “Developer” tab on the demo app, `DeveloperSettingsPaneViewController` and `SettingsPaneContainerView`.
+Please check the “Developer” tab on the demo app, `DeveloperSettingsPaneViewController` in `DemoViewControllers.swift` and `SettingsPaneContainerView`.
+
+### `SettingsPaneLayoutGuide`
+A protocol for a layout guide using `SettingsPaneContainerView`.
 
 
 ## Install
@@ -147,8 +150,10 @@ This key is used for localizing tab name process automatically.
 
 If you use this, SettingsTabViewController replaces `tabName` with the localized tab name. You can disable this feature with using a property `disablesLocalizationWithTabNameLocalizeKey` on SettingsTabViewController.
 
+This is useful when initializing view controllers in Interface Builder, but in normal cases, use `String(localized: “ANY KEY”)` (or `NSLocalizedString()`) for `tabName` property.
 
-## Controling window resizing behavior on a per-pane
+
+## Controlling window resizing behavior on a per-pane
 
 SettingsPaneViewController has the property `isResizableView`; setting true to allow window resizing only while the pane is active. The default value is false. Check the Demo implementation and `Main` Storyboard file.
 

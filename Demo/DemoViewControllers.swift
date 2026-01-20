@@ -1,61 +1,11 @@
 //
-//  Auxiliaries.swift
+//  DemoViewControllers.swift
 //  MacAppSettingsUI-Demo
 //
-//  Created by usagimaru on 2024/03/09.
+//  Created by usagimaru on 2026/01/20.
 //
 
 import Cocoa
-
-extension AppDelegate {
-	
-	static var shared: AppDelegate {
-		NSApp.delegate as! Self
-	}
-	
-	func applicationWillFinishLaunching(_ notification: Notification) {
-		// Localize the menu bar
-		// `applicationDidFinishLaunching(_:)` is too late
-		localizeMainMenuTitles()
-	}
-	
-	func applicationDidFinishLaunching(_ aNotification: Notification) {
-		setupForSettingsWindow()
-	}
-	
-	@IBAction func openSettings(_ sender: Any) {
-		settingsWindowController.showWindow(sender)
-	}
-	
-	/// Localize menu items in the menu bar
-	private func localizeMainMenuTitles() {
-		guard let mainMenuItems = NSApp.mainMenu?.items else {return}
-		
-		func setLocalizedTitle(to menuItems: [NSMenuItem], isRoot: Bool) {
-			for menuItem in menuItems {
-				if menuItem.isSeparatorItem {continue}
-				
-				let newTitle = NSLocalizedString(menuItem.title, comment: "")
-				menuItem.title = newTitle
-				
-				// Change the submenu’s title when it is the root
-				if isRoot {
-					menuItem.submenu?.title = newTitle
-				}
-				
-				if let submenuItems = menuItem.submenu?.items {
-					setLocalizedTitle(to: submenuItems, isRoot: false)
-				}
-			}
-		}
-		
-		setLocalizedTitle(to: mainMenuItems, isRoot: true)
-	}
-	
-}
-
-
-// MARK: -
 
 class DemoViewController: NSViewController {
 	
@@ -91,30 +41,8 @@ class DemoViewController: NSViewController {
 	
 }
 
-extension NSButton {
-	
-	@IBInspectable var titleLocalizable: String {
-		get {
-			self.titleLocalizable
-		}
-		set {
-			title = NSLocalizedString(newValue, comment: "")
-		}
-	}
-	
-	@IBInspectable var altTitleLocalizable: String {
-		get {
-			self.altTitleLocalizable
-		}
-		set {
-			alternateTitle = NSLocalizedString(newValue, comment: "")
-		}
-	}
-	
-}
 
-
-// MARK: -
+// MARK: - Panes
 
 extension SettingsPaneViewController {
 	
@@ -154,9 +82,30 @@ class ViewSettingsPaneViewController: SettingsPaneViewController {}
 
 class ExtensionsSettingsPaneViewController: SettingsPaneViewController {}
 
-class AdvancedSettingsPaneViewController: SettingsPaneViewController {}
+class AdvancedSettingsPaneViewController: SettingsPaneViewController, SettingsPaneLayoutGuide {
+	
+	var contentContainerView: SettingsPaneContainerView?
+	
+	override func viewDidLoad() {
+		super.viewDidLoad()
+		
+		// ----- Demo for setup the layout container -----
+		
+		// 1: First, prepare the container view with any maximum width value (or setting it to nil allows the container to behave flexibly).
+		setContentContainerView(maximumWidth: 550)
+		
+		// 2: If necessory, set any width value to the label layout guide.
+		contentContainerView?.labelLayoutGuideWidth = 160
+		
+		// 3: If necessary, enable wireframes for debugging. (Only effective in `DEBUG` build.)
+		contentContainerView?.debug_setWireframes(true)
+	}
+	
+}
 
-class DeveloperSettingsPaneViewController: SettingsPaneViewController {
+class DeveloperSettingsPaneViewController: SettingsPaneViewController, SettingsPaneLayoutGuide {
+	
+	var contentContainerView: SettingsPaneContainerView?
 	
 	override func loadView() {
 		// Setup the custom content view
@@ -190,10 +139,18 @@ class DeveloperSettingsPaneViewController: SettingsPaneViewController {
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		
-		// Demo: Prepare container view with any maximum width value
-		setContentContainerView(maximumWidth: 500)
+		// ----- Demo for setup the layout container -----
 		
-		// Demo: Insert labels and items
+		// 1: First, prepare the container view with any maximum width value (or setting it to nil allows the container to behave flexibly)
+		setContentContainerView(maximumWidth: nil)
+		
+		// 2: If necessary, enable wireframes for debugging. (Only effective in `DEBUG` build.)
+		contentContainerView?.debug_setWireframes(true)
+		
+		
+		// ----- Demo for adding contents -----
+		
+		// Insert labels and items
 		let label1 = setDemoLabel(topView: nil, label: "Setting item 1:")
 		setDemoItem(leadingView: label1, title: "This is a checkbox")
 		
@@ -203,11 +160,12 @@ class DeveloperSettingsPaneViewController: SettingsPaneViewController {
 		let label3 = setDemoLabel(topView: label2, label: "Pineapple pen + Apple pen:")
 		setDemoItem(leadingView: label3, title: "Pen-pineapple-apple-pen")
 		
-		// Demo: Add separator
-		let _ = setDemoSeparator(topView: label3)
+		// Add separator
+		let separator = setDemoSeparator(topView: label3)
 		
-		// Demo: Enable wireframes (for debug)
-		contentContainerView?.debug_setWireframes(true)
+		// Add toggle switch
+		let label4 = setDemoLabel(topView: separator, label: "Wireframes:")
+		setDemoSwitch(leadingView: label4, state: .on)
 	}
 	
 	private func setDemoLabel(topView: NSView?, label: String) -> NSTextField {
@@ -259,6 +217,27 @@ class DeveloperSettingsPaneViewController: SettingsPaneViewController {
 		}
 	}
 	
+	private func setDemoSwitch(leadingView: NSView, state: NSControl.StateValue) {
+		if let contentContainerView {
+			let item = NSSwitch()
+			item.state = state
+			item.controlSize = .small
+			item.target = self
+			item.identifier = .init("Wireframe switch")
+			item.action = #selector(switchAction(_:))
+			
+			contentContainerView.addSubview(item)
+			item.translatesAutoresizingMaskIntoConstraints = false
+			item.centerYAnchor.constraint(equalTo: leadingView.centerYAnchor).isActive = true
+			item.leadingAnchor.constraint(equalToSystemSpacingAfter: leadingView.trailingAnchor, multiplier: 1).isActive = true
+			contentContainerView.trailingAnchor.constraint(greaterThanOrEqualToSystemSpacingAfter: item.trailingAnchor, multiplier: 1).isActive = true
+			
+			// Set the weak priority for the horizontal resistance
+			let p = NSLayoutConstraint.Priority(NSLayoutConstraint.Priority.defaultLow.rawValue - 10)
+			item.setContentCompressionResistancePriority(p, for: .horizontal)
+		}
+	}
+	
 	private func setDemoSeparator(topView: NSView) -> NSBox {
 		let separator = NSBox()
 		separator.boxType = .separator
@@ -269,6 +248,12 @@ class DeveloperSettingsPaneViewController: SettingsPaneViewController {
 		view.trailingAnchor.constraint(equalToSystemSpacingAfter: separator.trailingAnchor, multiplier: 1).isActive = true
 		
 		return separator
+	}
+	
+	@objc private func switchAction(_ sender: Any) {
+		if let `switch` = sender as? NSSwitch, `switch`.identifier == .init("Wireframe switch") {
+			contentContainerView?.debug_setWireframes(`switch`.state == .on)
+		}
 	}
 	
 }

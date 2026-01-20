@@ -221,7 +221,11 @@ open class SettingsTabViewController: NSTabViewController {
 	private func updateTabName(of item: NSTabViewItem) {
 		if let pane = item.settingsPaneViewController {
 			if let localizeKey = pane.localizeKeyForTabName, !localizeKey.isEmpty && !disablesLocalizationWithTabNameLocalizeKey {
-				item.label = NSLocalizedString(localizeKey, comment: "")
+				if #available(macOS 12, *) {
+					item.label = String(localized: String.LocalizationValue(localizeKey))
+				} else {
+					item.label = NSLocalizedString(localizeKey, comment: "")
+				}
 			}
 			else {
 				item.label = pane.tabName ?? ""
