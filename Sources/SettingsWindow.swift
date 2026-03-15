@@ -106,11 +106,12 @@ open class SettingsWindow: NSWindow {
 			NSAnimationContext.runAnimationGroup { ctx in
 				ctx.allowsImplicitAnimation = true
 				ctx.duration = animationResizeTime(newFrame)
-				
 				if let function = animationTimingFunctionForResizing {
 					ctx.timingFunction = function
 				}
-				ctx.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+				else {
+					ctx.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+				}
 				
 				setFrame(newFrame, display: true)
 			} completionHandler: {
