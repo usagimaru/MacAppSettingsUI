@@ -13,7 +13,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 	// MARK: - Setup the Setting Window (demo)
 	// ====================================================>>>
 
-	private(set) var settingsWindowController: SettingsWindowController!
+	private(set) var settingsWindowController: SettingsWindowController?
 	
 	func setupForSettingsWindow() {
 		// Prepare setting panes
@@ -42,7 +42,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 			tabName_developer = NSLocalizedString("Developer", comment: "")
 		}
 		
-		//   Insert “Updates” tab to "Extensions [HERE] Advanced"
+		guard let settingsWindowController else { return }
+		
+		//   Insert "Updates" tab to "Extensions [HERE] Advanced"
 		settingsWindowController.tabViewController.insert(panes: [
 			UpdateSettingsPaneViewController(tabName: tabName_updates,
 											 tabImage: NSImage(systemSymbolName: "arrow.trianglehead.2.clockwise.rotate.90", accessibilityDescription: nil),
@@ -50,7 +52,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 											 isResizableView: false)
 		], at: settingsWindowController.tabViewController.panes.count-1)
 		
-		//   Insert “Developer” tab to the last
+		//   Insert "Developer" tab to the last
 		settingsWindowController.tabViewController.add(panes: [
 			DeveloperSettingsPaneViewController(tabName: tabName_developer,
 												tabImage: NSImage(systemSymbolName: "wrench.and.screwdriver", accessibilityDescription: nil),
@@ -102,7 +104,7 @@ extension AppDelegate {
 	}
 	
 	@IBAction func openSettings(_ sender: Any) {
-		settingsWindowController.showWindow(sender)
+		settingsWindowController?.showWindow(sender)
 	}
 	
 	/// Localize menu items in the menu bar

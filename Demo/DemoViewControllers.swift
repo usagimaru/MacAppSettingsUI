@@ -22,21 +22,22 @@ class DemoViewController: NSViewController {
 	
 	override func viewDidAppear() {
 		super.viewDidAppear()
-		DispatchQueue.main.async {
-			AppDelegate.shared.settingsWindowController.centersWindowPositionAlways = self.centerAlways.state == .on
+		DispatchQueue.main.async { [weak self] in
+			guard let self else { return }
+			AppDelegate.shared.settingsWindowController?.centersWindowPositionAlways = self.centerAlways.state == .on
 		}
 	}
 	
 	@IBAction func toggleCenterAlways(_ sender: NSButton) {
-		AppDelegate.shared.settingsWindowController.centersWindowPositionAlways = sender.state == .on
+		AppDelegate.shared.settingsWindowController?.centersWindowPositionAlways = sender.state == .on
 	}
 	
 	@IBAction func toggleAnimation(_ sender: NSButton) {
-		AppDelegate.shared.settingsWindowController.settingsWindow.fittingAnimationEnabled = sender.state == .on
+		AppDelegate.shared.settingsWindowController?.settingsWindow.fittingAnimationEnabled = sender.state == .on
 	}
 	
 	@IBAction func removeAutosaveFrame(_ sender: Any) {
-		AppDelegate.shared.settingsWindowController.removeAutosavedWindowFrame()
+		AppDelegate.shared.settingsWindowController?.removeAutosavedWindowFrame()
 	}
 	
 }

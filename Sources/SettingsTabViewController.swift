@@ -77,6 +77,11 @@ open class SettingsTabViewController: NSTabViewController {
 		
 		// Set tab style as `toolbar`
 		tabStyle = .toolbar
+		
+		// To resolve issues with switching between tabs, load the content of all tabs
+		tabView.tabViewItems.forEach {
+			$0.viewController?.loadViewIfNeeded()
+		}
 	}
 	
 	open override func viewWillAppear() {

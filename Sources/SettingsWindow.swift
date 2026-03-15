@@ -110,6 +110,7 @@ open class SettingsWindow: NSWindow {
 				if let function = animationTimingFunctionForResizing {
 					ctx.timingFunction = function
 				}
+				ctx.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
 				
 				setFrame(newFrame, display: true)
 			} completionHandler: {
@@ -122,9 +123,21 @@ open class SettingsWindow: NSWindow {
 		}
 	}
 	
-	/// Return default animation duration or your custom duration.
+	/// Return animation duration calculated from the frame size difference.
+	/// Minimum: 0.2s, Maximum: 0.5s
 	open override func animationResizeTime(_ newFrame: NSRect) -> TimeInterval {
-		super.animationResizeTime(newFrame)
+		let minDuration: TimeInterval = 0.2
+		let maxDuration: TimeInterval = 0.7
+		
+		let widthDiff = abs(newFrame.width - frame.width)
+		let heightDiff = abs(newFrame.height - frame.height)
+		let maxDiff = max(widthDiff, heightDiff)
+		
+		// Use screen size as the reference for normalization
+		let referenceLength = NSScreen.main?.frame.height ?? 800
+		let ratio = min(maxDiff / referenceLength, 1.0)
+		
+		return minDuration + (maxDuration - minDuration) * ratio
 	}
 	
 	
