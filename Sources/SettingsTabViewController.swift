@@ -79,8 +79,18 @@ open class SettingsTabViewController: NSTabViewController {
 		tabStyle = .toolbar
 		
 		// To resolve issues with switching between tabs, load the content of all tabs
+		loadAllTabs()
+	}
+	
+	open func loadAllTabs() {
 		tabView.tabViewItems.forEach {
-			$0.viewController?.loadViewIfNeeded()
+			if #available(macOS 14.0, *) {
+				$0.viewController?.loadViewIfNeeded()
+			}
+			else {
+				// Load views by accessing the view property
+				_ = $0.viewController?.view
+			}
 		}
 	}
 	
