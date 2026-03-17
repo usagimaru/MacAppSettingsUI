@@ -145,7 +145,7 @@ open class SettingsWindow: NSWindow {
 	// MARK: -
 	
 	/// Disable some default menu items
-	func disablingSelectorForMenuValidation() -> [Selector] {
+	open func disablingSelectorForMenuValidation() -> [Selector] {
 		[
 			#selector(NSSplitViewController.toggleSidebar(_:)),
 			#selector(toggleFullScreen(_:)),
