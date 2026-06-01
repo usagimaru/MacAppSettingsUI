@@ -27,10 +27,22 @@ open class SettingsPaneViewController: NSViewController {
 	
 	/// Make the window resizable when the view is activated
 	@IBInspectable open var isResizableView: Bool = false
-	
-	
+
+	/// Whether the pane content has been loaded via `loadPaneContent(completion:)`.
+	/// This flag is managed by `SettingsTabViewController`.
+	open var isPaneContentLoaded: Bool = false
+
+
 	// MARK: -
-	
+
+	/// Override this method to perform asynchronous content loading before the pane is displayed.
+	/// Call the completion handler when loading is finished.
+	/// The `isPaneContentLoaded` flag is managed automatically by the caller; subclasses do not need to set it.
+	/// The default implementation calls the completion immediately.
+	open func loadPaneContent(completion: @escaping () -> Void) {
+		completion()
+	}
+
 	/// Create View Controller Manually
 	/// - Parameters:
 	///   - tabViewController: Parent tab view controller if you will use it in the pane.

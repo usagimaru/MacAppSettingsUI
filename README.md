@@ -68,10 +68,14 @@ Window for Settings window.
 WindowController for Settings window.
 
 ### `SettingsTabViewController`
-WindowController’s contentViewController.
+WindowController’s contentViewController. It manages tab transitions with a lazy loading architecture — pane content is loaded on demand when a tab is first selected, rather than all at once. A `loadingView` is displayed during transitions. You can show a loading label by setting `showsLoadingLabel` to true and customize its text with `loadingLabelText`.
+
+If you prefer eager loading of all tabs, call `loadAllTabs()` explicitly.
 
 ### `SettingsPaneViewController`
 The base view controller for setting pane. You can use this class to customize your own.
+
+Override `loadPaneContent(completion:)` to perform asynchronous content loading before the pane is displayed. The `isPaneContentLoaded` flag is managed automatically by `SettingsTabViewController`.
 
 ### `SettingsPaneContainerView`
 This is a convenient container view for layouts. It is disabled by default; if you wish to use it, first enable it using the `setContentContainerView(maximumWidth: labelLayoutGuideWidth:)` method of the `SettingsPaneLayoutGuide`. Then add any contents to this container view.

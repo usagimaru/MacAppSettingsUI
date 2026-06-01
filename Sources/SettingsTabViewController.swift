@@ -60,9 +60,43 @@ open class SettingsTabViewController: NSTabViewController {
 		}
 	}
 	
-	/// Blank view for transition
-	open var blankView = NSView()
+	private static let defaultLoadingLabelText = "Loading…"
 	
+	/// Loading view displayed during tab transitions
+	open var loadingView: NSView = {
+		let view = NSView()
+		view.autoresizingMask = [.width, .height]
+
+		let label = NSTextField(labelWithString: defaultLoadingLabelText)
+		label.font = .systemFont(ofSize: NSFont.systemFontSize, weight: .semibold)
+		label.textColor = .tertiaryLabelColor
+		label.translatesAutoresizingMaskIntoConstraints = false
+		label.identifier = .init("LoadingLabel")
+		label.isHidden = true
+
+		view.addSubview(label)
+		NSLayoutConstraint.activate([
+			label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+			label.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+		])
+
+		return view
+	}()
+
+	/// Text displayed in the loading label
+	open var loadingLabelText: String = defaultLoadingLabelText {
+		didSet {
+			(loadingView.subviews.first { $0.identifier == .init("LoadingLabel") } as? NSTextField)?.stringValue = loadingLabelText
+		}
+	}
+
+	/// Show or hide the loading label in the loading view
+	open var showsLoadingLabel: Bool = false {
+		didSet {
+			loadingView.subviews.first { $0.identifier == .init("LoadingLabel") }?.isHidden = !showsLoadingLabel
+		}
+	}
+
 	public private(set) var tabViewSizes: [NSTabViewItem: NSSize] = [:]
 	
 	
@@ -70,18 +104,16 @@ open class SettingsTabViewController: NSTabViewController {
 	
 	open override func viewDidLoad() {
 		super.viewDidLoad()
-		
+
 		// Do not automatically set the active pane’s title to window title
 		// To delay window title refresh time and to manually control
 		canPropagateSelectedChildViewControllerTitle = false
-		
+
 		// Set tab style as `toolbar`
 		tabStyle = .toolbar
-		
-		// To resolve issues with switching between tabs, load the content of all tabs
-		loadAllTabs()
 	}
-	
+
+	/// Eagerly load all tab views. Call this explicitly if you want to pre-load all panes at once.
 	open func loadAllTabs() {
 		tabView.tabViewItems.forEach {
 			if #available(macOS 14.0, *) {
@@ -160,61 +192,123 @@ open class SettingsTabViewController: NSTabViewController {
 	
 	open override func tabView(_ tabView: NSTabView, willSelect tabViewItem: NSTabViewItem?) {
 		super.tabView(tabView, willSelect: tabViewItem)
-		
-		if let tabViewItem, let view = tabViewItem.view {
-			view.layoutSubtreeIfNeeded()
-			let size = view.frame.size
-			tabViewSizes[tabViewItem] = size
-		}
 		// Remove the resizable attribute from the window once
 		window?.resetWindowBehavior()
 	}
 	
 	/// Control transition of this tab view controller
 	open override func transition(from fromViewController: NSViewController, to toViewController: NSViewController, options: NSViewController.TransitionOptions = [], completionHandler completion: (() -> Void)? = nil) {
-		guard let superview = fromViewController.view.superview,  let selectedTabViewItem
+		guard let superview = fromViewController.view.superview, let selectedTabViewItem
 		else {
 			completion?()
 			return
 		}
-		
+
 		// [Transition views A -> B with a blank view]
 		// We need to insert a blank view during view transitions in order to correctly display implicit animations of an window frame and a toolbar.
 		// Apparently mysterious artifacts on animations are related to the Auto Layout system.
-		
-		// 1. Set the blank view instead of current view (A)
-		superview.replaceSubview(fromViewController.view, with: blankView)
-		
-		// 2. Do window resizing process and animate
-		fitWindowSize(to: selectedTabViewItem, animateIfPossible: true) {
-			// 3. The resize animation completed then, re-replace the blank view with the view (B)
-			superview.replaceSubview(self.blankView, with: toViewController.view)
-			
-			// 4. Reset window title and behavior
-			self.window?.setWindowTitle(with: selectedTabViewItem)
-			self.setWindowBehavior(with: selectedTabViewItem)
-			
-			completion?()
+
+		// 1. Set the loading view instead of current view (A)
+		loadingView.frame = fromViewController.view.frame
+		superview.replaceSubview(fromViewController.view, with: loadingView)
+
+		let pane = toViewController as? SettingsPaneViewController
+
+		let performTransition = { [weak self] in
+			guard let self else {
+				completion?()
+				return
+			}
+
+			let animates = !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
+
+			// 2. Layout the destination view and capture its size
+			self.cacheTabViewSize(for: selectedTabViewItem)
+
+			// 3. Do window resizing process and animate
+			self.fitWindowSize(to: selectedTabViewItem, animateIfPossible: animates) {
+				// 4. The resize animation completed then, re-replace the blank view with the view (B) with a dissolve
+				if animates {
+					let transition = CATransition()
+					transition.type = .fade
+					transition.duration = 0.07
+					transition.timingFunction = CAMediaTimingFunction(name: .easeOut)
+					superview.wantsLayer = true
+					superview.layer?.add(transition, forKey: "paneDissolve")
+				}
+
+				superview.replaceSubview(self.loadingView, with: toViewController.view)
+				
+				// 5. Reset window title and behavior
+				self.window?.setWindowTitle(with: selectedTabViewItem)
+				self.setWindowBehavior(with: selectedTabViewItem)
+
+				completion?()
+			}
+		}
+
+		// Load pane content lazily if not yet loaded
+		if let pane, !pane.isPaneContentLoaded {
+			pane.loadPaneContent { [weak pane] in
+				pane?.isPaneContentLoaded = true
+				performTransition()
+			}
+		}
+		else {
+			performTransition()
 		}
 	}
 	
+	/// Layout the tab view item's view and cache its size
+	open func cacheTabViewSize(for tabViewItem: NSTabViewItem) {
+		guard let view = tabViewItem.view else { return }
+		view.layoutSubtreeIfNeeded()
+		let size = view.fittingSize
+		if size.width > 0 && size.height > 0 {
+			tabViewSizes[tabViewItem] = size
+		}
+		else if view.frame.size.width > 0 && view.frame.size.height > 0 {
+			tabViewSizes[tabViewItem] = view.frame.size
+		}
+	}
+
 	/// Fit window size to specific tab view item
 	open func fitWindowSize(to tabViewItem: NSTabViewItem, animateIfPossible: Bool, completion: (() -> ())? = nil) {
 		guard let size = tabViewSizes[tabViewItem], let window else {
 			completion?()
 			return
 		}
-		
+
 		window.setWindowSize(size, animateIfPossible: animateIfPossible, completion: completion)
 	}
-	
-	
+
+
 	// MARK: -
-	
+
 	/// Select tab, fit window size and update window title
-	open func selectTab(with tabViewItem: NSTabViewItem, animateIfPossible: Bool) {
-		fitWindowSize(to: tabViewItem, animateIfPossible: animateIfPossible)
-		updateWindowTitleWithSelectedTab()
+	open func selectTab(with tabViewItem: NSTabViewItem, animateIfPossible: Bool, completion: (() -> Void)? = nil) {
+		let pane = tabViewItem.settingsPaneViewController
+
+		let doSelect = { [weak self] in
+			guard let self else {
+				completion?()
+				return
+			}
+			self.cacheTabViewSize(for: tabViewItem)
+			self.fitWindowSize(to: tabViewItem, animateIfPossible: animateIfPossible)
+			self.updateWindowTitleWithSelectedTab()
+			completion?()
+		}
+
+		if let pane, !pane.isPaneContentLoaded {
+			pane.loadPaneContent { [weak pane] in
+				pane?.isPaneContentLoaded = true
+				doSelect()
+			}
+		}
+		else {
+			doSelect()
+		}
 	}
 	
 	/// Update window title on title bar, window menu item on the menu bar and Dock tile title
