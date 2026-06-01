@@ -251,7 +251,10 @@ open class SettingsTabViewController: NSTabViewController {
 		if let pane, !pane.isPaneContentLoaded {
 			pane.loadPaneContent { [weak pane] in
 				pane?.isPaneContentLoaded = true
-				performTransition()
+				// Defer to next frame to separate layout calculation from animation
+				DispatchQueue.main.async {
+					performTransition()
+				}
 			}
 		}
 		else {
