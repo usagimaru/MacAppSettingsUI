@@ -106,7 +106,7 @@ open class SettingsPaneContainerView: NSView {
 			
 			let w1 = labelLayoutGuide.widthAnchor.constraint(equalToConstant: labelLayoutGuideWidth)
 			w1.identifier = .init("\(Self.idscope).LabelLayoutGuide.width.1")
-			w1.priority = .defaultLow
+			w1.priority = .defaultHigh
 			w1.isActive = true
 			
 			let c = labelLayoutGuide.leadingAnchor.constraint(equalToSystemSpacingAfter: leadingAnchor, multiplier: 1).constant

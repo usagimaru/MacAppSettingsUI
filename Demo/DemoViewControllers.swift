@@ -25,6 +25,10 @@ class DemoViewController: NSViewController {
 		DispatchQueue.main.async { [weak self] in
 			guard let self else { return }
 			AppDelegate.shared.settingsWindowController?.centersWindowPositionAlways = self.centerAlways.state == .on
+			
+			// "Loading…" label
+			AppDelegate.shared.settingsWindowController?.tabViewController.loadingLabelText = String(localized: "Loading…")
+			AppDelegate.shared.settingsWindowController?.tabViewController.showsLoadingLabel = true
 		}
 	}
 	

@@ -29,3 +29,5 @@
 "Center always" = "常に中央に表示";
 "Animation" = "アニメーション";
 "Remove Autosave Frame" = "自動保存されたフレームを削除";
+
+"Loading…" = "読み込み中…";
