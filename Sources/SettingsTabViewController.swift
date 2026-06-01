@@ -263,12 +263,15 @@ open class SettingsTabViewController: NSTabViewController {
 	open func cacheTabViewSize(for tabViewItem: NSTabViewItem) {
 		guard let view = tabViewItem.view else { return }
 		view.layoutSubtreeIfNeeded()
-		let size = view.fittingSize
-		if size.width > 0 && size.height > 0 {
-			tabViewSizes[tabViewItem] = size
+		let frameSize = view.frame.size
+		if frameSize.width > 0 && frameSize.height > 0 {
+			tabViewSizes[tabViewItem] = frameSize
 		}
-		else if view.frame.size.width > 0 && view.frame.size.height > 0 {
-			tabViewSizes[tabViewItem] = view.frame.size
+		else {
+			let fittingSize = view.fittingSize
+			if fittingSize.width > 0 && fittingSize.height > 0 {
+				tabViewSizes[tabViewItem] = fittingSize
+			}
 		}
 	}
 
