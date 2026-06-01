@@ -16,10 +16,10 @@ public extension NSTabViewItem {
 open class SettingsTabViewController: NSTabViewController {
 	
 	/// Reference to SettingsWindowController
-	open weak var windowController: SettingsWindowController?
+	open weak var settingsWindowController: SettingsWindowController?
 	
 	/// Reference to SettingsWindow (getter)
-	open var window: SettingsWindow? {
+	open var settingsWindow: SettingsWindow? {
 		(view.window as? SettingsWindow)
 	}
 	
@@ -61,6 +61,7 @@ open class SettingsTabViewController: NSTabViewController {
 	}
 	
 	private static let defaultLoadingLabelText = "Loading…"
+	private static let defaultLabelIdentifier = NSUserInterfaceItemIdentifier("LoadingLabel")
 	
 	/// Loading view displayed during tab transitions
 	open var loadingView: NSView = {
@@ -71,7 +72,7 @@ open class SettingsTabViewController: NSTabViewController {
 		label.font = .systemFont(ofSize: NSFont.systemFontSize, weight: .semibold)
 		label.textColor = .tertiaryLabelColor
 		label.translatesAutoresizingMaskIntoConstraints = false
-		label.identifier = .init("LoadingLabel")
+		label.identifier = defaultLabelIdentifier
 		label.isHidden = true
 
 		view.addSubview(label)
@@ -86,33 +87,41 @@ open class SettingsTabViewController: NSTabViewController {
 	/// Text displayed in the loading label
 	open var loadingLabelText: String = defaultLoadingLabelText {
 		didSet {
-			(loadingView.subviews.first { $0.identifier == .init("LoadingLabel") } as? NSTextField)?.stringValue = loadingLabelText
+			(loadingView.subviews.first { $0.identifier == Self.defaultLabelIdentifier } as? NSTextField)?.stringValue = loadingLabelText
 		}
 	}
 
 	/// Show or hide the loading label in the loading view
 	open var showsLoadingLabel: Bool = false {
 		didSet {
-			loadingView.subviews.first { $0.identifier == .init("LoadingLabel") }?.isHidden = !showsLoadingLabel
+			loadingView.subviews.first { $0.identifier == Self.defaultLabelIdentifier }?.isHidden = !showsLoadingLabel
 		}
 	}
 
+	/// If set to true, clamp all pane widths to the minimum content width imposed by the toolbar.
+	/// This prevents flicker when a pane's preferred width is narrower than the toolbar requires.
+	open var clampsToToolbarMinimumWidth: Bool = true
+
 	public private(set) var tabViewSizes: [NSTabViewItem: NSSize] = [:]
+
+	/// The minimum content width observed from the window after toolbar layout.
+	/// Captured once after the first tab is displayed, then used to clamp pane widths.
+	private var minimumContentWidth: CGFloat = 0
 	
 	
 	// MARK: -
 	
 	open override func viewDidLoad() {
 		super.viewDidLoad()
-
+		
 		// Do not automatically set the active pane’s title to window title
 		// To delay window title refresh time and to manually control
 		canPropagateSelectedChildViewControllerTitle = false
-
+		
 		// Set tab style as `toolbar`
 		tabStyle = .toolbar
 	}
-
+	
 	/// Eagerly load all tab views. Call this explicitly if you want to pre-load all panes at once.
 	open func loadAllTabs() {
 		tabView.tabViewItems.forEach {
@@ -136,6 +145,25 @@ open class SettingsTabViewController: NSTabViewController {
 		// If a TabViewItem exists but is not selected, select #0. (Just in case)
 		if !tabViewItems.isEmpty && selectedTabViewItem == nil {
 			selectedTabViewItemIndex = 0
+		}
+		
+		// Capture the minimum content width imposed by the toolbar layout.
+		// After the first selectTab, the window frame has been corrected by the system.
+		// Use this as a floor for all pane widths to prevent flicker.
+		// Capture the minimum content width imposed by the toolbar layout.
+		// Only re-cache tabs whose preferred size is already known,
+		// to avoid triggering view loading for unvisited tabs.
+		if clampsToToolbarMinimumWidth && minimumContentWidth == 0,
+		   let contentWidth = settingsWindow?.contentView?.frame.size.width,
+		   contentWidth > 0
+		{
+			minimumContentWidth = contentWidth
+			for item in tabViewItems {
+				if item.settingsPaneViewController?.preferredPaneSize != nil
+					|| item.viewController?.isViewLoaded == true {
+					cacheTabViewSize(for: item)
+				}
+			}
 		}
 	}
 	
@@ -184,7 +212,7 @@ open class SettingsTabViewController: NSTabViewController {
 	
 	open override func tabView(_ tabView: NSTabView, shouldSelect tabViewItem: NSTabViewItem?) -> Bool {
 		// Block toolbar interactions during transitions
-		if window?.isWindowResizing == true {
+		if settingsWindow?.isWindowResizing == true {
 			return false
 		}
 		return super.tabView(tabView, shouldSelect: tabViewItem)
@@ -193,7 +221,7 @@ open class SettingsTabViewController: NSTabViewController {
 	open override func tabView(_ tabView: NSTabView, willSelect tabViewItem: NSTabViewItem?) {
 		super.tabView(tabView, willSelect: tabViewItem)
 		// Remove the resizable attribute from the window once
-		window?.resetWindowBehavior()
+		settingsWindow?.resetWindowBehavior()
 	}
 	
 	/// Control transition of this tab view controller
@@ -203,58 +231,58 @@ open class SettingsTabViewController: NSTabViewController {
 			completion?()
 			return
 		}
-
+		
 		// [Transition views A -> B with a blank view]
 		// We need to insert a blank view during view transitions in order to correctly display implicit animations of an window frame and a toolbar.
 		// Apparently mysterious artifacts on animations are related to the Auto Layout system.
-
+		
 		// 1. Set the loading view instead of current view (A)
 		loadingView.frame = fromViewController.view.frame
 		superview.replaceSubview(fromViewController.view, with: loadingView)
-
+		
 		let pane = toViewController as? SettingsPaneViewController
-
+		
 		let performTransition = { [weak self] in
 			guard let self else {
 				completion?()
 				return
 			}
-
+			
 			let animates = !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
-
-			// 2. Layout the destination view and capture its size
+			
+			// 2. Cache the pane size (clamped to toolbar minimum if enabled)
 			self.cacheTabViewSize(for: selectedTabViewItem)
-
-			// 3. Do window resizing process and animate
+			
+			// 3. Animate window to the cached size and place the view
 			self.fitWindowSize(to: selectedTabViewItem, animateIfPossible: animates) {
-				// 4. The resize animation completed then, re-replace the blank view with the view (B) with a dissolve
+				// 4. Dissolve transition
 				if animates {
 					let transition = CATransition()
 					transition.type = .fade
-					transition.duration = 0.07
+					transition.duration = 0.08
 					transition.timingFunction = CAMediaTimingFunction(name: .easeOut)
 					superview.wantsLayer = true
 					superview.layer?.add(transition, forKey: "paneDissolve")
 				}
-
-				superview.replaceSubview(self.loadingView, with: toViewController.view)
 				
-				// 5. Reset window title and behavior
-				self.window?.setWindowTitle(with: selectedTabViewItem)
+				// 5. Place the view and resolve layout
+				toViewController.view.frame = self.loadingView.frame
+				superview.replaceSubview(self.loadingView, with: toViewController.view)
+				toViewController.view.layoutSubtreeIfNeeded()
+				
+				// 6. Reset window title and behavior
+				self.settingsWindow?.setWindowTitle(with: selectedTabViewItem)
 				self.setWindowBehavior(with: selectedTabViewItem)
-
+				
 				completion?()
 			}
 		}
-
+		
 		// Load pane content lazily if not yet loaded
 		if let pane, !pane.isPaneContentLoaded {
 			pane.loadPaneContent { [weak pane] in
 				pane?.isPaneContentLoaded = true
-				// Defer to next frame to separate layout calculation from animation
-				DispatchQueue.main.async {
-					performTransition()
-				}
+				performTransition()
 			}
 		}
 		else {
@@ -262,30 +290,51 @@ open class SettingsTabViewController: NSTabViewController {
 		}
 	}
 	
-	/// Layout the tab view item's view and cache its size
+	/// Cache the pane size for window resizing.
+	/// Prioritizes `preferredPaneSize` set by `SettingsPaneViewController` (captured from Storyboard or `loadView()` frame).
+	/// Falls back to the current view frame or fitting size.
 	open func cacheTabViewSize(for tabViewItem: NSTabViewItem) {
-		guard let view = tabViewItem.view else { return }
-		view.layoutSubtreeIfNeeded()
-		let frameSize = view.frame.size
-		if frameSize.width > 0 && frameSize.height > 0 {
-			tabViewSizes[tabViewItem] = frameSize
+		var size: NSSize?
+		
+		// Prefer the preferred pane size declared by SettingsPaneViewController
+		if let pane = tabViewItem.settingsPaneViewController,
+		   let preferredSize = pane.preferredPaneSize,
+		   preferredSize.width > 0 && preferredSize.height > 0 {
+			size = preferredSize
 		}
-		else {
-			let fittingSize = view.fittingSize
-			if fittingSize.width > 0 && fittingSize.height > 0 {
-				tabViewSizes[tabViewItem] = fittingSize
+		
+		// Fallback: use the view's current frame or fitting size (only if already loaded)
+		if size == nil,
+		   tabViewItem.viewController?.isViewLoaded == true,
+		   let view = tabViewItem.view {
+			let frameSize = view.frame.size
+			if frameSize.width > 0 && frameSize.height > 0 {
+				size = frameSize
+			}
+			else {
+				let fittingSize = view.fittingSize
+				if fittingSize.width > 0 && fittingSize.height > 0 {
+					size = fittingSize
+				}
 			}
 		}
+		
+		if var s = size {
+			if clampsToToolbarMinimumWidth && minimumContentWidth > 0 {
+				s.width = max(s.width, minimumContentWidth)
+			}
+			tabViewSizes[tabViewItem] = s
+		}
 	}
-
+	
 	/// Fit window size to specific tab view item
 	open func fitWindowSize(to tabViewItem: NSTabViewItem, animateIfPossible: Bool, completion: (() -> ())? = nil) {
-		guard let size = tabViewSizes[tabViewItem], let window else {
+		guard let size = tabViewSizes[tabViewItem], let settingsWindow else {
 			completion?()
 			return
 		}
-
-		window.setWindowSize(size, animateIfPossible: animateIfPossible, completion: completion)
+		
+		settingsWindow.setWindowSize(size, animateIfPossible: animateIfPossible, completion: completion)
 	}
 
 
@@ -319,16 +368,16 @@ open class SettingsTabViewController: NSTabViewController {
 	
 	/// Update window title on title bar, window menu item on the menu bar and Dock tile title
 	open func updateWindowTitleWithSelectedTab() {
-		window?.setWindowTitle(with: selectedTabViewItem)
+		settingsWindow?.setWindowTitle(with: selectedTabViewItem)
 	}
 	
 	/// Reflect the resizable attribute of the selected tab item to the window
 	private func setWindowBehavior(with tabViewItem: NSTabViewItem) {
 		if tabViewItem.settingsPaneViewController?.isResizableView == true {
-			window?.addResizableBehavior()
+			settingsWindow?.addResizableBehavior()
 		}
 		else {
-			window?.resetWindowBehavior()
+			settingsWindow?.resetWindowBehavior()
 		}
 	}
 	

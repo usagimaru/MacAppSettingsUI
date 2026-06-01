@@ -104,6 +104,9 @@ class AdvancedSettingsPaneViewController: SettingsPaneViewController, SettingsPa
 		
 		// 3: If necessary, enable wireframes for debugging. (Only effective in `DEBUG` build.)
 		contentContainerView?.debug_setWireframes(true)
+		
+		// 4: Update preferred pane size
+		resolvePreferredPaneSize()
 	}
 	
 }
@@ -127,20 +130,6 @@ class DeveloperSettingsPaneViewController: SettingsPaneViewController, SettingsP
 		])
 	}
 	
-	private func setDemoBlankText() {
-		let label = NSTextField(labelWithString: "\(self.tabName ?? "")\n(Resizable)")
-		label.alignment = .center
-		label.font = .boldSystemFont(ofSize: NSFont.systemFontSize)
-		label.textColor = .tertiaryLabelColor
-		label.translatesAutoresizingMaskIntoConstraints = false
-		view.addSubview(label)
-		
-		NSLayoutConstraint.activate([
-			label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-			label.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-		])
-	}
-	
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		
@@ -152,9 +141,13 @@ class DeveloperSettingsPaneViewController: SettingsPaneViewController, SettingsP
 		// 2: If necessary, enable wireframes for debugging. (Only effective in `DEBUG` build.)
 		contentContainerView?.debug_setWireframes(true)
 		
+		buildUI()
 		
-		// ----- Demo for adding contents -----
-		
+		// 3: Update preferred pane size
+		resolvePreferredPaneSize()
+	}
+	
+	private func buildUI() {
 		// Insert labels and items
 		let label1 = setDemoLabel(topView: nil, label: "Setting item 1:")
 		setDemoItem(leadingView: label1, title: "This is a checkbox")

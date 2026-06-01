@@ -77,6 +77,8 @@ The base view controller for setting pane. You can use this class to customize y
 
 Override `loadPaneContent(completion:)` to perform asynchronous content loading before the pane is displayed. The `isPaneContentLoaded` flag is managed automatically by `SettingsTabViewController`.
 
+Each pane captures its `preferredPaneSize` automatically in `viewDidLoad()`. If your subclass adds subviews or modifies constraints after `super.viewDidLoad()`, call `resolvePreferredPaneSize()` at the end of your `viewDidLoad()` to recapture the correct size.
+
 ### `SettingsPaneContainerView`
 This is a convenient container view for layouts. It is disabled by default; if you wish to use it, first enable it using the `setContentContainerView(maximumWidth: labelLayoutGuideWidth:)` method of the `SettingsPaneLayoutGuide`. Then add any contents to this container view.
 
@@ -160,6 +162,11 @@ This is useful when initializing view controllers in Interface Builder, but in n
 ## Controlling window resizing behavior on a per-pane
 
 SettingsPaneViewController has the property `isResizableView`; setting true to allow window resizing only while the pane is active. The default value is false. Check the Demo implementation and `Main` Storyboard file.
+
+
+## Toolbar minimum width clamping
+
+`SettingsTabViewController` has a `clampsToToolbarMinimumWidth` property (default: `true`). When enabled, all pane widths are clamped to at least the minimum content width imposed by the toolbar layout. This prevents visual flicker when a pane's preferred width is narrower than the toolbar requires.
 
 
 ## License

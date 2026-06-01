@@ -125,7 +125,7 @@ open class SettingsWindow: NSWindow {
 	}
 	
 	/// Return animation duration calculated from the frame size difference.
-	/// Minimum: 0.2s, Maximum: 0.5s
+	/// Minimum: 0.2s, Maximum: 0.7s
 	open override func animationResizeTime(_ newFrame: NSRect) -> TimeInterval {
 		let minDuration: TimeInterval = 0.2
 		let maxDuration: TimeInterval = 0.7

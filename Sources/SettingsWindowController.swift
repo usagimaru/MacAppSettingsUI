@@ -30,7 +30,7 @@ open class SettingsWindowController: NSWindowController {
 	}
 	
 	open var tabViewController: SettingsTabViewController! { didSet {
-		tabViewController.windowController = self
+		tabViewController.settingsWindowController = self
 	}}
 	
 	open var settingsWindow: SettingsWindow {
