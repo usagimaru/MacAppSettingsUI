@@ -8,7 +8,7 @@
 import Cocoa
 
 class DemoViewController: NSViewController {
-	
+
 	@IBOutlet var centerAlways: NSButton!
 	@IBOutlet var enablesAnimation: NSButton!
 	
@@ -43,14 +43,14 @@ class DemoViewController: NSViewController {
 	@IBAction func removeAutosaveFrame(_ sender: Any) {
 		AppDelegate.shared.settingsWindowController?.removeAutosavedWindowFrame()
 	}
-	
+
 }
 
 
 // MARK: - Panes
 
 extension SettingsPaneViewController {
-	
+
 	class func fromStoryboard(tabViewController: SettingsTabViewController? = nil,
 							  tabName: String? = nil,
 							  localizeKeyForTabName: String? = nil,
@@ -78,17 +78,254 @@ extension SettingsPaneViewController {
 		
 		return vc
 	}
-	
+
 }
 
-class GeneralSettingsPaneViewController: SettingsPaneViewController {}
+private extension SettingsPaneViewController {
 
-class ViewSettingsPaneViewController: SettingsPaneViewController {}
+	/// Give the pane a lower bound, then shrink-wrap it to its sections
+	func resolvePaneSize(minimumWidth: CGFloat) {
+		view.widthAnchor.constraint(greaterThanOrEqualToConstant: minimumWidth).isActive = true
 
+		// The width has to settle before the height, since it decides how many lines the descriptions take
+		view.setFrameSize(NSSize(width: minimumWidth, height: 0))
+		view.layoutSubtreeIfNeeded()
+		
+		// The first pass settles the width, the second measures the height at that width
+		for _ in 0 ..< 2 {
+			view.setFrameSize(view.fittingSize)
+			view.layoutSubtreeIfNeeded()
+		}
+	}
+
+}
+
+// Section-based layout
+class GeneralSettingsPaneViewController: SettingsPaneViewController {
+
+	/// The narrowest width this pane is laid out for
+	private static let minimumPaneWidth: CGFloat = 450
+	
+	/// Keeps the item column from stretching across the whole pane
+	private static let itemColumnMaximumWidth: CGFloat = 260
+	
+	private var layoutView: SettingsLayoutView?
+
+
+	// MARK: -
+	
+	override func loadView() {
+		// Setup the custom content view. This pane has no storyboard scene
+		view = NSView()
+		
+		buildSections()
+		resolvePaneSize(minimumWidth: Self.minimumPaneWidth)
+	}
+	
+	private func buildSections() {
+		// Layout with section stack
+		
+		let layoutView = SettingsLayoutView()
+		layoutView.install(in: view)
+		self.layoutView = layoutView
+		
+		// Section with a single item. The upper bound passed here governs the item column of every section
+		let startup = layoutView.addColumnSection(label: String(localized: "Startup"),
+												  itemColumnMaximumWidth: Self.itemColumnMaximumWidth,
+												  identifier: .init("Startup"))
+		startup.addCheckbox(title: String(localized: "Open at Login"),
+							target: self,
+							action: nil)
+		
+		// Section with multiple items. Items added to the same section are stacked downward
+		let behavior = layoutView.addColumnSection(label: String(localized: "Behavior"),
+												   identifier: .init("Behavior"))
+		behavior.addCheckbox(title: String(localized: "Confirm Before Quitting"),
+							 isOn: true,
+							 target: self,
+							 action: nil)
+		behavior.addCheckbox(title: String(localized: "Restore Windows on Launch"),
+							 isOn: true,
+							 target: self,
+							 action: nil)
+		behavior.addCheckbox(title: String(localized: "Send Usage Data"),
+							 target: self,
+							 action: nil)
+		
+		// Section with a pop-up button
+		let downloads = layoutView.addColumnSection(label: String(localized: "Save Downloads To"),
+													identifier: .init("Downloads"))
+		let downloadLocation = downloads.addPopUpButton(target: self, action: nil)
+		downloadLocation.addItems(withTitles: [String(localized: "Downloads Folder"),
+											   String(localized: "Desktop"),
+											   String(localized: "Ask Each Time")])
+		downloads.addDescriptionLabel(String(localized: "GENERAL_DOWNLOADS_DESCRIPTION"))
+		
+		// Section with multiple items followed by a description label
+		let notifications = layoutView.addColumnSection(label: String(localized: "Notifications"),
+														identifier: .init("Notifications"))
+		notifications.addCheckbox(title: String(localized: "Allow Notifications"),
+								  isOn: true,
+								  target: self,
+								  action: nil)
+		notifications.addCheckbox(title: String(localized: "Play Sound"),
+								  target: self,
+								  action: nil)
+		notifications.addDescriptionLabel(String(localized: "GENERAL_NOTIFICATIONS_DESCRIPTION"))
+		
+		layoutView.addSeparatorSection()
+		
+		// Section with a push button
+		let cache = layoutView.addColumnSection(label: String(localized: "Cache"),
+												identifier: .init("Cache"))
+		cache.addButton(title: String(localized: "Clear Cache…"),
+						target: self,
+						action: nil)
+		cache.addDescriptionLabel(String(localized: "GENERAL_CACHE_DESCRIPTION"))
+		
+		layoutView.addSeparatorSection()
+		
+		// Full-width section that places a single button without the label column
+		layoutView.addButtonSection(title: String(localized: "Restore Defaults"),
+									identifier: .init("Restore Defaults"),
+									target: self,
+									action: nil)
+		
+		layoutView.addSeparatorSection()
+		
+		// Section holding an arbitrary control. The switch reveals the debug wireframes of this pane
+		let wireframes = layoutView.addColumnSection(label: String(localized: "Wireframes"),
+													 identifier: .init("Wireframes"))
+		let wireframeSwitch = DemoSwitch { [weak self] isOn in
+			self?.layoutView?.debug_setWireframes(isOn)
+		}
+		wireframes.addCustomView(wireframeSwitch, verticalAlignment: .centerY)
+	}
+
+}
+
+// Section-based layout
+class ViewSettingsPaneViewController: SettingsPaneViewController {
+
+	/// The narrowest width this pane is laid out for
+	private static let minimumPaneWidth: CGFloat = 450
+	
+	/// Keeps the item column from stretching across the whole pane
+	private static let itemColumnMaximumWidth: CGFloat = 300
+	
+	private var layoutView: SettingsLayoutView?
+
+
+	// MARK: -
+	
+	override func loadView() {
+		// Setup the custom content view. This pane has no storyboard scene
+		view = NSView()
+
+		buildSections()
+		resolvePaneSize(minimumWidth: Self.minimumPaneWidth)
+	}
+	
+	private func buildSections() {
+		let layoutView = SettingsLayoutView()
+		layoutView.install(in: view)
+		self.layoutView = layoutView
+		
+		// Section with a segmented control. The upper bound passed here governs the item column of every section
+		let appearance = layoutView.addColumnSection(label: String(localized: "Appearance"),
+													 itemColumnMaximumWidth: Self.itemColumnMaximumWidth,
+													 identifier: .init("Appearance"))
+		let appearanceSelector = NSSegmentedControl(labels: [String(localized: "Light"),
+															 String(localized: "Dark"),
+															 String(localized: "Auto")],
+													trackingMode: .selectOne,
+													target: self,
+													action: #selector(selectItem(_:)))
+		appearanceSelector.selectedSegment = 2
+		appearance.addCustomView(appearanceSelector)
+		
+		// Section whose item carries an accessory view on its trailing side
+		let accentColor = layoutView.addColumnSection(label: String(localized: "Accent Color"),
+													  identifier: .init("Accent Color"))
+		let colorWell = NSColorWell()
+		colorWell.color = .controlAccentColor
+		colorWell.widthAnchor.constraint(equalToConstant: 44).isActive = true
+		accentColor.addCustomView(colorWell, verticalAlignment: .centerY)
+		
+		let resetButton = NSButton(title: String(localized: "Reset"),
+								   target: self,
+								   action: #selector(resetAccentColor(_:)))
+		resetButton.bezelStyle = .push
+		resetButton.controlSize = .small
+		accentColor.addAccessoryView(resetButton, to: colorWell)
+		
+		// Section with multiple items followed by a description label
+		let sidebar = layoutView.addColumnSection(label: String(localized: "Sidebar"),
+												  identifier: .init("Sidebar"))
+		sidebar.addCheckbox(title: String(localized: "Show Sidebar"),
+							isOn: true,
+							target: self,
+							action: #selector(toggleItem(_:)))
+		sidebar.addCheckbox(title: String(localized: "Show Icons Only"),
+							target: self,
+							action: #selector(toggleItem(_:)))
+		sidebar.addDescriptionLabel(String(localized: "VIEW_SIDEBAR_DESCRIPTION"))
+		
+		// Section with a slider. Sliders have no intrinsic width, so the width comes from a constraint
+		let textSize = layoutView.addColumnSection(label: String(localized: "Text Size"),
+												   identifier: .init("Text Size"))
+		let textSizeSlider = NSSlider(value: 13,
+									  minValue: 10,
+									  maxValue: 20,
+									  target: self,
+									  action: #selector(selectItem(_:)))
+		textSizeSlider.numberOfTickMarks = 6
+		textSizeSlider.allowsTickMarkValuesOnly = true
+		textSizeSlider.widthAnchor.constraint(equalToConstant: 200).isActive = true
+		textSize.addCustomView(textSizeSlider, verticalAlignment: .centerY)
+		textSize.addDescriptionLabel(String(localized: "VIEW_TEXT_SIZE_DESCRIPTION"))
+		
+		layoutView.addSeparatorSection()
+		
+		// Full-width section that places a checkbox and its description without the label column
+		layoutView.addCheckboxSection(title: String(localized: "Show Status Bar"),
+									  isOn: true,
+									  description: String(localized: "VIEW_STATUS_BAR_DESCRIPTION"),
+									  identifier: .init("Show Status Bar"),
+									  target: self,
+									  action: #selector(toggleItem(_:)))
+		
+		layoutView.addSeparatorSection()
+		
+		// Section holding an arbitrary control. The switch reveals the debug wireframes of this pane
+		let wireframes = layoutView.addColumnSection(label: String(localized: "Wireframes"),
+													 identifier: .init("Wireframes"))
+		let wireframeSwitch = DemoSwitch { [weak self] isOn in
+			self?.layoutView?.debug_setWireframes(isOn)
+		}
+		wireframes.addCustomView(wireframeSwitch, verticalAlignment: .centerY)
+	}
+
+
+	// MARK: - Actions
+	
+	@objc private func toggleItem(_ sender: Any) {
+	}
+	
+	@objc private func selectItem(_ sender: Any) {
+	}
+	
+	@objc private func resetAccentColor(_ sender: Any) {
+	}
+
+}
+
+// Storyboard-based layout
 class ExtensionsSettingsPaneViewController: SettingsPaneViewController {}
 
+// Guide-based layout
 class AdvancedSettingsPaneViewController: SettingsPaneViewController, SettingsPaneLayoutGuide {
-	
+
 	var contentContainerView: SettingsPaneContainerView?
 	
 	override func viewDidLoad() {
@@ -108,11 +345,12 @@ class AdvancedSettingsPaneViewController: SettingsPaneViewController, SettingsPa
 		// 4: Update preferred pane size
 		resolvePreferredPaneSize()
 	}
-	
+
 }
 
+// Guide-based layout
 class DeveloperSettingsPaneViewController: SettingsPaneViewController, SettingsPaneLayoutGuide {
-	
+
 	var contentContainerView: SettingsPaneContainerView?
 	
 	override func loadView() {
@@ -217,12 +455,10 @@ class DeveloperSettingsPaneViewController: SettingsPaneViewController, SettingsP
 	
 	private func setDemoSwitch(leadingView: NSView, state: NSControl.StateValue) {
 		if let contentContainerView {
-			let item = NSSwitch()
-			item.state = state
-			item.controlSize = .small
-			item.target = self
+			let item = DemoSwitch(isOn: state == .on) { [weak self] isOn in
+				self?.contentContainerView?.debug_setWireframes(isOn)
+			}
 			item.identifier = .init("Wireframe switch")
-			item.action = #selector(switchAction(_:))
 			
 			contentContainerView.addSubview(item)
 			item.translatesAutoresizingMaskIntoConstraints = false
@@ -247,17 +483,11 @@ class DeveloperSettingsPaneViewController: SettingsPaneViewController, SettingsP
 		
 		return separator
 	}
-	
-	@objc private func switchAction(_ sender: Any) {
-		if let `switch` = sender as? NSSwitch, `switch`.identifier == .init("Wireframe switch") {
-			contentContainerView?.debug_setWireframes(`switch`.state == .on)
-		}
-	}
-	
+
 }
 
 class UpdateSettingsPaneViewController: SettingsPaneViewController {
-	
+
 	override func loadView() {
 		// Setup the custom content view
 		
@@ -275,5 +505,5 @@ class UpdateSettingsPaneViewController: SettingsPaneViewController {
 			label.centerYAnchor.constraint(equalTo: view.centerYAnchor),
 		])
 	}
-	
+
 }

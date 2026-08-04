@@ -31,3 +31,39 @@
 "Remove Autosave Frame" = "自動保存されたフレームを削除";
 
 "Loading…" = "読み込み中…";
+
+"Startup" = "起動";
+"Open at Login" = "ログイン時に開く";
+"Behavior" = "動作";
+"Confirm Before Quitting" = "終了前に確認";
+"Restore Windows on Launch" = "起動時にウインドウを復元";
+"Send Usage Data" = "使用状況データを送信";
+"Save Downloads To" = "ダウンロードの保存先";
+"Downloads Folder" = "ダウンロードフォルダ";
+"Desktop" = "デスクトップ";
+"Ask Each Time" = "毎回確認";
+"GENERAL_DOWNLOADS_DESCRIPTION" = "ダウンロードしたファイルの保存先を選びます。";
+"Notifications" = "通知";
+"Allow Notifications" = "通知を許可";
+"Play Sound" = "サウンドを再生";
+"GENERAL_NOTIFICATIONS_DESCRIPTION" = "重要なアップデートがある場合にのみ通知が届きます。";
+"Cache" = "キャッシュ";
+"Clear Cache…" = "キャッシュを削除…";
+"GENERAL_CACHE_DESCRIPTION" = "削除したデータは、次に必要になったときに再度ダウンロードされます。";
+"Restore Defaults" = "デフォルトに戻す";
+"Wireframes" = "ワイヤーフレーム";
+
+"Appearance" = "外観";
+"Light" = "ライト";
+"Dark" = "ダーク";
+"Auto" = "自動";
+"Accent Color" = "アクセントカラー";
+"Reset" = "リセット";
+"Sidebar" = "サイドバー";
+"Show Sidebar" = "サイドバーを表示";
+"Show Icons Only" = "アイコンのみ表示";
+"VIEW_SIDEBAR_DESCRIPTION" = "サイドバーの状態はウインドウごとに保持されます。";
+"Text Size" = "文字サイズ";
+"VIEW_TEXT_SIZE_DESCRIPTION" = "文字サイズはリストとサイドバーに反映されます。";
+"Show Status Bar" = "ステータスバーを表示";
+"VIEW_STATUS_BAR_DESCRIPTION" = "ステータスバーには、選択中の項目数がウインドウ下部に表示されます。";

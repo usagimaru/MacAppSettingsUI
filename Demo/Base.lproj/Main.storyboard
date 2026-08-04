@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="24506" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="ZJH-HF-2gP">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="25094" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="ZJH-HF-2gP">
     <dependencies>
-        <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="24506"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="25094"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -40,7 +39,7 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="e3W-fr-jRo">
-                                <rect key="frame" x="199" y="135" width="129" height="40"/>
+                                <rect key="frame" x="201" y="141" width="125" height="28"/>
                                 <buttonCell key="cell" type="push" title="Open Settings…" bezelStyle="rounded" alignment="center" controlSize="large" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="9pb-zj-sQw">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -56,7 +55,7 @@ DQ
                                 </connections>
                             </button>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="564-J6-Rn0">
-                                <rect key="frame" x="330" y="13" width="183" height="32"/>
+                                <rect key="frame" x="333" y="20" width="173" height="24"/>
                                 <buttonCell key="cell" type="push" title="Remove Autosave Frame" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="z8p-uV-4fz">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -69,7 +68,7 @@ DQ
                                 </connections>
                             </button>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="C4Y-jS-9Uq">
-                                <rect key="frame" x="203" y="114" width="111" height="18"/>
+                                <rect key="frame" x="201" y="115" width="107" height="16"/>
                                 <buttonCell key="cell" type="check" title="Center always" bezelStyle="regularSquare" imagePosition="left" inset="2" id="5AY-cW-xgE">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -82,7 +81,7 @@ DQ
                                 </connections>
                             </button>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="sdG-sO-oWY">
-                                <rect key="frame" x="203" y="92" width="87" height="18"/>
+                                <rect key="frame" x="201" y="93" width="83" height="16"/>
                                 <buttonCell key="cell" type="check" title="Animation" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="Ymz-e2-Sh1">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -321,108 +320,6 @@ DQ
             </objects>
             <point key="canvasLocation" x="-656" y="-395"/>
         </scene>
-        <!--General Settings Pane View Controller-->
-        <scene sceneID="uuV-za-wa0">
-            <objects>
-                <customObject id="5ZX-Uh-TWS" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
-                <viewController storyboardIdentifier="GeneralSettingsPaneViewController" id="eei-X9-zTZ" customClass="GeneralSettingsPaneViewController" customModule="MacAppSettingsUI_Demo" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" id="jgR-zA-Rqx">
-                        <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                        <subviews>
-                            <box boxType="custom" borderType="none" borderWidth="0.0" title="Box" titlePosition="noTitle" transparent="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Be5-qn-xll">
-                                <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
-                                <view key="contentView" id="GYx-oL-b6n">
-                                    <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
-                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                    <subviews>
-                                        <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="zXi-V3-UdO">
-                                            <rect key="frame" x="198" y="142" width="55" height="16"/>
-                                            <textFieldCell key="cell" lineBreakMode="clipping" title="General" id="N6F-rk-3Rw">
-                                                <font key="font" metaFont="systemBold"/>
-                                                <color key="textColor" name="tertiaryLabelColor" catalog="System" colorSpace="catalog"/>
-                                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                            </textFieldCell>
-                                        </textField>
-                                    </subviews>
-                                    <constraints>
-                                        <constraint firstItem="zXi-V3-UdO" firstAttribute="centerX" secondItem="GYx-oL-b6n" secondAttribute="centerX" id="fL4-Ih-XTM"/>
-                                        <constraint firstItem="zXi-V3-UdO" firstAttribute="centerY" secondItem="GYx-oL-b6n" secondAttribute="centerY" id="jGT-Yb-UYv"/>
-                                    </constraints>
-                                </view>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="450" id="76S-Yh-ghb"/>
-                                    <constraint firstAttribute="height" constant="300" id="irQ-HB-Et0"/>
-                                </constraints>
-                            </box>
-                        </subviews>
-                        <constraints>
-                            <constraint firstAttribute="bottom" secondItem="Be5-qn-xll" secondAttribute="bottom" id="Csj-GY-2M2"/>
-                            <constraint firstItem="Be5-qn-xll" firstAttribute="top" secondItem="jgR-zA-Rqx" secondAttribute="top" id="Kz2-Qm-60p"/>
-                            <constraint firstItem="Be5-qn-xll" firstAttribute="leading" secondItem="jgR-zA-Rqx" secondAttribute="leading" id="bI0-Mr-OdN"/>
-                            <constraint firstAttribute="trailing" secondItem="Be5-qn-xll" secondAttribute="trailing" id="qTS-MT-iyb"/>
-                        </constraints>
-                    </view>
-                    <userDefinedRuntimeAttributes>
-                        <userDefinedRuntimeAttribute type="string" keyPath="tabIdentifier" value="General"/>
-                        <userDefinedRuntimeAttribute type="image" keyPath="tabImage" value="gearshape" catalog="system"/>
-                        <userDefinedRuntimeAttribute type="string" keyPath="localizeKeyForTabName" value="General"/>
-                    </userDefinedRuntimeAttributes>
-                </viewController>
-            </objects>
-            <point key="canvasLocation" x="-24" y="330"/>
-        </scene>
-        <!--View Settings Pane View Controller-->
-        <scene sceneID="hXC-LI-n2A">
-            <objects>
-                <viewController storyboardIdentifier="ViewSettingsPaneViewController" id="E5I-MC-dkL" customClass="ViewSettingsPaneViewController" customModule="MacAppSettingsUI_Demo" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" id="fXN-mv-Tjp">
-                        <rect key="frame" x="0.0" y="0.0" width="450" height="200"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                        <subviews>
-                            <box boxType="custom" borderType="none" borderWidth="0.0" title="Box" titlePosition="noTitle" transparent="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wak-yd-ESX">
-                                <rect key="frame" x="0.0" y="0.0" width="450" height="200"/>
-                                <view key="contentView" id="Aas-wh-4bz">
-                                    <rect key="frame" x="0.0" y="0.0" width="450" height="200"/>
-                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                    <subviews>
-                                        <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="zt2-mq-2q5">
-                                            <rect key="frame" x="207" y="92" width="36" height="16"/>
-                                            <textFieldCell key="cell" lineBreakMode="clipping" title="View" id="ZbZ-Pl-2eB">
-                                                <font key="font" metaFont="systemBold"/>
-                                                <color key="textColor" name="tertiaryLabelColor" catalog="System" colorSpace="catalog"/>
-                                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                            </textFieldCell>
-                                        </textField>
-                                    </subviews>
-                                    <constraints>
-                                        <constraint firstItem="zt2-mq-2q5" firstAttribute="centerY" secondItem="Aas-wh-4bz" secondAttribute="centerY" id="T2O-hi-mTg"/>
-                                        <constraint firstItem="zt2-mq-2q5" firstAttribute="centerX" secondItem="Aas-wh-4bz" secondAttribute="centerX" id="pO2-sp-u5y"/>
-                                    </constraints>
-                                </view>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="200" id="kuN-EX-mqk"/>
-                                    <constraint firstAttribute="width" constant="450" id="oRS-7H-9ZF"/>
-                                </constraints>
-                            </box>
-                        </subviews>
-                        <constraints>
-                            <constraint firstItem="wak-yd-ESX" firstAttribute="top" secondItem="fXN-mv-Tjp" secondAttribute="top" id="7KL-Bt-hB5"/>
-                            <constraint firstAttribute="trailing" secondItem="wak-yd-ESX" secondAttribute="trailing" id="kx3-sY-w6E"/>
-                            <constraint firstAttribute="bottom" secondItem="wak-yd-ESX" secondAttribute="bottom" id="m0L-oi-sxo"/>
-                            <constraint firstItem="wak-yd-ESX" firstAttribute="leading" secondItem="fXN-mv-Tjp" secondAttribute="leading" id="rpC-fP-AhO"/>
-                        </constraints>
-                    </view>
-                    <userDefinedRuntimeAttributes>
-                        <userDefinedRuntimeAttribute type="image" keyPath="tabImage" value="eyeglasses" catalog="system"/>
-                        <userDefinedRuntimeAttribute type="string" keyPath="tabIdentifier" value="View"/>
-                        <userDefinedRuntimeAttribute type="string" keyPath="localizeKeyForTabName" value="View"/>
-                    </userDefinedRuntimeAttributes>
-                </viewController>
-                <customObject id="pjA-3s-MRF" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="512" y="280"/>
-        </scene>
         <!--Extensions Settings Pane View Controller-->
         <scene sceneID="NRl-qh-LHs">
             <objects>
@@ -477,7 +374,7 @@ DQ
                 </viewController>
                 <customObject id="Wfw-05-drV" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-99" y="870"/>
+            <point key="canvasLocation" x="-59" y="430"/>
         </scene>
         <!--Advanced Settings Pane View Controller-->
         <scene sceneID="dnO-s9-YBk">
@@ -528,12 +425,10 @@ DQ
                     </userDefinedRuntimeAttributes>
                 </viewController>
             </objects>
-            <point key="canvasLocation" x="591" y="820"/>
+            <point key="canvasLocation" x="534" y="380"/>
         </scene>
     </scenes>
     <resources>
-        <image name="eyeglasses" catalog="system" width="23" height="10"/>
-        <image name="gearshape" catalog="system" width="16" height="16"/>
         <image name="gearshape.2" catalog="system" width="20" height="16"/>
         <image name="puzzlepiece.extension" catalog="system" width="19" height="15"/>
     </resources>

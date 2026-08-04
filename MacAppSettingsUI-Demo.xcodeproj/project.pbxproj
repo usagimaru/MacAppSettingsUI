@@ -19,6 +19,11 @@
 		51DA20B42F1E40870049E463 /* SettingsPaneContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DA20B32F1E40870049E463 /* SettingsPaneContainerView.swift */; };
 		51DA20B62F1F4BF80049E463 /* SettingsPaneLayoutGuide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DA20B52F1F4BF80049E463 /* SettingsPaneLayoutGuide.swift */; };
 		51DA20BA2F1F7CF60049E463 /* DemoViewControllers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DA20B92F1F7CF60049E463 /* DemoViewControllers.swift */; };
+		51DE6B2B3021BD9A000E6501 /* SettingsFullWidthSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DE6B263021BD9A000E6501 /* SettingsFullWidthSections.swift */; };
+		51DE6B2C3021BD9A000E6501 /* SettingsColumnSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DE6B253021BD9A000E6501 /* SettingsColumnSectionView.swift */; };
+		51DE6B2D3021BD9A000E6501 /* SettingsLayoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DE6B273021BD9A000E6501 /* SettingsLayoutView.swift */; };
+		51DE6B2E3021BD9A000E6501 /* SettingsSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DE6B283021BD9A000E6501 /* SettingsSectionView.swift */; };
+		51DE6B2F3021BD9A000E6501 /* SettingsWrappingLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DE6B293021BD9A000E6501 /* SettingsWrappingLabel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +41,11 @@
 		51DA20B32F1E40870049E463 /* SettingsPaneContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsPaneContainerView.swift; sourceTree = "<group>"; };
 		51DA20B52F1F4BF80049E463 /* SettingsPaneLayoutGuide.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsPaneLayoutGuide.swift; sourceTree = "<group>"; };
 		51DA20B92F1F7CF60049E463 /* DemoViewControllers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoViewControllers.swift; sourceTree = "<group>"; };
+		51DE6B253021BD9A000E6501 /* SettingsColumnSectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsColumnSectionView.swift; sourceTree = "<group>"; };
+		51DE6B263021BD9A000E6501 /* SettingsFullWidthSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsFullWidthSections.swift; sourceTree = "<group>"; };
+		51DE6B273021BD9A000E6501 /* SettingsLayoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsLayoutView.swift; sourceTree = "<group>"; };
+		51DE6B283021BD9A000E6501 /* SettingsSectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSectionView.swift; sourceTree = "<group>"; };
+		51DE6B293021BD9A000E6501 /* SettingsWrappingLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsWrappingLabel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -87,9 +97,22 @@
 				5159E1172B9A580800F3E575 /* SettingsTabViewController.swift */,
 				5159E1192B9A580800F3E575 /* SettingsPaneViewController.swift */,
 				51DA20B32F1E40870049E463 /* SettingsPaneContainerView.swift */,
-				51DA20B52F1F4BF80049E463 /* SettingsPaneLayoutGuide.swift */,
+				51DE6B2A3021BD9A000E6501 /* Layout */,
 			);
 			path = Sources;
+			sourceTree = "<group>";
+		};
+		51DE6B2A3021BD9A000E6501 /* Layout */ = {
+			isa = PBXGroup;
+			children = (
+				51DE6B283021BD9A000E6501 /* SettingsSectionView.swift */,
+				51DE6B253021BD9A000E6501 /* SettingsColumnSectionView.swift */,
+				51DE6B263021BD9A000E6501 /* SettingsFullWidthSections.swift */,
+				51DE6B273021BD9A000E6501 /* SettingsLayoutView.swift */,
+				51DE6B293021BD9A000E6501 /* SettingsWrappingLabel.swift */,
+				51DA20B52F1F4BF80049E463 /* SettingsPaneLayoutGuide.swift */,
+			);
+			path = Layout;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -168,6 +191,11 @@
 				51DA20B62F1F4BF80049E463 /* SettingsPaneLayoutGuide.swift in Sources */,
 				51DA20B42F1E40870049E463 /* SettingsPaneContainerView.swift in Sources */,
 				5159E11D2B9A580800F3E575 /* SettingsPaneViewController.swift in Sources */,
+				51DE6B2B3021BD9A000E6501 /* SettingsFullWidthSections.swift in Sources */,
+				51DE6B2C3021BD9A000E6501 /* SettingsColumnSectionView.swift in Sources */,
+				51DE6B2D3021BD9A000E6501 /* SettingsLayoutView.swift in Sources */,
+				51DE6B2E3021BD9A000E6501 /* SettingsSectionView.swift in Sources */,
+				51DE6B2F3021BD9A000E6501 /* SettingsWrappingLabel.swift in Sources */,
 				5159E0F92B99A72900F3E575 /* AppDelegate.swift in Sources */,
 				5159E11C2B9A580800F3E575 /* SettingsWindowController.swift in Sources */,
 				51904F9D2B9EC39A007A8750 /* SettingsWindow.swift in Sources */,
@@ -340,7 +368,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15.6;
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.clickandmagic.MacAppSettingsUI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -370,7 +398,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15.6;
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.clickandmagic.MacAppSettingsUI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

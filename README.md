@@ -53,11 +53,27 @@ On before macOS Ventura, “Settings” was “Preferences”. This module can a
 More details of this design (Japanese): [macOS Venturaからの新しい“Settings”表記と、旧“Preferences”表記からの移行](https://zenn.dev/usagimaru/articles/de5012155f4916)
 
 
-### Layout Guide (experimental)
+### Pane Layout Helpers
 
-I have prepared a simple layout guide and a wireframing feature to help you build the standard setting layout. Please check the “Developer” tab on the demo app, `DeveloperSettingsPaneViewController` and `SettingsPaneContainerView`.
+Building the standard “label on the left, controls on the right” form by hand means writing the same constraints over and over. Two helpers are provided to avoid that, and both are supported.
+
+| Approach | What you write | Suited for |
+|---|---|---|
+| **Section-based** (recommended) | One call per row | The standard two-column settings form |
+| Layout guide | Your own constraints against shared guides | Layouts that do not fit the two-column form |
+
+The layout guide is not deprecated, but the section-based approach is considerably simpler for ordinary settings panes because it owns the column widths, the spacing and the wrapping of description text for you.
+
+Both come with a wireframing feature for debugging. See [Building a Pane Layout](#building-a-pane-layout).
+
+Section-based, with wireframes revealing the sections and the two columns:
+
+<img src="./Guide/sectionbasedlayout.jpg" width=562>
+
+Layout guide, with wireframes revealing the label area and the secondary area:
 
 <img src="./Guide/layoutguide.jpg" width=692>
+
 
 ## Core Files
 
@@ -79,8 +95,25 @@ Override `loadPaneContent(completion:)` to perform asynchronous content loading 
 
 Each pane captures its `preferredPaneSize` automatically in `viewDidLoad()`. If your subclass adds subviews or modifies constraints after `super.viewDidLoad()`, call `resolvePreferredPaneSize()` at the end of your `viewDidLoad()` to recapture the correct size.
 
+### `SettingsLayoutView`
+The container of the section-based layout. Stack sections into it and it decides the column widths, the spacing between sections and the width at which description text wraps. See [Building a Pane Layout](#building-a-pane-layout).
+
+Please check the “General” and “View” tabs on the demo app, `GeneralSettingsPaneViewController` and `ViewSettingsPaneViewController` in `DemoViewControllers.swift`.
+
+### `SettingsSectionView`
+The base class of every section. It exposes a `contentGuide` that the container gives the shared content width, which is what keeps separators aligned with the two columns.
+
+### `SettingsColumnSectionView`
+A two-column section: one trailing-aligned label, and any number of leading-aligned items stacked downward.
+
+### `SettingsSeparatorSectionView` / `SettingsButtonSectionView` / `SettingsCheckboxSectionView` / `SettingsCustomSectionView`
+Sections that span the content width without the label column.
+
+### `SettingsWrappingLabel`
+The description label used by sections. It shrinks to its text and wraps only when the text does not fit the column.
+
 ### `SettingsPaneContainerView`
-This is a convenient container view for layouts. It is disabled by default; if you wish to use it, first enable it using the `setContentContainerView(maximumWidth: labelLayoutGuideWidth:)` method of the `SettingsPaneLayoutGuide`. Then add any contents to this container view.
+This is a convenient container view for the layout guide approach. It is disabled by default; if you wish to use it, first enable it using the `setContentContainerView(maximumWidth: labelLayoutGuideWidth:)` method of the `SettingsPaneLayoutGuide`. Then add any contents to this container view.
 
 Please check the “Developer” tab on the demo app, `DeveloperSettingsPaneViewController` in `DemoViewControllers.swift` and `SettingsPaneContainerView`.
 
@@ -136,6 +169,146 @@ func insert(tabViewItem: NSTabViewItem, at index: Int)
 ```
 
 To remove any pane, use NSTabViewController’s methods.
+
+
+## Building a Pane Layout
+
+### Section-Based Layout (recommended)
+
+Create a `SettingsLayoutView`, install it into the pane view, then add one section per row. `install(in:)` pins the layout view to the pane view with system margins on all four edges.
+
+```swift
+class GeneralSettingsPaneViewController: SettingsPaneViewController {
+
+	private var layoutView: SettingsLayoutView?
+
+	override func loadView() {
+		view = NSView()
+
+		let layoutView = SettingsLayoutView()
+		layoutView.install(in: view)
+		self.layoutView = layoutView
+
+		let startup = layoutView.addColumnSection(label: "Startup", identifier: .init("Startup"))
+		startup.addCheckbox(title: "Open at Login", target: self, action: #selector(toggleItem(_:)))
+
+		let downloads = layoutView.addColumnSection(label: "Save Downloads To", identifier: .init("Downloads"))
+		let location = downloads.addPopUpButton(target: self, action: #selector(selectItem(_:)))
+		location.addItems(withTitles: ["Downloads Folder", "Desktop", "Ask Each Time"])
+		downloads.addDescriptionLabel("Choose where downloaded files are saved.")
+
+		layoutView.addSeparatorSection()
+
+		layoutView.addButtonSection(title: "Restore Defaults", target: self, action: #selector(restoreDefaults(_:)))
+	}
+
+}
+```
+
+
+#### Sections
+
+Sections are stacked in the order you add them, spaced by `SettingsLayoutMetrics.sectionSpacing`. You never place them yourself.
+
+| Method | Result |
+|---|---|
+| `addColumnSection(label:itemColumnMaximumWidth:identifier:)` | Two-column section |
+| `addSeparatorSection(identifier:)` | Horizontal separator |
+| `addButtonSection(title:controlSize:alignment:identifier:target:action:)` | A single button, without the label column |
+| `addCheckboxSection(title:isOn:description:identifier:target:action:)` | A leading-aligned checkbox with an optional description, without the label column |
+| `addCustomSection(_:identifier:)` | Any view, spanning the content width |
+
+
+#### Items in a Two-Column Section
+
+Items added to the same section stack downward, spaced by `SettingsLayoutMetrics.itemSpacing`.
+
+| Method | Result |
+|---|---|
+| `addCheckbox(title:isOn:target:action:)` | Checkbox |
+| `addButton(title:controlSize:target:action:)` | Push button |
+| `addPopUpButton(controlSize:target:action:)` | Pop-up button |
+| `addDescriptionLabel(_:)` | Supplementary description text |
+| `addCustomView(_:verticalAlignment:)` | Any view |
+| `addAccessoryView(_:to:spacing:)` | Any view, placed on the trailing side of an item you already added |
+
+`verticalAlignment` decides how the label lines up with the first item: `.firstBaseline` (default), `.top` or `.centerY`. Use `.centerY` for controls that have no text baseline, such as a switch or a color well.
+
+
+#### Column Widths
+
+You do not set the column widths. The label column follows its longest label, and the item column follows whatever its items need — including the width a description label wants before it has to wrap. Whatever is left over becomes equal margins on both sides, so the whole block stays centered.
+
+Two knobs are available.
+
+| Knob | Effect |
+|---|---|
+| `itemColumnMaximumWidth` | Caps the item column. Long descriptions then wrap at that width instead of widening the pane |
+| `SettingsLayoutView.itemColumnMinimumWidth` (default 200) | Floors the item column, which effectively decides the minimum pane width |
+
+The item column is shared across every section, so passing `itemColumnMaximumWidth` on any one `addColumnSection` call applies it to the whole pane. It is also available as a property on `SettingsColumnSectionView`.
+
+
+#### Resolving the Pane Size
+
+`SettingsTabViewController` sizes the window from each pane’s `preferredPaneSize`. For a pane built in code, give the view a lower bound and shrink-wrap it to the sections at the end of `loadView()`.
+
+```swift
+view.widthAnchor.constraint(greaterThanOrEqualToConstant: minimumWidth).isActive = true
+
+view.setFrameSize(NSSize(width: minimumWidth, height: 0))
+view.layoutSubtreeIfNeeded()
+
+// The width has to settle before the height, since it decides how many lines the descriptions take
+for _ in 0 ..< 2 {
+	view.setFrameSize(view.fittingSize)
+	view.layoutSubtreeIfNeeded()
+}
+```
+
+The demo wraps this as `resolvePaneSize(minimumWidth:)` in `DemoViewControllers.swift`.
+
+
+#### Reaching Sections Afterwards
+
+Pass an `identifier` when adding a section if you want to find it later.
+
+```swift
+var sections: [SettingsSectionView]
+var columnSections: [SettingsColumnSectionView]
+
+func section(with identifier: NSUserInterfaceItemIdentifier) -> SettingsSectionView?
+func columnSection(with identifier: NSUserInterfaceItemIdentifier) -> SettingsColumnSectionView?
+func moveSection(_ identifier: NSUserInterfaceItemIdentifier, to index: Int)
+func swapSections(_ first: NSUserInterfaceItemIdentifier, _ second: NSUserInterfaceItemIdentifier)
+```
+
+
+#### Wireframes
+
+`layoutView.debug_setWireframes(true)` outlines each level in its own color: the container, every section, the label column, the item column and the controls. It has no effect outside a `DEBUG` build, and it also reaches sections added after the call.
+
+
+### Layout Guide
+
+Enable the container view, set the label column width if you need to, then constrain your own views against `labelLayoutGuide` and `secondaryAreaLayoutGuide`. Setting `maximumWidth` to nil lets the container behave flexibly.
+
+```swift
+class AdvancedSettingsPaneViewController: SettingsPaneViewController, SettingsPaneLayoutGuide {
+
+	var contentContainerView: SettingsPaneContainerView?
+
+	override func viewDidLoad() {
+		super.viewDidLoad()
+
+		setContentContainerView(maximumWidth: 550)
+		contentContainerView?.labelLayoutGuideWidth = 160
+		contentContainerView?.debug_setWireframes(true)
+		resolvePreferredPaneSize()
+	}
+
+}
+```
 
 
 ## Appearance of Tabs

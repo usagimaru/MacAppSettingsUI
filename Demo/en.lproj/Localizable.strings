@@ -31,3 +31,39 @@
 "Remove Autosave Frame" = "Remove Autosave Frame";
 
 "Loading…" = "Loading…";
+
+"Startup" = "Startup";
+"Open at Login" = "Open at Login";
+"Behavior" = "Behavior";
+"Confirm Before Quitting" = "Confirm Before Quitting";
+"Restore Windows on Launch" = "Restore Windows on Launch";
+"Send Usage Data" = "Send Usage Data";
+"Save Downloads To" = "Save Downloads To";
+"Downloads Folder" = "Downloads Folder";
+"Desktop" = "Desktop";
+"Ask Each Time" = "Ask Each Time";
+"GENERAL_DOWNLOADS_DESCRIPTION" = "Choose where downloaded files are saved.";
+"Notifications" = "Notifications";
+"Allow Notifications" = "Allow Notifications";
+"Play Sound" = "Play Sound";
+"GENERAL_NOTIFICATIONS_DESCRIPTION" = "Notifications are delivered only for important updates.";
+"Cache" = "Cache";
+"Clear Cache…" = "Clear Cache…";
+"GENERAL_CACHE_DESCRIPTION" = "Cleared data is downloaded again the next time it is needed.";
+"Restore Defaults" = "Restore Defaults";
+"Wireframes" = "Wireframes";
+
+"Appearance" = "Appearance";
+"Light" = "Light";
+"Dark" = "Dark";
+"Auto" = "Auto";
+"Accent Color" = "Accent Color";
+"Reset" = "Reset";
+"Sidebar" = "Sidebar";
+"Show Sidebar" = "Show Sidebar";
+"Show Icons Only" = "Show Icons Only";
+"VIEW_SIDEBAR_DESCRIPTION" = "The sidebar keeps its own state for each window.";
+"Text Size" = "Text Size";
+"VIEW_TEXT_SIZE_DESCRIPTION" = "The text size applies to lists and the sidebar.";
+"Show Status Bar" = "Show Status Bar";
+"VIEW_STATUS_BAR_DESCRIPTION" = "The status bar shows the number of selected items at the bottom of the window.";

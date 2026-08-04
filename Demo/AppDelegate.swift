@@ -9,25 +9,37 @@ import Cocoa
 
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
-	
+
 	// MARK: - Setup the Setting Window (demo)
 	// ====================================================>>>
-
+	
 	private(set) var settingsWindowController: SettingsWindowController?
 	
 	func setupForSettingsWindow() {
 		// Prepare setting panes
 		
 		// Case 1. Create panes with storyboard (See `DemoViewControllers.swift` and Main.storyboard for details).
-		//   “General”, “Appearance”, “Extensions”, “Advanced”
+		//   “Extensions“, “Advanced”
+		
+		//   The “General” and “View” panes have no storyboard scene. Their views and sections are built entirely in code.
+		let generalPane = GeneralSettingsPaneViewController(tabImage: NSImage(systemSymbolName: "gearshape", accessibilityDescription: nil),
+															tabIdentifier: "General",
+															isResizableView: false)
+		generalPane.localizeKeyForTabName = "General"
+		
+		let viewPane = ViewSettingsPaneViewController(tabImage: NSImage(systemSymbolName: "eyeglasses", accessibilityDescription: nil),
+													  tabIdentifier: "View",
+													  isResizableView: false)
+		viewPane.localizeKeyForTabName = "View"
+		
 		settingsWindowController = .init(with: [
-			GeneralSettingsPaneViewController.fromStoryboard(),
-			ViewSettingsPaneViewController.fromStoryboard(),
+			generalPane,
+			viewPane,
 			ExtensionsSettingsPaneViewController.fromStoryboard(),
 			AdvancedSettingsPaneViewController.fromStoryboard(),
 		])
-		
-		
+
+
 		// Case 2. You can also insert additional panes manually.
 		
 		let tabName_updates: String
@@ -59,8 +71,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 												tabIdentifier: "Developer",
 												isResizableView: true)
 		])
-		
-		
+
+
 		// `defaultWindowTitle` is used for the title on the window menu.
 		if #available(macOS 13, *) {
 			settingsWindowController.settingsWindow.defaultWindowTitle = NSLocalizedString("Settings", comment: "")
@@ -68,17 +80,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		else {
 			settingsWindowController.settingsWindow.defaultWindowTitle = NSLocalizedString("Preferences", comment: "")
 		}
-		
-		
+
+
 		/*
 		 Notes about “Settings” and “Preferences”:
-		 
+		
 		 Starting with macOS Ventura (version 13), Apple began using the label `Settings` instead of `Preferences` in U.S. English to describe a preferences UI.
 		 Therefore, all Mac apps must label preferences as “Settings”.
-		 
+		
 		 If there is a “Preferences…” menu item in the Main Menu, the system automatically relabels it with “Settings…” in the runtime when the app is launched, so we no need to implement an extra program.
 		 Also we can disable this behavior through the “NSMenuShouldUpdateSettingsTitle” as Bool in the environment variables. (Not that we need to.)
-		 
+		
 		 For labels outside of this mechanism on the Main Menu, developers will need to deal with them themselves.
 		 */
 	}
@@ -88,7 +100,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 }
 
 extension AppDelegate {
-	
+
 	static var shared: AppDelegate {
 		NSApp.delegate as! Self
 	}
@@ -131,5 +143,5 @@ extension AppDelegate {
 		
 		setLocalizedTitle(to: mainMenuItems, isRoot: true)
 	}
-	
+
 }
