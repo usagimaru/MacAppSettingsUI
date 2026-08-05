@@ -48,7 +48,6 @@
 "Cache" = "キャッシュ";
 "Clear Cache…" = "キャッシュを削除…";
 "GENERAL_CACHE_DESCRIPTION" = "削除したデータは、次に必要になったときに再度ダウンロードされます。";
-"Restore Defaults" = "デフォルトに戻す";
 "Wireframes" = "ワイヤーフレーム";
 
 "Appearance" = "外観";
@@ -73,3 +72,11 @@
 "Centered in the container" = "コンテナ内で中央";
 "Leading in the container" = "コンテナ内で先頭寄せ";
 "Trailing in the container" = "コンテナ内で末尾寄せ";
+
+"Quick Look" = "クイックルック";
+"Share Menu" = "共有メニュー";
+"Finder Sync" = "Finder同期";
+"Stable" = "安定版";
+"Beta" = "ベータ版";
+"EXTENSIONS_UPDATE_CHANNEL_DESCRIPTION" = "ベータ版は動作が不安定な場合があります。";
+"Allow unsigned extensions" = "未署名の機能拡張を許可";

@@ -20,10 +20,11 @@ open class SettingsColumnSectionView: SettingsSectionView {
 
 	public private(set) var titleLabel: NSTextField!
 
-	/// Upper bound of the item column width. nil lets the column follow whatever its items need
+	/// Width this section asks of the item column. nil lets the column follow whatever its items need
 	open var itemColumnMaximumWidth: CGFloat? {
 		didSet {
 			updateItemColumnMaximumWidthConstraint()
+			layoutView?.invalidateItemColumnDeclaredWidth()
 		}
 	}
 
@@ -34,6 +35,8 @@ open class SettingsColumnSectionView: SettingsSectionView {
 
 	private unowned let labelColumnWidthGuide: NSLayoutGuide
 	private unowned let itemColumnWidthGuide: NSLayoutGuide
+	/// The container that aggregates the declared widths. Assigned as the section joins one
+	weak var layoutView: SettingsLayoutView?
 
 	private var items = [NSView]()
 	private var bottomConstraint: NSLayoutConstraint?
@@ -85,7 +88,7 @@ open class SettingsColumnSectionView: SettingsSectionView {
 		])
 	}
 
-	/// The container shares the item column width guide across every section, so this bound reaches the whole layout
+	/// The container shares the item column width guide across every section, so the narrowest declaration wins for the whole layout
 	private func updateItemColumnMaximumWidthConstraint() {
 		itemColumnMaximumWidthConstraint?.isActive = false
 		itemColumnMaximumWidthConstraint = nil
@@ -93,7 +96,7 @@ open class SettingsColumnSectionView: SettingsSectionView {
 		guard let itemColumnMaximumWidth else { return }
 
 		let constraint = itemColumnWidthGuide.widthAnchor.constraint(lessThanOrEqualToConstant: itemColumnMaximumWidth)
-		constraint.priority = SettingsLayoutPriority.itemColumnMaximumWidth
+		constraint.priority = SettingsLayoutPriority.itemColumnDeclaredWidth
 		constraint.isActive = true
 		itemColumnMaximumWidthConstraint = constraint
 	}
@@ -112,8 +115,12 @@ open class SettingsColumnSectionView: SettingsSectionView {
 
 		// Left in wrapping mode the label gains no intrinsic width and the column collapses to zero
 		titleLabel.usesSingleLineMode = true
-		titleLabel.lineBreakMode = .byTruncatingTail
+		// Truncating in the middle keeps the trailing colon, so a shortened label still reads as a label
+		titleLabel.lineBreakMode = .byTruncatingMiddle
 		titleLabel.cell?.isScrollable = false
+
+		// Recovers a truncated label on hover, so a narrow pane never hides the wording outright
+		titleLabel.allowsExpansionToolTips = true
 
 		titleLabel.translatesAutoresizingMaskIntoConstraints = false
 		addSubview(titleLabel)

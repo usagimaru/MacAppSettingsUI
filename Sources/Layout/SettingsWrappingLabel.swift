@@ -49,7 +49,7 @@ open class SettingsWrappingLabel: NSTextField {
 
 	/// Width the text takes on a single line. The column asks for this much before settling on a narrower, wrapping box
 	open var naturalTextWidth: CGFloat {
-		let unbounded = NSRect(x: 0, y: 0, width: CGFloat(10_000), height: CGFloat(10_000))
+		let unbounded = NSRect(x: 0, y: 0, width: CGFloat(10000), height: CGFloat(10000))
 		return cell?.cellSize(forBounds: unbounded).width ?? 0
 	}
 

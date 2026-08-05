@@ -320,62 +320,6 @@ DQ
             </objects>
             <point key="canvasLocation" x="-656" y="-395"/>
         </scene>
-        <!--Extensions Settings Pane View Controller-->
-        <scene sceneID="NRl-qh-LHs">
-            <objects>
-                <viewController storyboardIdentifier="ExtensionsSettingsPaneViewController" id="Ez7-e3-MYj" customClass="ExtensionsSettingsPaneViewController" customModule="MacAppSettingsUI_Demo" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" id="JIq-bB-dZb">
-                        <rect key="frame" x="0.0" y="0.0" width="300" height="400"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                        <subviews>
-                            <box boxType="custom" borderType="none" borderWidth="0.0" title="Box" titlePosition="noTitle" transparent="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2pV-8p-4YW">
-                                <rect key="frame" x="0.0" y="0.0" width="300" height="400"/>
-                                <view key="contentView" id="YDV-i8-qKb">
-                                    <rect key="frame" x="0.0" y="0.0" width="300" height="400"/>
-                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                    <subviews>
-                                        <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="miP-3p-OHM">
-                                            <rect key="frame" x="111" y="184" width="78" height="32"/>
-                                            <textFieldCell key="cell" lineBreakMode="clipping" id="yly-wh-PE6">
-                                                <font key="font" metaFont="systemBold"/>
-                                                <string key="title">Extensions
-(Resizable)</string>
-                                                <color key="textColor" name="tertiaryLabelColor" catalog="System" colorSpace="catalog"/>
-                                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                            </textFieldCell>
-                                        </textField>
-                                    </subviews>
-                                    <constraints>
-                                        <constraint firstItem="miP-3p-OHM" firstAttribute="centerX" secondItem="YDV-i8-qKb" secondAttribute="centerX" id="Vfq-7P-Tqz"/>
-                                        <constraint firstItem="miP-3p-OHM" firstAttribute="centerY" secondItem="YDV-i8-qKb" secondAttribute="centerY" id="dni-45-DZK"/>
-                                    </constraints>
-                                </view>
-                                <constraints>
-                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="300" id="BTj-87-3Hc"/>
-                                    <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="400" id="GYw-7g-KrD"/>
-                                    <constraint firstAttribute="width" relation="lessThanOrEqual" constant="600" id="d3I-mK-7uX"/>
-                                    <constraint firstAttribute="height" relation="lessThanOrEqual" constant="700" id="s1q-xh-DWa"/>
-                                </constraints>
-                            </box>
-                        </subviews>
-                        <constraints>
-                            <constraint firstItem="2pV-8p-4YW" firstAttribute="leading" secondItem="JIq-bB-dZb" secondAttribute="leading" id="PMf-IS-Q8l"/>
-                            <constraint firstAttribute="trailing" secondItem="2pV-8p-4YW" secondAttribute="trailing" id="k12-s5-re2"/>
-                            <constraint firstItem="2pV-8p-4YW" firstAttribute="top" secondItem="JIq-bB-dZb" secondAttribute="top" id="olZ-Sa-bQt"/>
-                            <constraint firstAttribute="bottom" secondItem="2pV-8p-4YW" secondAttribute="bottom" id="pr6-rC-tD4"/>
-                        </constraints>
-                    </view>
-                    <userDefinedRuntimeAttributes>
-                        <userDefinedRuntimeAttribute type="boolean" keyPath="isResizableView" value="YES"/>
-                        <userDefinedRuntimeAttribute type="image" keyPath="tabImage" value="puzzlepiece.extension" catalog="system"/>
-                        <userDefinedRuntimeAttribute type="string" keyPath="tabIdentifier" value="Extensions"/>
-                        <userDefinedRuntimeAttribute type="string" keyPath="localizeKeyForTabName" value="Extensions"/>
-                    </userDefinedRuntimeAttributes>
-                </viewController>
-                <customObject id="Wfw-05-drV" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="-59" y="430"/>
-        </scene>
         <!--Advanced Settings Pane View Controller-->
         <scene sceneID="dnO-s9-YBk">
             <objects>

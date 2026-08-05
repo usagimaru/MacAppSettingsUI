@@ -309,8 +309,74 @@ class ViewSettingsPaneViewController: SettingsPaneViewController {
 
 }
 
-// Storyboard-based layout
-class ExtensionsSettingsPaneViewController: SettingsPaneViewController {}
+// Section-based layout that declares no width for the item column
+class ExtensionsSettingsPaneViewController: SettingsPaneViewController {
+
+	/// The narrowest width this pane is laid out for
+	private static let minimumPaneWidth: CGFloat = 500
+	
+	private var layoutView: SettingsLayoutView?
+
+
+	// MARK: -
+	
+	override func loadView() {
+		// Setup the custom content view. The storyboard scene of this pane is left unused
+		view = NSView()
+		
+		buildSections()
+		sizePaneToFitContent(minimumWidth: Self.minimumPaneWidth)
+	}
+	
+	private func buildSections() {
+		let layoutView = SettingsLayoutView()
+		layoutView.install(in: view)
+		self.layoutView = layoutView
+		
+		// The labels here are far shorter than the items, so the block would sit off-center without a floor
+		layoutView.labelColumnMinimumWidth = 100
+		
+		// No section declares a width here, so the item column hugs the widest item across the pane
+		let installed = layoutView.addColumnSection(label: "A",
+													identifier: .init("Installed"))
+		installed.addCheckbox(title: String(localized: "Quick Look"),
+							  isOn: true,
+							  target: self,
+							  action: nil)
+		installed.addCheckbox(title: String(localized: "Share Menu"),
+							  isOn: true,
+							  target: self,
+							  action: nil)
+		installed.addCheckbox(title: String(localized: "Finder Sync"),
+							  target: self,
+							  action: nil)
+		
+		let updateChannel = layoutView.addColumnSection(label: "B",
+														identifier: .init("Update Channel"))
+		let channelSelector = updateChannel.addPopUpButton(target: self, action: nil)
+		channelSelector.addItems(withTitles: [String(localized: "Stable"),
+											  String(localized: "Beta")])
+		updateChannel.addDescriptionLabel(String(localized: "EXTENSIONS_UPDATE_CHANNEL_DESCRIPTION"))
+		
+		layoutView.addSeparatorSection()
+		
+		let thirdParty = layoutView.addColumnSection(label: "C",
+													 identifier: .init("Third-Party"))
+		thirdParty.addCheckbox(title: String(localized: "Allow unsigned extensions"),
+							   target: self,
+							   action: nil)
+		
+		layoutView.addSeparatorSection()
+		
+		// Section holding an arbitrary control. The switch reveals the debug wireframes of this pane
+		let wireframes = layoutView.addColumnSection(label: "D", identifier: .init("Wireframes"))
+		let wireframeSwitch = DemoSwitch(sizingWindow: tabViewController?.view.window) { [weak self] isOn in
+			self?.layoutView?.debug_setWireframes(isOn)
+		}
+		wireframes.addCustomView(wireframeSwitch, verticalAlignment: .centerY)
+	}
+
+}
 
 // Guide-based layout
 class AdvancedSettingsPaneViewController: SettingsPaneViewController, SettingsPaneLayoutGuide {

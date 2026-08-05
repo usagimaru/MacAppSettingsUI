@@ -20,7 +20,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		
 		// Case 1. Create panes with storyboard (See `DemoViewControllers.swift` and Main.storyboard for details).
 		
-		//   The “General” and “View” panes have no storyboard scene. Their views and sections are built entirely in code.
+		//   The “General”, “View” and “Extensions” panes have no storyboard scene. Their views and sections are built entirely in code.
 		let generalPane = GeneralSettingsPaneViewController(tabName: String(localized: "General"),
 															tabImage: NSImage(systemSymbolName: "gearshape", accessibilityDescription: nil),
 															tabIdentifier: "General",
@@ -31,10 +31,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 													  tabIdentifier: "View",
 													  isResizableView: false)
 		
+		let extensionsPane = ExtensionsSettingsPaneViewController(tabName: String(localized: "Extensions"),
+																  tabImage: NSImage(systemSymbolName: "puzzlepiece.extension", accessibilityDescription: nil),
+																  tabIdentifier: "Extensions",
+																  isResizableView: false)
+		
 		settingsWindowController = .init(with: [
 			generalPane,
 			viewPane,
-			ExtensionsSettingsPaneViewController.fromStoryboard(),
+			extensionsPane,
 			AdvancedSettingsPaneViewController.fromStoryboard(),
 		])
 

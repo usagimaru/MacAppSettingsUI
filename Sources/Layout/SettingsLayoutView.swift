@@ -31,10 +31,8 @@ public enum SettingsLayoutMargins {
 /// Ladder of layout priorities of a settings pane
 public enum SettingsLayoutPriority {
 
-	/// Upper bound of the item column width. Not required, so that the minimum width wins on conflict
-	public static let itemColumnMaximumWidth = NSLayoutConstraint.Priority(rawValue: 999)
-	/// Upper bound of the label column width. Beats the compression resistance of ordinary controls
-	public static let labelColumnMaximumWidth = NSLayoutConstraint.Priority(rawValue: 751)
+	/// Width a section declares for the item column. Not required, so that wider items can still push the column open
+	public static let itemColumnDeclaredWidth = NSLayoutConstraint.Priority(rawValue: 999)
 	/// Width a description label asks of the item column. Loses to the upper bound, beats the shrink
 	public static let descriptionWidthDemand = NSLayoutConstraint.Priority(rawValue: 500)
 	/// Force that hugs the item column to what its items need
@@ -96,17 +94,27 @@ open class SettingsLayoutView: NSView {
 	/// Guide that aggregates the width of both columns plus the spacing. Every section matches it, so their edges line up
 	public private(set) var contentBlockWidthGuide = NSLayoutGuide()
 
-	/// Lower bound of the item column width. The pane never goes below it, so this effectively decides the minimum pane width
-	open var itemColumnMinimumWidth: CGFloat = 200 {
+	/// Lower bound of the label column width. nil leaves the width to the labels themselves
+	open var labelColumnMinimumWidth: CGFloat? {
 		didSet {
-			itemColumnMinimumWidthConstraint?.constant = itemColumnMinimumWidth
+			updateMinimumWidthConstraint(labelColumnMinimumWidthConstraint, to: labelColumnMinimumWidth)
+		}
+	}
+
+	/// Lower bound of the item column width. nil leaves the width to the sections and their items
+	open var itemColumnMinimumWidth: CGFloat? {
+		didSet {
+			updateMinimumWidthConstraint(itemColumnMinimumWidthConstraint, to: itemColumnMinimumWidth)
 		}
 	}
 
 	private let stackView = NSStackView()
 	/// Stands in for the item column at its real position, so the block width can be read off its trailing edge
 	private let itemColumnMeasuringGuide = NSLayoutGuide()
+	private var labelColumnMinimumWidthConstraint: NSLayoutConstraint?
 	private var itemColumnMinimumWidthConstraint: NSLayoutConstraint?
+	/// Holds the narrowest width the sections declared. Inactive while no section declares one
+	private var itemColumnDeclaredWidthConstraint: NSLayoutConstraint?
 	private var itemColumnShrinkConstraint: NSLayoutConstraint?
 	private var debugWireframeLayer = CALayer()
 	private var isDebugWireframesEnabled = false
@@ -172,17 +180,25 @@ open class SettingsLayoutView: NSView {
 		labelColumnWidthGuide.identifier = .init("SettingsLayoutView.LabelColumnWidthGuide")
 		itemColumnWidthGuide.identifier = .init("SettingsLayoutView.ItemColumnWidthGuide")
 
-		// Keep the label column from crushing the item column in languages with long wordings
-		let labelColumnMaximumWidth = labelColumnWidthGuide.widthAnchor.constraint(lessThanOrEqualTo: widthAnchor,
-																				  multiplier: 0.4)
-		labelColumnMaximumWidth.priority = SettingsLayoutPriority.labelColumnMaximumWidth
+		// A declaration only caps the column, so the same value comes back as a lower bound and the column stops hugging narrower
+		itemColumnDeclaredWidthConstraint = itemColumnWidthGuide.widthAnchor.constraint(greaterThanOrEqualToConstant: 0)
+		itemColumnDeclaredWidthConstraint?.priority = SettingsLayoutPriority.itemColumnDeclaredWidth
 
-		itemColumnMinimumWidthConstraint = itemColumnWidthGuide.widthAnchor
-			.constraint(greaterThanOrEqualToConstant: itemColumnMinimumWidth)
-
-		NSLayoutConstraint.activate([labelColumnMaximumWidth, itemColumnMinimumWidthConstraint!])
+		// Both lower bounds stay inactive until a width is given, so an unset column keeps following its content
+		labelColumnMinimumWidthConstraint = labelColumnWidthGuide.widthAnchor.constraint(greaterThanOrEqualToConstant: 0)
+		itemColumnMinimumWidthConstraint = itemColumnWidthGuide.widthAnchor.constraint(greaterThanOrEqualToConstant: 0)
 
 		setUpContentBlockWidthGuide()
+	}
+
+	private func updateMinimumWidthConstraint(_ constraint: NSLayoutConstraint?, to width: CGFloat?) {
+		guard let width else {
+			constraint?.isActive = false
+			return
+		}
+
+		constraint?.constant = width
+		constraint?.isActive = true
 	}
 
 	private func setUpContentBlockWidthGuide() {
@@ -243,9 +259,11 @@ open class SettingsLayoutView: NSView {
 												itemColumnWidthGuide: itemColumnWidthGuide,
 												itemColumnMaximumWidth: itemColumnMaximumWidth,
 												identifier: identifier)
+		section.layoutView = self
 		appendSection(section)
 		section.activateColumnWidthConstraints()
 		itemColumnShrinkConstraint?.isActive = true
+		invalidateItemColumnDeclaredWidth()
 		return section
 	}
 
@@ -313,6 +331,21 @@ open class SettingsLayoutView: NSView {
 		section.adoptContentWidth(from: contentBlockWidthGuide)
 		section.widthMode = widthMode
 		section.debug_setWireframes(isDebugWireframesEnabled)
+	}
+
+
+	// MARK: - Item column width
+
+	/// Take in the widths the sections declared. Only the narrowest one satisfies every declaration at once, so that becomes the column width
+	func invalidateItemColumnDeclaredWidth() {
+		guard let narrowestDeclaredWidth = columnSections.compactMap({ $0.itemColumnMaximumWidth }).min()
+		else {
+			itemColumnDeclaredWidthConstraint?.isActive = false
+			return
+		}
+
+		itemColumnDeclaredWidthConstraint?.constant = narrowestDeclaredWidth
+		itemColumnDeclaredWidthConstraint?.isActive = true
 	}
 
 

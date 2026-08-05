@@ -48,7 +48,6 @@
 "Cache" = "Cache";
 "Clear Cache…" = "Clear Cache…";
 "GENERAL_CACHE_DESCRIPTION" = "Cleared data is downloaded again the next time it is needed.";
-"Restore Defaults" = "Restore Defaults";
 "Wireframes" = "Wireframes";
 
 "Appearance" = "Appearance";
@@ -73,3 +72,11 @@
 "Centered in the container" = "Centered in the container";
 "Leading in the container" = "Leading in the container";
 "Trailing in the container" = "Trailing in the container";
+
+"Quick Look" = "Quick Look";
+"Share Menu" = "Share Menu";
+"Finder Sync" = "Finder Sync";
+"Stable" = "Stable";
+"Beta" = "Beta";
+"EXTENSIONS_UPDATE_CHANNEL_DESCRIPTION" = "Beta builds may be unstable.";
+"Allow unsigned extensions" = "Allow unsigned extensions";
