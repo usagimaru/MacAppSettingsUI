@@ -289,6 +289,36 @@ Description labels only learn the width they wrap at during layout, so the metho
 For a pane sized by a Storyboard or by your own constraints, call `capturePreferredPaneSize()` instead. It lays the view out and records the resulting frame size, without touching the width.
 
 
+#### Embedding SwiftUI Views
+
+`NSHostingView` resolves its SwiftUI layout only once it belongs to a window. Until then it ignores environment values such as `controlSize` and reports the default size instead. A pane is measured during `loadView()`, before it reaches a window, so that difference is left over as slack at the bottom of the layout.
+
+Settle the size at initialization by putting the hosting view into a window and running a single layout pass. The window is already reachable during `loadView()` through `tabViewController?.view.window`.
+
+```swift
+final class DemoSwitch: NSHostingView<DemoSwitchView> {
+
+	convenience init(sizingWindow: NSWindow?, onChange: @escaping (Bool) -> Void) {
+		self.init(rootView: DemoSwitchView(onChange: onChange))
+		settleIntrinsicContentSize(in: sizingWindow)
+	}
+
+	private func settleIntrinsicContentSize(in window: NSWindow?) {
+		guard let contentView = window?.contentView else { return }
+
+		contentView.addSubview(self)
+		layoutSubtreeIfNeeded()
+		removeFromSuperview()
+	}
+
+}
+```
+
+`addSubview(_:)` alone does not settle anything, the layout pass is what does. Once resolved the size sticks, even after the view leaves the window again. See `DemoSwitch` in `Supports.swift` of the demo app.
+
+Avoid measuring the pane again after it appears. Resizing the window from `viewDidAppear()` competes with the window presentation and the tab transition.
+
+
 #### Re-measuring After a Change
 
 `preferredPaneSize` is a snapshot, and `SettingsTabViewController` caches it again per tab. Neither notices a later change to the content, the font size or the locale.

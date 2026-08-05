@@ -137,7 +137,7 @@ class GeneralSettingsPaneViewController: SettingsPaneViewController {
 		// Section holding an arbitrary control. The switch reveals the debug wireframes of this pane
 		let wireframes = layoutView.addColumnSection(label: String(localized: "Wireframes"),
 													 identifier: .init("Wireframes"))
-		let wireframeSwitch = DemoSwitch { [weak self] isOn in
+		let wireframeSwitch = DemoSwitch(sizingWindow: tabViewController?.view.window) { [weak self] isOn in
 			self?.layoutView?.debug_setWireframes(isOn)
 		}
 		wireframes.addCustomView(wireframeSwitch, verticalAlignment: .centerY)
@@ -301,7 +301,7 @@ class ViewSettingsPaneViewController: SettingsPaneViewController {
 		
 		// Section holding an arbitrary control. The switch reveals the debug wireframes of this pane
 		let wireframes = layoutView.addColumnSection(label: String(localized: "Wireframes"), identifier: .init("Wireframes"))
-		let wireframeSwitch = DemoSwitch { [weak self] isOn in
+		let wireframeSwitch = DemoSwitch(sizingWindow: tabViewController?.view.window) { [weak self] isOn in
 			self?.layoutView?.debug_setWireframes(isOn)
 		}
 		wireframes.addCustomView(wireframeSwitch, verticalAlignment: .centerY)
@@ -444,7 +444,8 @@ class DeveloperSettingsPaneViewController: SettingsPaneViewController, SettingsP
 	
 	private func setDemoSwitch(leadingView: NSView, state: NSControl.StateValue) {
 		if let contentContainerView {
-			let item = DemoSwitch(isOn: state == .on) { [weak self] isOn in
+			let item = DemoSwitch(isOn: state == .on,
+								  sizingWindow: tabViewController?.settingsWindow) { [weak self] isOn in
 				self?.contentContainerView?.debug_setWireframes(isOn)
 			}
 			item.identifier = .init("Wireframe switch")
