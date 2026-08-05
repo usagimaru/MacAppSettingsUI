@@ -6,14 +6,33 @@
 
 import Cocoa
 
+/// Width a section content spans
+public enum SettingsSectionWidthMode {
+
+	/// Line up with the two-column block, so the section edges match the column sections
+	case contentBlock
+	/// Span the whole container width, regardless of how wide the columns are
+	case fullWidth
+
+}
+
 /// A unit of view stacked in a SettingsLayoutView
 open class SettingsSectionView: NSView {
 
-	/// Box holding the section content. The container gives it the shared block width and it stays centered
+	/// Box holding the section content. Its width follows the width mode and it stays centered
 	public let contentGuide = NSLayoutGuide()
 
-	/// Width used while the section stands outside a container
-	private var standaloneWidthConstraint: NSLayoutConstraint?
+	/// Which width the content box follows. Switching it swaps the active width constraint
+	open var widthMode: SettingsSectionWidthMode = .contentBlock {
+		didSet {
+			updateContentWidthConstraint()
+		}
+	}
+
+	/// Width of the section itself, which the container has already stretched to its full width
+	private var fullWidthConstraint: NSLayoutConstraint?
+	/// Width shared with the two-column block. Absent while the section stands outside a container
+	private var contentBlockWidthConstraint: NSLayoutConstraint?
 
 	public init(identifier: NSUserInterfaceItemIdentifier? = nil) {
 		super.init(frame: .zero)
@@ -36,15 +55,29 @@ open class SettingsSectionView: NSView {
 			contentGuide.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor),
 		])
 
-		standaloneWidthConstraint = contentGuide.widthAnchor.constraint(equalTo: widthAnchor)
-		standaloneWidthConstraint?.isActive = true
+		fullWidthConstraint = contentGuide.widthAnchor.constraint(equalTo: widthAnchor)
+		updateContentWidthConstraint()
 	}
 
-	/// Follow the container's shared block width. Only the two-column sections decide it, so the rest stop asking for a width
+	/// Take over the container's shared block width. Whether the section actually follows it is up to the width mode
 	func adoptContentWidth(from widthGuide: NSLayoutGuide) {
-		standaloneWidthConstraint?.isActive = false
-		standaloneWidthConstraint = nil
-		contentGuide.widthAnchor.constraint(equalTo: widthGuide.widthAnchor).isActive = true
+		contentBlockWidthConstraint = contentGuide.widthAnchor.constraint(equalTo: widthGuide.widthAnchor)
+		updateContentWidthConstraint()
+	}
+
+	private func updateContentWidthConstraint() {
+		// Outside a container there is no block to follow, so the section width stays the only width available
+		let followsContentBlock = (widthMode == .contentBlock && contentBlockWidthConstraint != nil)
+
+		// Drop the old width before putting up the new one, so the two never coexist
+		if followsContentBlock {
+			fullWidthConstraint?.isActive = false
+			contentBlockWidthConstraint?.isActive = true
+		}
+		else {
+			contentBlockWidthConstraint?.isActive = false
+			fullWidthConstraint?.isActive = true
+		}
 	}
 
 	/// Apply a control size together with the font size that matches it
@@ -75,7 +108,7 @@ open class SettingsSectionView: NSView {
 
 }
 
-/// A section that fits an arbitrary view to the full container width
+/// A section that fits an arbitrary view to the section content box
 open class SettingsCustomSectionView: SettingsSectionView {
 
 	public private(set) var contentView: NSView

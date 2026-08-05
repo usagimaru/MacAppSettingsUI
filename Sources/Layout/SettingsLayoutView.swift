@@ -18,6 +18,16 @@ public enum SettingsLayoutMetrics {
 
 }
 
+/// Margins between a settings pane and the layout view laid into it
+public enum SettingsLayoutMargins {
+
+	/// System standard spacing on all four edges
+	case systemSpacing
+	/// Fixed insets. The leading and trailing sides follow the writing direction
+	case insets(NSDirectionalEdgeInsets)
+
+}
+
 /// Ladder of layout priorities of a settings pane
 public enum SettingsLayoutPriority {
 
@@ -115,17 +125,28 @@ open class SettingsLayoutView: NSView {
 		fatalError("init(coder:) has not been implemented")
 	}
 
-	/// Lay this view into a pane view with system margins on all four edges
-	open func install(in parentView: NSView) {
+	/// Lay this view into a pane view. Leaving `margins` out gives the system standard spacing on all four edges
+	open func install(in parentView: NSView, margins: SettingsLayoutMargins = .systemSpacing) {
 		translatesAutoresizingMaskIntoConstraints = false
 		parentView.addSubview(self, positioned: .below, relativeTo: nil)
 
-		NSLayoutConstraint.activate([
-			topAnchor.constraint(equalToSystemSpacingBelow: parentView.topAnchor, multiplier: 1),
-			leadingAnchor.constraint(equalToSystemSpacingAfter: parentView.leadingAnchor, multiplier: 1),
-			parentView.trailingAnchor.constraint(equalToSystemSpacingAfter: trailingAnchor, multiplier: 1),
-			parentView.bottomAnchor.constraint(equalToSystemSpacingBelow: bottomAnchor, multiplier: 1),
-		])
+		switch margins {
+			case .systemSpacing:
+				NSLayoutConstraint.activate([
+					topAnchor.constraint(equalToSystemSpacingBelow: parentView.topAnchor, multiplier: 1),
+					leadingAnchor.constraint(equalToSystemSpacingAfter: parentView.leadingAnchor, multiplier: 1),
+					parentView.trailingAnchor.constraint(equalToSystemSpacingAfter: trailingAnchor, multiplier: 1),
+					parentView.bottomAnchor.constraint(equalToSystemSpacingBelow: bottomAnchor, multiplier: 1),
+				])
+
+			case .insets(let insets):
+				NSLayoutConstraint.activate([
+					topAnchor.constraint(equalTo: parentView.topAnchor, constant: insets.top),
+					leadingAnchor.constraint(equalTo: parentView.leadingAnchor, constant: insets.leading),
+					parentView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: insets.trailing),
+					parentView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: insets.bottom),
+				])
+		}
 	}
 
 	private func setUpGuides() {
@@ -228,19 +249,20 @@ open class SettingsLayoutView: NSView {
 		return section
 	}
 
-	/// Add a separator section spanning the full container width
+	/// Add a separator section. A separator divides the whole pane, so it always spans the container width
 	@discardableResult
 	public func addSeparatorSection(identifier: NSUserInterfaceItemIdentifier? = nil) -> SettingsSeparatorSectionView {
 		let section = SettingsSeparatorSectionView(identifier: identifier)
-		appendSection(section)
+		appendSection(section, widthMode: .fullWidth)
 		return section
 	}
 
-	/// Add a section that places a single button in an area spanning the full container width
+	/// Add a section that places a single button. `widthMode` decides the area the button is aligned in
 	@discardableResult
 	public func addButtonSection(title: String,
 								 controlSize: NSControl.ControlSize = .regular,
 								 alignment: SettingsSectionAlignment = .center,
+								 widthMode: SettingsSectionWidthMode = .fullWidth,
 								 identifier: NSUserInterfaceItemIdentifier? = nil,
 								 target: AnyObject?,
 								 action: Selector?) -> SettingsButtonSectionView
@@ -251,15 +273,16 @@ open class SettingsLayoutView: NSView {
 												identifier: identifier,
 												target: target,
 												action: action)
-		appendSection(section)
+		appendSection(section, widthMode: widthMode)
 		return section
 	}
 
-	/// Add a section that places a leading-aligned checkbox in an area spanning the full container width
+	/// Add a section that places a leading-aligned checkbox. `widthMode` decides the area it is laid out in
 	@discardableResult
 	public func addCheckboxSection(title: String,
 								   isOn: Bool = false,
 								   description: String? = nil,
+								   widthMode: SettingsSectionWidthMode = .fullWidth,
 								   identifier: NSUserInterfaceItemIdentifier? = nil,
 								   target: AnyObject?,
 								   action: Selector?) -> SettingsCheckboxSectionView
@@ -270,21 +293,25 @@ open class SettingsLayoutView: NSView {
 												  identifier: identifier,
 												  target: target,
 												  action: action)
-		appendSection(section)
+		appendSection(section, widthMode: widthMode)
 		return section
 	}
 
-	/// Add an arbitrary view as a section spanning the full container width
+	/// Add an arbitrary view as a section. `widthMode` decides the area the view is fitted to
 	@discardableResult
-	public func addCustomSection(_ view: NSView, identifier: NSUserInterfaceItemIdentifier? = nil) -> SettingsCustomSectionView {
+	public func addCustomSection(_ view: NSView,
+								 widthMode: SettingsSectionWidthMode = .fullWidth,
+								 identifier: NSUserInterfaceItemIdentifier? = nil) -> SettingsCustomSectionView
+	{
 		let section = SettingsCustomSectionView(contentView: view, identifier: identifier)
-		appendSection(section)
+		appendSection(section, widthMode: widthMode)
 		return section
 	}
 
-	private func appendSection(_ section: SettingsSectionView) {
+	private func appendSection(_ section: SettingsSectionView, widthMode: SettingsSectionWidthMode = .contentBlock) {
 		stackView.addArrangedSubview(section)
 		section.adoptContentWidth(from: contentBlockWidthGuide)
+		section.widthMode = widthMode
 		section.debug_setWireframes(isDebugWireframesEnabled)
 	}
 

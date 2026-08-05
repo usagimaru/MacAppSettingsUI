@@ -6,7 +6,7 @@
 
 import Cocoa
 
-/// Horizontal placement of a control in a full-width section
+/// Horizontal placement of a control inside the section content box
 public enum SettingsSectionAlignment {
 
 	case leading
@@ -15,7 +15,7 @@ public enum SettingsSectionAlignment {
 
 }
 
-/// A separator spanning the full container width
+/// A separator that spans the section content box
 open class SettingsSeparatorSectionView: SettingsSectionView {
 
 	public private(set) var separator: NSBox!
@@ -42,7 +42,7 @@ open class SettingsSeparatorSectionView: SettingsSectionView {
 
 }
 
-/// A section that places a single button in an area spanning the full container width
+/// A section that places a single button in the section content box
 open class SettingsButtonSectionView: SettingsSectionView {
 
 	public private(set) var button: NSButton!
@@ -89,7 +89,7 @@ open class SettingsButtonSectionView: SettingsSectionView {
 
 }
 
-/// A section that places a leading-aligned checkbox spanning the full container width, optionally with a description
+/// A section that places a leading-aligned checkbox in the section content box, optionally with a description
 open class SettingsCheckboxSectionView: SettingsSectionView {
 
 	public private(set) var checkbox: NSButton!

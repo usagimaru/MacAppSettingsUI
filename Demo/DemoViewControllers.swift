@@ -53,7 +53,7 @@ class DemoViewController: NSViewController {
 class GeneralSettingsPaneViewController: SettingsPaneViewController {
 
 	/// The narrowest width this pane is laid out for
-	private static let minimumPaneWidth: CGFloat = 450
+	private static let minimumPaneWidth: CGFloat = 500
 	
 	/// Keeps the item column from stretching across the whole pane
 	private static let itemColumnMaximumWidth: CGFloat = 260
@@ -82,22 +82,22 @@ class GeneralSettingsPaneViewController: SettingsPaneViewController {
 		let startup = layoutView.addColumnSection(label: String(localized: "Startup"),
 												  itemColumnMaximumWidth: Self.itemColumnMaximumWidth,
 												  identifier: .init("Startup"))
-		startup.addCheckbox(title: String(localized: "Open at Login"),
+		startup.addCheckbox(title: String(localized: "Open at login"),
 							target: self,
 							action: nil)
 		
 		// Section with multiple items. Items added to the same section are stacked downward
 		let behavior = layoutView.addColumnSection(label: String(localized: "Behavior"),
 												   identifier: .init("Behavior"))
-		behavior.addCheckbox(title: String(localized: "Confirm Before Quitting"),
+		behavior.addCheckbox(title: String(localized: "Confirm before quitting"),
 							 isOn: true,
 							 target: self,
 							 action: nil)
-		behavior.addCheckbox(title: String(localized: "Restore Windows on Launch"),
+		behavior.addCheckbox(title: String(localized: "Restore windows on launch"),
 							 isOn: true,
 							 target: self,
 							 action: nil)
-		behavior.addCheckbox(title: String(localized: "Send Usage Data"),
+		behavior.addCheckbox(title: String(localized: "Send usage data"),
 							 target: self,
 							 action: nil)
 		
@@ -113,11 +113,11 @@ class GeneralSettingsPaneViewController: SettingsPaneViewController {
 		// Section with multiple items followed by a description label
 		let notifications = layoutView.addColumnSection(label: String(localized: "Notifications"),
 														identifier: .init("Notifications"))
-		notifications.addCheckbox(title: String(localized: "Allow Notifications"),
+		notifications.addCheckbox(title: String(localized: "Allow notifications"),
 								  isOn: true,
 								  target: self,
 								  action: nil)
-		notifications.addCheckbox(title: String(localized: "Play Sound"),
+		notifications.addCheckbox(title: String(localized: "Play sound"),
 								  target: self,
 								  action: nil)
 		notifications.addDescriptionLabel(String(localized: "GENERAL_NOTIFICATIONS_DESCRIPTION"))
@@ -131,14 +131,6 @@ class GeneralSettingsPaneViewController: SettingsPaneViewController {
 						target: self,
 						action: nil)
 		cache.addDescriptionLabel(String(localized: "GENERAL_CACHE_DESCRIPTION"))
-		
-		layoutView.addSeparatorSection()
-		
-		// Full-width section that places a single button without the label column
-		layoutView.addButtonSection(title: String(localized: "Restore Defaults"),
-									identifier: .init("Restore Defaults"),
-									target: self,
-									action: nil)
 		
 		layoutView.addSeparatorSection()
 		
@@ -157,10 +149,10 @@ class GeneralSettingsPaneViewController: SettingsPaneViewController {
 class ViewSettingsPaneViewController: SettingsPaneViewController {
 
 	/// The narrowest width this pane is laid out for
-	private static let minimumPaneWidth: CGFloat = 450
+	private static let minimumPaneWidth: CGFloat = 500
 	
 	/// Keeps the item column from stretching across the whole pane
-	private static let itemColumnMaximumWidth: CGFloat = 300
+	private static let itemColumnMaximumWidth: CGFloat = 260
 	
 	private var layoutView: SettingsLayoutView?
 
@@ -189,7 +181,7 @@ class ViewSettingsPaneViewController: SettingsPaneViewController {
 															 String(localized: "Auto")],
 													trackingMode: .selectOne,
 													target: self,
-													action: #selector(selectItem(_:)))
+													action: nil)
 		appearanceSelector.selectedSegment = 2
 		appearanceSelector.controlSize = .small
 		appearance.addCustomView(appearanceSelector)
@@ -203,20 +195,20 @@ class ViewSettingsPaneViewController: SettingsPaneViewController {
 		
 		let resetButton = NSButton(title: String(localized: "Reset"),
 								   target: self,
-								   action: #selector(resetAccentColor(_:)))
+								   action: nil)
 		resetButton.bezelStyle = .push
 		resetButton.controlSize = .small
 		accentColor.addAccessoryView(resetButton, to: colorWell)
 		
 		// Section with multiple items followed by a description label
 		let sidebar = layoutView.addColumnSection(label: String(localized: "Sidebar"), identifier: .init("Sidebar"))
-		sidebar.addCheckbox(title: String(localized: "Show Sidebar"),
+		sidebar.addCheckbox(title: String(localized: "Show sidebar"),
 							isOn: true,
 							target: self,
-							action: #selector(toggleItem(_:)))
-		sidebar.addCheckbox(title: String(localized: "Show Icons Only"),
+							action: nil)
+		sidebar.addCheckbox(title: String(localized: "Show icons only"),
 							target: self,
-							action: #selector(toggleItem(_:)))
+							action: nil)
 		sidebar.addDescriptionLabel(String(localized: "VIEW_SIDEBAR_DESCRIPTION"))
 		
 		// Section with a slider. Sliders have no intrinsic width, so the width comes from a constraint
@@ -225,7 +217,7 @@ class ViewSettingsPaneViewController: SettingsPaneViewController {
 									  minValue: 10,
 									  maxValue: 20,
 									  target: self,
-									  action: #selector(selectItem(_:)))
+									  action: nil)
 		textSizeSlider.numberOfTickMarks = 6
 		textSizeSlider.allowsTickMarkValuesOnly = true
 		textSizeSlider.widthAnchor.constraint(equalToConstant: 200).isActive = true
@@ -234,13 +226,76 @@ class ViewSettingsPaneViewController: SettingsPaneViewController {
 		
 		layoutView.addSeparatorSection()
 		
-		// Full-width section that places a checkbox and its description without the label column
-		layoutView.addCheckboxSection(title: String(localized: "Show Status Bar"),
+		// Content block section that places a checkbox and its description without the label column
+		layoutView.addCheckboxSection(title: String(localized: "Align to block"),
 									  isOn: true,
-									  description: String(localized: "VIEW_STATUS_BAR_DESCRIPTION"),
-									  identifier: .init("Show Status Bar"),
+									  description: String(localized: "VIEW_ALIGN_BLOCK_DESCRIPTION"),
+									  widthMode: .contentBlock,
+									  identifier: .init("Align to block"),
 									  target: self,
-									  action: #selector(toggleItem(_:)))
+									  action: nil)
+		
+		layoutView.addSeparatorSection()
+		
+		// Full-width section that places a checkbox and its description without the label column
+		layoutView.addCheckboxSection(title: String(localized: "Full-width"),
+									  isOn: true,
+									  description: String(localized: "VIEW_FULL_WIDTH_DESCRIPTION"),
+									  widthMode: .fullWidth,
+									  identifier: .init("Full-width"),
+									  target: self,
+									  action: nil)
+		
+		layoutView.addSeparatorSection()
+		
+		// Buttons laid out in the content block. Their area matches the two-column sections above, so the alignment stops at the block edges
+		layoutView.addButtonSection(title: String(localized: "Centered in the block"),
+									controlSize: .small,
+									alignment: .center,
+									widthMode: .contentBlock,
+									identifier: .init("Block Center Button"),
+									target: self,
+									action: nil)
+		
+		layoutView.addButtonSection(title: String(localized: "Leading in the block"),
+									controlSize: .small,
+									alignment: .leading,
+									widthMode: .contentBlock,
+									identifier: .init("Block Leading Button"),
+									target: self,
+									action: nil)
+		
+		layoutView.addButtonSection(title: String(localized: "Trailing in the block"),
+									controlSize: .small,
+									alignment: .trailing,
+									widthMode: .contentBlock,
+									identifier: .init("Block Trailing Button"),
+									target: self,
+									action: nil)
+		
+		layoutView.addSeparatorSection()
+		
+		// The same three buttons in full-width mode. Their area is the whole container, so the alignment reaches the pane edges
+		layoutView.addButtonSection(title: String(localized: "Centered in the container"),
+									controlSize: .small,
+									alignment: .center,
+									identifier: .init("Container Center Button"),
+									target: self,
+									action: nil)
+		
+		layoutView.addButtonSection(title: String(localized: "Leading in the container"),
+									controlSize: .small,
+									alignment: .leading,
+									identifier: .init("Container Leading Button"),
+									target: self,
+									action: nil)
+		
+		layoutView.addButtonSection(title: String(localized: "Trailing in the container"),
+									controlSize: .small,
+									alignment: .trailing,
+									identifier: .init("Container Trailing Button"),
+									target: self,
+									action: nil)
 		
 		layoutView.addSeparatorSection()
 		
@@ -250,18 +305,6 @@ class ViewSettingsPaneViewController: SettingsPaneViewController {
 			self?.layoutView?.debug_setWireframes(isOn)
 		}
 		wireframes.addCustomView(wireframeSwitch, verticalAlignment: .centerY)
-	}
-
-
-	// MARK: - Actions
-	
-	@objc private func toggleItem(_ sender: Any) {
-	}
-	
-	@objc private func selectItem(_ sender: Any) {
-	}
-	
-	@objc private func resetAccentColor(_ sender: Any) {
 	}
 
 }
@@ -303,7 +346,7 @@ class DeveloperSettingsPaneViewController: SettingsPaneViewController, SettingsP
 		// Setup the custom content view
 		
 		// View with default pane size
-		view = NSView(frame: NSMakeRect(0, 0, 400, 280))
+		view = NSView(frame: NSMakeRect(0, 0, 500, 280))
 		
 		// Set minimum / maximum size of this pane
 		NSLayoutConstraint.activate([

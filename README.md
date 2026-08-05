@@ -101,13 +101,13 @@ The container of the section-based layout. Stack sections into it and it decides
 Please check the “General” and “View” tabs on the demo app, `GeneralSettingsPaneViewController` and `ViewSettingsPaneViewController` in `DemoViewControllers.swift`.
 
 ### `SettingsSectionView`
-The base class of every section. It exposes a `contentGuide` that the container gives the shared content width, which is what keeps separators aligned with the two columns.
+The base class of every section. It exposes a `contentGuide` holding the section content, and a `widthMode` deciding whether that box follows the two-column block or spans the whole container. See [Section Width](#section-width).
 
 ### `SettingsColumnSectionView`
 A two-column section: one trailing-aligned label, and any number of leading-aligned items stacked downward.
 
 ### `SettingsSeparatorSectionView` / `SettingsButtonSectionView` / `SettingsCheckboxSectionView` / `SettingsCustomSectionView`
-Sections that span the content width without the label column.
+Sections without the label column. They span the whole container by default, and all but the separator can line up with the two-column block instead.
 
 ### `SettingsWrappingLabel`
 The description label used by sections. It shrinks to its text and wraps only when the text does not fit the column.
@@ -175,7 +175,7 @@ To remove any pane, use NSTabViewController’s methods.
 
 ### Section-Based Layout (recommended)
 
-Create a `SettingsLayoutView`, install it into the pane view, then add one section per row. `install(in:)` pins the layout view to the pane view with system margins on all four edges.
+Create a `SettingsLayoutView`, install it into the pane view, then add one section per row. `install(in:margins:)` pins the layout view to the pane view, with the system standard spacing on all four edges unless you pass `.insets(_:)` for your own margins.
 
 ```swift
 class GeneralSettingsPaneViewController: SettingsPaneViewController {
@@ -213,10 +213,32 @@ Sections are stacked in the order you add them, spaced by `SettingsLayoutMetrics
 | Method | Result |
 |---|---|
 | `addColumnSection(label:itemColumnMaximumWidth:identifier:)` | Two-column section |
-| `addSeparatorSection(identifier:)` | Horizontal separator |
-| `addButtonSection(title:controlSize:alignment:identifier:target:action:)` | A single button, without the label column |
-| `addCheckboxSection(title:isOn:description:identifier:target:action:)` | A leading-aligned checkbox with an optional description, without the label column |
-| `addCustomSection(_:identifier:)` | Any view, spanning the content width |
+| `addSeparatorSection(identifier:)` | Horizontal separator, always spanning the container |
+| `addButtonSection(title:controlSize:alignment:widthMode:identifier:target:action:)` | A single button, without the label column |
+| `addCheckboxSection(title:isOn:description:widthMode:identifier:target:action:)` | A leading-aligned checkbox with an optional description, without the label column |
+| `addCustomSection(_:widthMode:identifier:)` | Any view, without the label column |
+
+
+#### Section Width
+
+A section without the label column decides the area it is laid out in with `SettingsSectionWidthMode`.
+
+| Case | Result |
+|---|---|
+| `.fullWidth` (default) | The section spans the whole container, so its content reaches the pane margins |
+| `.contentBlock` | The section follows the two-column block, so its edges line up with the column sections |
+
+The two only look different once the columns are narrower than the pane, because the block stays centered while the container does not. A separator divides the whole pane, so it always spans the container and takes no width mode.
+
+```swift
+layoutView.addButtonSection(title: "Restore Defaults",
+							alignment: .trailing,
+							widthMode: .contentBlock,
+							target: self,
+							action: #selector(restoreDefaults(_:)))
+```
+
+`widthMode` is also a property on `SettingsSectionView`, so a section can be switched over after it has been added.
 
 
 #### Items in a Two-Column Section

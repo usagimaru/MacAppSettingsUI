@@ -13,13 +13,11 @@
 "Help" = "ヘルプ";
 
 "Preferences…" = "環境設定…";
-"Settings…" = "設定…";
 
 "Preferences" = "環境設定";
 "Settings" = "設定";
 
 "General" = "一般";
-"View" = "表示";
 "Extensions" = "機能拡張";
 "Advanced" = "詳細";
 "Updates" = "アップデート";
@@ -33,19 +31,19 @@
 "Loading…" = "読み込み中…";
 
 "Startup" = "起動";
-"Open at Login" = "ログイン時に開く";
+"Open at login" = "ログイン時に開く";
 "Behavior" = "動作";
-"Confirm Before Quitting" = "終了前に確認";
-"Restore Windows on Launch" = "起動時にウインドウを復元";
-"Send Usage Data" = "使用状況データを送信";
+"Confirm before quitting" = "終了前に確認";
+"Restore windows on launch" = "起動時にウインドウを復元";
+"Send usage data" = "使用状況データを送信";
 "Save Downloads To" = "ダウンロードの保存先";
 "Downloads Folder" = "ダウンロードフォルダ";
 "Desktop" = "デスクトップ";
 "Ask Each Time" = "毎回確認";
 "GENERAL_DOWNLOADS_DESCRIPTION" = "ダウンロードしたファイルの保存先を選びます。";
 "Notifications" = "通知";
-"Allow Notifications" = "通知を許可";
-"Play Sound" = "サウンドを再生";
+"Allow notifications" = "通知を許可";
+"Play sound" = "サウンドを再生";
 "GENERAL_NOTIFICATIONS_DESCRIPTION" = "重要なアップデートがある場合にのみ通知が届きます。";
 "Cache" = "キャッシュ";
 "Clear Cache…" = "キャッシュを削除…";
@@ -60,10 +58,18 @@
 "Accent Color" = "アクセントカラー";
 "Reset" = "リセット";
 "Sidebar" = "サイドバー";
-"Show Sidebar" = "サイドバーを表示";
-"Show Icons Only" = "アイコンのみ表示";
+"Show sidebar" = "サイドバーを表示";
+"Show icons only" = "アイコンのみ表示";
 "VIEW_SIDEBAR_DESCRIPTION" = "サイドバーの状態はウインドウごとに保持されます。";
 "Text Size" = "文字サイズ";
 "VIEW_TEXT_SIZE_DESCRIPTION" = "文字サイズはリストとサイドバーに反映されます。";
-"Show Status Bar" = "ステータスバーを表示";
-"VIEW_STATUS_BAR_DESCRIPTION" = "ステータスバーには、選択中の項目数がウインドウ下部に表示されます。";
+"Align to block" = "ブロックに揃える";
+"VIEW_ALIGN_BLOCK_DESCRIPTION" = "このセクションは2カラムのブロックに従うため、上のセクションと端が揃います。";
+"Full-width" = "全幅";
+"VIEW_FULL_WIDTH_DESCRIPTION" = "このセクションは、カラムの幅にかかわらずコンテナいっぱいに広がります。";
+"Centered in the block" = "ブロック内で中央";
+"Leading in the block" = "ブロック内で先頭寄せ";
+"Trailing in the block" = "ブロック内で末尾寄せ";
+"Centered in the container" = "コンテナ内で中央";
+"Leading in the container" = "コンテナ内で先頭寄せ";
+"Trailing in the container" = "コンテナ内で末尾寄せ";
