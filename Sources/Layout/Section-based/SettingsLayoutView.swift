@@ -46,44 +46,6 @@ public enum SettingsLayoutPriority {
 
 }
 
-/// Wireframe drawing for debugging. Colors differ per level so the levels stay distinguishable
-public enum SettingsDebugWireframe {
-
-	/// Whole container
-	public static let containerColor = NSColor.systemBlue
-	/// Section
-	public static let sectionColor = NSColor.systemOrange
-	/// Label column box
-	public static let labelColumnColor = NSColor.systemRed
-	/// Item column box
-	public static let itemColumnColor = NSColor.systemGreen
-	/// Labels and controls
-	public static let controlColor = NSColor.systemPurple
-
-	public static func tinted(_ color: NSColor) -> NSColor {
-		color.withAlphaComponent(0.5)
-	}
-
-	/// Outline a view together with its descendants
-	public static func apply(_ flag: Bool, to view: NSView, color: NSColor) {
-		setBorder(flag, to: view, color: color)
-		view.subviews.forEach { apply(flag, to: $0, color: color) }
-	}
-
-	/// Outline a section itself and the controls inside it in separate colors
-	public static func applyToSection(_ flag: Bool, section: NSView) {
-		setBorder(flag, to: section, color: sectionColor)
-		section.subviews.forEach { apply(flag, to: $0, color: controlColor) }
-	}
-
-	private static func setBorder(_ flag: Bool, to view: NSView, color: NSColor) {
-		view.wantsLayer = true
-		view.layer?.borderWidth = flag ? 1 : 0
-		view.layer?.borderColor = flag ? tinted(color).cgColor : nil
-	}
-
-}
-
 /// A container that builds a settings pane out of sections. Column widths come from the content and this view owns the section spacing
 open class SettingsLayoutView: NSView {
 
@@ -93,6 +55,9 @@ open class SettingsLayoutView: NSView {
 	public private(set) var itemColumnWidthGuide = NSLayoutGuide()
 	/// Guide that aggregates the width of both columns plus the spacing. Every section matches it, so their edges line up
 	public private(set) var contentBlockWidthGuide = NSLayoutGuide()
+
+	/// Outline of this container. Each section owns the outlines of its own boxes
+	public lazy var debugWireframes = LayoutDebugWireframes(host: self)
 
 	/// Lower bound of the label column width. nil leaves the width to the labels themselves
 	open var labelColumnMinimumWidth: CGFloat? {
@@ -109,15 +74,17 @@ open class SettingsLayoutView: NSView {
 	}
 
 	private let stackView = NSStackView()
-	/// Stands in for the item column at its real position, so the block width can be read off its trailing edge
+	/// Stands in for the item column next to the label column, so the block width can be read off its trailing edge
 	private let itemColumnMeasuringGuide = NSLayoutGuide()
+	/// Content block where it really appears. The width guides carry no position, so the debug rules read these instead
+	private let blockPositionGuide = NSLayoutGuide()
+	private let labelColumnPositionGuide = NSLayoutGuide()
+	private let itemColumnPositionGuide = NSLayoutGuide()
 	private var labelColumnMinimumWidthConstraint: NSLayoutConstraint?
 	private var itemColumnMinimumWidthConstraint: NSLayoutConstraint?
 	/// Holds the narrowest width the sections declared. Inactive while no section declares one
 	private var itemColumnDeclaredWidthConstraint: NSLayoutConstraint?
 	private var itemColumnShrinkConstraint: NSLayoutConstraint?
-	private var debugWireframeLayer = CALayer()
-	private var isDebugWireframesEnabled = false
 
 
 	// MARK: - Initialization
@@ -126,7 +93,8 @@ open class SettingsLayoutView: NSView {
 		super.init(frame: .zero)
 		setUpGuides()
 		setUpStackView()
-		setUpDebugLayer()
+
+		setUpDebugRules()
 	}
 
 	public required init?(coder: NSCoder) {
@@ -222,6 +190,33 @@ open class SettingsLayoutView: NSView {
 		let blockGrow = contentBlockWidthGuide.trailingAnchor.constraint(equalTo: trailingAnchor)
 		blockGrow.priority = SettingsLayoutPriority.contentWidthGrow
 		blockGrow.isActive = true
+
+		setUpPositionGuides()
+	}
+
+	/// The width guides sit at the origin, so they say nothing about where the columns appear.
+	/// These guides stand where the content really is, which is what the debug rules need
+	private func setUpPositionGuides() {
+		[blockPositionGuide, labelColumnPositionGuide, itemColumnPositionGuide].forEach { addLayoutGuide($0) }
+
+		NSLayoutConstraint.activate([
+			// Sections center their content box, so the block position follows the center as well
+			blockPositionGuide.topAnchor.constraint(equalTo: topAnchor),
+			blockPositionGuide.heightAnchor.constraint(equalToConstant: 0),
+			blockPositionGuide.centerXAnchor.constraint(equalTo: centerXAnchor),
+			blockPositionGuide.widthAnchor.constraint(equalTo: contentBlockWidthGuide.widthAnchor),
+
+			labelColumnPositionGuide.topAnchor.constraint(equalTo: topAnchor),
+			labelColumnPositionGuide.heightAnchor.constraint(equalToConstant: 0),
+			labelColumnPositionGuide.leadingAnchor.constraint(equalTo: blockPositionGuide.leadingAnchor),
+			labelColumnPositionGuide.widthAnchor.constraint(equalTo: labelColumnWidthGuide.widthAnchor),
+
+			itemColumnPositionGuide.topAnchor.constraint(equalTo: topAnchor),
+			itemColumnPositionGuide.heightAnchor.constraint(equalToConstant: 0),
+			itemColumnPositionGuide.leadingAnchor.constraint(equalTo: labelColumnPositionGuide.trailingAnchor,
+															constant: SettingsLayoutMetrics.columnSpacing),
+			itemColumnPositionGuide.widthAnchor.constraint(equalTo: itemColumnWidthGuide.widthAnchor),
+		])
 	}
 
 	private func setUpStackView() {
@@ -330,7 +325,7 @@ open class SettingsLayoutView: NSView {
 		stackView.addArrangedSubview(section)
 		section.adoptContentWidth(from: contentBlockWidthGuide)
 		section.widthMode = widthMode
-		section.debug_setWireframes(isDebugWireframesEnabled)
+		section.debug_setWireframes(debugWireframes.isEnabled)
 	}
 
 
@@ -402,33 +397,65 @@ open class SettingsLayoutView: NSView {
 
 	// MARK: - Debug
 
-	private func setUpDebugLayer() {
-		wantsLayer = true
-		layer?.insertSublayer(debugWireframeLayer, at: 0)
-		debugWireframeLayer.borderWidth = 1
-		debugWireframeLayer.borderColor = SettingsDebugWireframe.tinted(SettingsDebugWireframe.containerColor).cgColor
-		debugWireframeLayer.isHidden = true
+	private func setUpDebugRules() {
+		debugWireframes.add(view: self, color: LayoutDebugWireframeColor.container)
+
+		// Rules run the height of the pane, so a section whose edge is off shows up at a glance
+		debugWireframes.addRule(at: .minX, of: self, color: LayoutDebugWireframeColor.container)
+		debugWireframes.addRule(at: .maxX, of: self, color: LayoutDebugWireframeColor.container)
+		debugWireframes.addRule(at: .centerX, of: self, color: LayoutDebugWireframeColor.container)
+		debugWireframes.addRule(at: .minX, of: blockPositionGuide, color: LayoutDebugWireframeColor.section)
+		debugWireframes.addRule(at: .maxX, of: blockPositionGuide, color: LayoutDebugWireframeColor.section)
+		debugWireframes.addRule(at: .maxX, of: labelColumnPositionGuide, color: LayoutDebugWireframeColor.labelColumn)
+		debugWireframes.addRule(at: .minX, of: itemColumnPositionGuide, color: LayoutDebugWireframeColor.itemColumn)
+
+		// Each readout takes the side its column is aligned to, so it reads against the content below it
+		debugWireframes.addWidthReadout(of: labelColumnPositionGuide,
+										alignedTo: .maxX,
+										color: LayoutDebugWireframeColor.labelColumn)
+		debugWireframes.addWidthReadout(of: itemColumnPositionGuide,
+										alignedTo: .minX,
+										color: LayoutDebugWireframeColor.itemColumn)
+		debugWireframes.addWidthReadout(of: blockPositionGuide,
+										alignedTo: .maxX,
+										color: LayoutDebugWireframeColor.section)
+		// Kept on the left, or it would land on the block width that shares the same right edge
+		debugWireframes.addWidthReadout(of: self,
+										alignedTo: .minX,
+										color: LayoutDebugWireframeColor.container)
 	}
 
 	/// Visualize the boxes of every level as wireframes. Calling it before adding sections still affects sections added later
 	open func debug_setWireframes(_ flag: Bool) {
-#if DEBUG
-		isDebugWireframesEnabled = flag
-#else
-		isDebugWireframesEnabled = false
-#endif
-		debugWireframeLayer.isHidden = !isDebugWireframesEnabled
-		sections.forEach { $0.debug_setWireframes(isDebugWireframesEnabled) }
+		debugWireframes.isEnabled = flag
+		sections.forEach { $0.debug_setWireframes(debugWireframes.isEnabled) }
 	}
 
 	open override func layout() {
 		super.layout()
 
-		CATransaction.begin()
-		CATransaction.setDisableActions(true)
-		debugWireframeLayer.frame = bounds
-		debugWireframeLayer.contentsScale = window?.backingScaleFactor ?? 1.0
-		CATransaction.commit()
+		// The rules are meant to reach the pane edges, so the margin this view sits in is handed back to them
+		debugWireframes.ruleOverhang = marginToParentView()
+		debugWireframes.updateLayout()
+	}
+
+	// Moving between displays changes the scale without moving the layout, so the layers are refreshed here as well
+	open override func viewDidChangeBackingProperties() {
+		super.viewDidChangeBackingProperties()
+		debugWireframes.updateLayout()
+	}
+
+	/// Widest margin between this view and the view it was laid into.
+	/// System spacing settles during layout, so it is measured from the frames rather than read off the constraints
+	private func marginToParentView() -> CGFloat {
+		guard let superview else { return 0 }
+
+		let margins = [frame.minX - superview.bounds.minX,
+					   superview.bounds.maxX - frame.maxX,
+					   frame.minY - superview.bounds.minY,
+					   superview.bounds.maxY - frame.maxY]
+
+		return max(margins.max() ?? 0, 0)
 	}
 
 }

@@ -44,10 +44,6 @@ open class SettingsColumnSectionView: SettingsSectionView {
 	/// Constraints that let the label decide the height while no item has been added yet
 	private var labelOnlyVerticalConstraints = [NSLayoutConstraint]()
 
-	private var debugLabelBoxLayer = CALayer()
-	private var debugItemBoxLayer = CALayer()
-	private var isDebugWireframesEnabled = false
-
 
 	// MARK: - Initialization
 
@@ -64,8 +60,13 @@ open class SettingsColumnSectionView: SettingsSectionView {
 
 		setUpGuides()
 		setUpTitleLabel(labelTitle)
-		setUpDebugLayers()
 		updateItemColumnMaximumWidthConstraint()
+
+		// Registered after the section fill, so the column tints land on top of it
+		debugWireframes.addFill(guide: labelBoxGuide, color: LayoutDebugWireframeColor.labelColumn)
+		debugWireframes.addFill(guide: itemBoxGuide, color: LayoutDebugWireframeColor.itemColumn)
+		debugWireframes.add(guide: labelBoxGuide, color: LayoutDebugWireframeColor.labelColumn)
+		debugWireframes.add(guide: itemBoxGuide, color: LayoutDebugWireframeColor.itemColumn)
 	}
 
 	public required init?(coder: NSCoder) {
@@ -228,7 +229,7 @@ open class SettingsColumnSectionView: SettingsSectionView {
 			itemColumnWidthGuide.widthAnchor.constraint(greaterThanOrEqualTo: pairGuide.widthAnchor),
 		])
 
-		SettingsDebugWireframe.apply(isDebugWireframesEnabled, to: accessoryView, color: SettingsDebugWireframe.controlColor)
+		debugWireframes.refresh()
 
 		return accessoryView
 	}
@@ -281,7 +282,7 @@ open class SettingsColumnSectionView: SettingsSectionView {
 		bottomConstraint = bottomAnchor.constraint(equalTo: item.bottomAnchor)
 		bottomConstraint?.isActive = true
 
-		SettingsDebugWireframe.apply(isDebugWireframesEnabled, to: item, color: SettingsDebugWireframe.controlColor)
+		debugWireframes.refresh()
 
 		items.append(item)
 	}
@@ -300,41 +301,13 @@ open class SettingsColumnSectionView: SettingsSectionView {
 	}
 
 
-	// MARK: - Debug
-
-	private func setUpDebugLayers() {
-		wantsLayer = true
-
-		[debugLabelBoxLayer, debugItemBoxLayer].forEach {
-			layer?.insertSublayer($0, at: 0)
-			$0.borderWidth = 1
-			$0.isHidden = true
-		}
-
-		debugLabelBoxLayer.borderColor = SettingsDebugWireframe.tinted(SettingsDebugWireframe.labelColumnColor).cgColor
-		debugItemBoxLayer.borderColor = SettingsDebugWireframe.tinted(SettingsDebugWireframe.itemColumnColor).cgColor
-	}
-
-	open override func debug_setWireframes(_ flag: Bool) {
-		isDebugWireframesEnabled = isDebugWireframesAllowed(flag)
-		[debugLabelBoxLayer, debugItemBoxLayer].forEach { $0.isHidden = !isDebugWireframesEnabled }
-		super.debug_setWireframes(isDebugWireframesEnabled)
-	}
+	// MARK: - Layout
 
 	open override func layout() {
 		super.layout()
 
 		let itemColumnWidth = itemBoxGuide.frame.width
 		items.forEach { ($0 as? SettingsWrappingLabel)?.availableWidth = itemColumnWidth }
-
-		CATransaction.begin()
-		CATransaction.setDisableActions(true)
-		debugLabelBoxLayer.frame = labelBoxGuide.frame
-		debugItemBoxLayer.frame = itemBoxGuide.frame
-		[debugLabelBoxLayer, debugItemBoxLayer].forEach {
-			$0.contentsScale = window?.backingScaleFactor ?? 1.0
-		}
-		CATransaction.commit()
 	}
 
 }

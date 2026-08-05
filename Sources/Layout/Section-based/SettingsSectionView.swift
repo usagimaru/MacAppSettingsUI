@@ -29,6 +29,9 @@ open class SettingsSectionView: NSView {
 		}
 	}
 
+	/// Outlines of this section and everything inside it. Subclasses add their own boxes to it
+	public lazy var debugWireframes = LayoutDebugWireframes(host: self)
+
 	/// Width of the section itself, which the container has already stretched to its full width
 	private var fullWidthConstraint: NSLayoutConstraint?
 	/// Width shared with the two-column block. Absent while the section stands outside a container
@@ -38,6 +41,12 @@ open class SettingsSectionView: NSView {
 		super.init(frame: .zero)
 		self.identifier = identifier
 		setUpContentGuide()
+
+		// Hatched rather than filled, so the flat column tints inside it stay readable
+		debugWireframes.addHatch(view: self, color: LayoutDebugWireframeColor.sectionFill)
+		debugWireframes.add(view: self,
+							color: LayoutDebugWireframeColor.section,
+							descendantColor: LayoutDebugWireframeColor.control)
 	}
 
 	public required init?(coder: NSCoder) {
@@ -94,16 +103,18 @@ open class SettingsSectionView: NSView {
 
 	/// Outline this section and the controls inside it
 	open func debug_setWireframes(_ flag: Bool) {
-		SettingsDebugWireframe.applyToSection(isDebugWireframesAllowed(flag), section: self)
+		debugWireframes.isEnabled = flag
 	}
 
-	/// Wireframes never appear in release builds
-	public func isDebugWireframesAllowed(_ flag: Bool) -> Bool {
-#if DEBUG
-		flag
-#else
-		false
-#endif
+	open override func layout() {
+		super.layout()
+		debugWireframes.updateLayout()
+	}
+
+	// Moving between displays changes the scale without moving the layout, so the layers are refreshed here as well
+	open override func viewDidChangeBackingProperties() {
+		super.viewDidChangeBackingProperties()
+		debugWireframes.updateLayout()
 	}
 
 }
