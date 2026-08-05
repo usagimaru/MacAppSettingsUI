@@ -49,57 +49,6 @@ class DemoViewController: NSViewController {
 
 // MARK: - Panes
 
-extension SettingsPaneViewController {
-
-	class func fromStoryboard(tabViewController: SettingsTabViewController? = nil,
-							  tabName: String? = nil,
-							  localizeKeyForTabName: String? = nil,
-							  tabImage: NSImage? = nil,
-							  tabIdentifier: String? = nil,
-							  isResizableView: Bool? = nil) -> Self {
-		let vc = NSStoryboard(name: "Main", bundle: nil).instantiateController(withIdentifier: "\(Self.self)") as! Self
-		vc.tabViewController = tabViewController
-		
-		if let tabName {
-			vc.tabName = tabName
-		}
-		if let localizeKeyForTabName {
-			vc.localizeKeyForTabName = localizeKeyForTabName
-		}
-		if let tabImage {
-			vc.tabImage = tabImage
-		}
-		if let tabIdentifier {
-			vc.tabIdentifier = tabIdentifier
-		}
-		if let isResizableView {
-			vc.isResizableView = isResizableView
-		}
-		
-		return vc
-	}
-
-}
-
-private extension SettingsPaneViewController {
-
-	/// Give the pane a lower bound, then shrink-wrap it to its sections
-	func resolvePaneSize(minimumWidth: CGFloat) {
-		view.widthAnchor.constraint(greaterThanOrEqualToConstant: minimumWidth).isActive = true
-
-		// The width has to settle before the height, since it decides how many lines the descriptions take
-		view.setFrameSize(NSSize(width: minimumWidth, height: 0))
-		view.layoutSubtreeIfNeeded()
-		
-		// The first pass settles the width, the second measures the height at that width
-		for _ in 0 ..< 2 {
-			view.setFrameSize(view.fittingSize)
-			view.layoutSubtreeIfNeeded()
-		}
-	}
-
-}
-
 // Section-based layout
 class GeneralSettingsPaneViewController: SettingsPaneViewController {
 
