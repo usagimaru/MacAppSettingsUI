@@ -19,7 +19,7 @@ open class SettingsWindow: NSWindow {
 	
 	/// Get “Reduce Motion” accessibility setting
 	open var reduceMotionIfNeeded: Bool {
-		NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
+		!Accessibility.allowsMotion()
 	}
 	
 	/// Notify true when window is resizing

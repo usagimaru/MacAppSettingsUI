@@ -24,6 +24,7 @@
 		51DE6B2D3021BD9A000E6501 /* SettingsLayoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DE6B273021BD9A000E6501 /* SettingsLayoutView.swift */; };
 		51DE6B2E3021BD9A000E6501 /* SettingsSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DE6B283021BD9A000E6501 /* SettingsSectionView.swift */; };
 		51DE6B2F3021BD9A000E6501 /* SettingsWrappingLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DE6B293021BD9A000E6501 /* SettingsWrappingLabel.swift */; };
+		51DE6DE330231F5F000E6501 /* Accessibility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DE6DE230231F5F000E6501 /* Accessibility.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -46,6 +47,7 @@
 		51DE6B273021BD9A000E6501 /* SettingsLayoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsLayoutView.swift; sourceTree = "<group>"; };
 		51DE6B283021BD9A000E6501 /* SettingsSectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSectionView.swift; sourceTree = "<group>"; };
 		51DE6B293021BD9A000E6501 /* SettingsWrappingLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsWrappingLabel.swift; sourceTree = "<group>"; };
+		51DE6DE230231F5F000E6501 /* Accessibility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Accessibility.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -97,6 +99,7 @@
 				5159E1172B9A580800F3E575 /* SettingsTabViewController.swift */,
 				5159E1192B9A580800F3E575 /* SettingsPaneViewController.swift */,
 				51DA20B32F1E40870049E463 /* SettingsPaneContainerView.swift */,
+				51DE6DE230231F5F000E6501 /* Accessibility.swift */,
 				51DE6B2A3021BD9A000E6501 /* Layout */,
 			);
 			path = Sources;
@@ -194,6 +197,7 @@
 				51DE6B2B3021BD9A000E6501 /* SettingsFullWidthSections.swift in Sources */,
 				51DE6B2C3021BD9A000E6501 /* SettingsColumnSectionView.swift in Sources */,
 				51DE6B2D3021BD9A000E6501 /* SettingsLayoutView.swift in Sources */,
+				51DE6DE330231F5F000E6501 /* Accessibility.swift in Sources */,
 				51DE6B2E3021BD9A000E6501 /* SettingsSectionView.swift in Sources */,
 				51DE6B2F3021BD9A000E6501 /* SettingsWrappingLabel.swift in Sources */,
 				5159E0F92B99A72900F3E575 /* AppDelegate.swift in Sources */,

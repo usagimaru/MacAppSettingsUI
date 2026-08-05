@@ -248,7 +248,7 @@ open class SettingsTabViewController: NSTabViewController {
 				return
 			}
 			
-			let animates = !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
+			let animates = Accessibility.allowsMotion()
 			
 			// 2. Cache the pane size (clamped to toolbar minimum if enabled)
 			self.cacheTabViewSize(for: selectedTabViewItem)
@@ -327,6 +327,18 @@ open class SettingsTabViewController: NSTabViewController {
 		}
 	}
 	
+	/// Discard the size cached for a pane and measure it again. The window follows only while that pane is on screen
+	open func invalidateCachedSize(for pane: SettingsPaneViewController) {
+		guard let tabViewItem = tabViewItems.first(where: { $0.viewController === pane }) else { return }
+		
+		tabViewSizes[tabViewItem] = nil
+		cacheTabViewSize(for: tabViewItem)
+		
+		if tabViewItem == selectedTabViewItem {
+			fitWindowSize(to: tabViewItem, animateIfPossible: false)
+		}
+	}
+	
 	/// Fit window size to specific tab view item
 	open func fitWindowSize(to tabViewItem: NSTabViewItem, animateIfPossible: Bool, completion: (() -> ())? = nil) {
 		guard let size = tabViewSizes[tabViewItem], let settingsWindow else {
@@ -385,11 +397,7 @@ open class SettingsTabViewController: NSTabViewController {
 	private func updateTabName(of item: NSTabViewItem) {
 		if let pane = item.settingsPaneViewController {
 			if let localizeKey = pane.localizeKeyForTabName, !localizeKey.isEmpty && !disablesLocalizationWithTabNameLocalizeKey {
-				if #available(macOS 12, *) {
-					item.label = String(localized: String.LocalizationValue(localizeKey))
-				} else {
-					item.label = NSLocalizedString(localizeKey, comment: "")
-				}
+				item.label = String(localized: String.LocalizationValue(localizeKey))
 			}
 			else {
 				item.label = pane.tabName ?? ""

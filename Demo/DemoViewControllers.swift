@@ -68,7 +68,7 @@ class GeneralSettingsPaneViewController: SettingsPaneViewController {
 		view = NSView()
 		
 		buildSections()
-		resolvePaneSize(minimumWidth: Self.minimumPaneWidth)
+		sizePaneToFitContent(minimumWidth: Self.minimumPaneWidth)
 	}
 	
 	private func buildSections() {
@@ -172,7 +172,7 @@ class ViewSettingsPaneViewController: SettingsPaneViewController {
 		view = NSView()
 
 		buildSections()
-		resolvePaneSize(minimumWidth: Self.minimumPaneWidth)
+		sizePaneToFitContent(minimumWidth: Self.minimumPaneWidth)
 	}
 	
 	private func buildSections() {
@@ -191,11 +191,11 @@ class ViewSettingsPaneViewController: SettingsPaneViewController {
 													target: self,
 													action: #selector(selectItem(_:)))
 		appearanceSelector.selectedSegment = 2
+		appearanceSelector.controlSize = .small
 		appearance.addCustomView(appearanceSelector)
 		
 		// Section whose item carries an accessory view on its trailing side
-		let accentColor = layoutView.addColumnSection(label: String(localized: "Accent Color"),
-													  identifier: .init("Accent Color"))
+		let accentColor = layoutView.addColumnSection(label: String(localized: "Accent Color"), identifier: .init("Accent Color"))
 		let colorWell = NSColorWell()
 		colorWell.color = .controlAccentColor
 		colorWell.widthAnchor.constraint(equalToConstant: 44).isActive = true
@@ -209,8 +209,7 @@ class ViewSettingsPaneViewController: SettingsPaneViewController {
 		accentColor.addAccessoryView(resetButton, to: colorWell)
 		
 		// Section with multiple items followed by a description label
-		let sidebar = layoutView.addColumnSection(label: String(localized: "Sidebar"),
-												  identifier: .init("Sidebar"))
+		let sidebar = layoutView.addColumnSection(label: String(localized: "Sidebar"), identifier: .init("Sidebar"))
 		sidebar.addCheckbox(title: String(localized: "Show Sidebar"),
 							isOn: true,
 							target: self,
@@ -221,8 +220,7 @@ class ViewSettingsPaneViewController: SettingsPaneViewController {
 		sidebar.addDescriptionLabel(String(localized: "VIEW_SIDEBAR_DESCRIPTION"))
 		
 		// Section with a slider. Sliders have no intrinsic width, so the width comes from a constraint
-		let textSize = layoutView.addColumnSection(label: String(localized: "Text Size"),
-												   identifier: .init("Text Size"))
+		let textSize = layoutView.addColumnSection(label: String(localized: "Text Size"), identifier: .init("Text Size"))
 		let textSizeSlider = NSSlider(value: 13,
 									  minValue: 10,
 									  maxValue: 20,
@@ -247,8 +245,7 @@ class ViewSettingsPaneViewController: SettingsPaneViewController {
 		layoutView.addSeparatorSection()
 		
 		// Section holding an arbitrary control. The switch reveals the debug wireframes of this pane
-		let wireframes = layoutView.addColumnSection(label: String(localized: "Wireframes"),
-													 identifier: .init("Wireframes"))
+		let wireframes = layoutView.addColumnSection(label: String(localized: "Wireframes"), identifier: .init("Wireframes"))
 		let wireframeSwitch = DemoSwitch { [weak self] isOn in
 			self?.layoutView?.debug_setWireframes(isOn)
 		}
@@ -292,7 +289,7 @@ class AdvancedSettingsPaneViewController: SettingsPaneViewController, SettingsPa
 		contentContainerView?.debug_setWireframes(true)
 		
 		// 4: Update preferred pane size
-		resolvePreferredPaneSize()
+		capturePreferredPaneSize()
 	}
 
 }
@@ -331,7 +328,7 @@ class DeveloperSettingsPaneViewController: SettingsPaneViewController, SettingsP
 		buildUI()
 		
 		// 3: Update preferred pane size
-		resolvePreferredPaneSize()
+		capturePreferredPaneSize()
 	}
 	
 	private func buildUI() {

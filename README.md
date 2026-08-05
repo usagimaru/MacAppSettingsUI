@@ -93,7 +93,7 @@ The base view controller for setting pane. You can use this class to customize y
 
 Override `loadPaneContent(completion:)` to perform asynchronous content loading before the pane is displayed. The `isPaneContentLoaded` flag is managed automatically by `SettingsTabViewController`.
 
-Each pane captures its `preferredPaneSize` automatically in `viewDidLoad()`. If your subclass adds subviews or modifies constraints after `super.viewDidLoad()`, call `resolvePreferredPaneSize()` at the end of your `viewDidLoad()` to recapture the correct size.
+Each pane captures its `preferredPaneSize` automatically in `viewDidLoad()`. If your subclass adds subviews or modifies constraints after `super.viewDidLoad()`, call `capturePreferredPaneSize()` at the end of your `viewDidLoad()` to recapture the correct size. See [Resolving the Pane Size](#resolving-the-pane-size).
 
 ### `SettingsLayoutView`
 The container of the section-based layout. Stack sections into it and it decides the column widths, the spacing between sections and the width at which description text wraps. See [Building a Pane Layout](#building-a-pane-layout).
@@ -251,22 +251,32 @@ The item column is shared across every section, so passing `itemColumnMaximumWid
 
 #### Resolving the Pane Size
 
-`SettingsTabViewController` sizes the window from each pane’s `preferredPaneSize`. For a pane built in code, give the view a lower bound and shrink-wrap it to the sections at the end of `loadView()`.
+`SettingsTabViewController` sizes the window from each pane’s `preferredPaneSize`. For a pane built in code, call `sizePaneToFitContent(minimumWidth:)` at the end of `loadView()`. It gives the view a lower bound, shrink-wraps it to the sections and records the result.
 
 ```swift
-view.widthAnchor.constraint(greaterThanOrEqualToConstant: minimumWidth).isActive = true
+override func loadView() {
+	view = NSView()
 
-view.setFrameSize(NSSize(width: minimumWidth, height: 0))
-view.layoutSubtreeIfNeeded()
-
-// The width has to settle before the height, since it decides how many lines the descriptions take
-for _ in 0 ..< 2 {
-	view.setFrameSize(view.fittingSize)
-	view.layoutSubtreeIfNeeded()
+	buildSections()
+	sizePaneToFitContent(minimumWidth: 450)
 }
 ```
 
-The demo wraps this as `resolvePaneSize(minimumWidth:)` in `DemoViewControllers.swift`.
+Description labels only learn the width they wrap at during layout, so the method measures repeatedly until the size stops changing. It is safe to call again with a different lower bound.
+
+For a pane sized by a Storyboard or by your own constraints, call `capturePreferredPaneSize()` instead. It lays the view out and records the resulting frame size, without touching the width.
+
+
+#### Re-measuring After a Change
+
+`preferredPaneSize` is a snapshot, and `SettingsTabViewController` caches it again per tab. Neither notices a later change to the content, the font size or the locale.
+
+Call `invalidatePaneSize()` on the pane to measure again and refresh both caches. The window resizes to follow only while that pane is the one on screen.
+
+```swift
+layoutView?.addColumnSection(label: "Sync", identifier: .init("Sync"))
+invalidatePaneSize()
+```
 
 
 #### Reaching Sections Afterwards
@@ -304,7 +314,7 @@ class AdvancedSettingsPaneViewController: SettingsPaneViewController, SettingsPa
 		setContentContainerView(maximumWidth: 550)
 		contentContainerView?.labelLayoutGuideWidth = 160
 		contentContainerView?.debug_setWireframes(true)
-		resolvePreferredPaneSize()
+		capturePreferredPaneSize()
 	}
 
 }

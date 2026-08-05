@@ -19,18 +19,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		// Prepare setting panes
 		
 		// Case 1. Create panes with storyboard (See `DemoViewControllers.swift` and Main.storyboard for details).
-		//   “Extensions“, “Advanced”
 		
 		//   The “General” and “View” panes have no storyboard scene. Their views and sections are built entirely in code.
-		let generalPane = GeneralSettingsPaneViewController(tabImage: NSImage(systemSymbolName: "gearshape", accessibilityDescription: nil),
+		let generalPane = GeneralSettingsPaneViewController(tabName: String(localized: "General"),
+															tabImage: NSImage(systemSymbolName: "gearshape", accessibilityDescription: nil),
 															tabIdentifier: "General",
 															isResizableView: false)
-		generalPane.localizeKeyForTabName = "General"
 		
-		let viewPane = ViewSettingsPaneViewController(tabImage: NSImage(systemSymbolName: "eyeglasses", accessibilityDescription: nil),
+		let viewPane = ViewSettingsPaneViewController(tabName: String(localized: "View"),
+													  tabImage: NSImage(systemSymbolName: "eyeglasses", accessibilityDescription: nil),
 													  tabIdentifier: "View",
 													  isResizableView: false)
-		viewPane.localizeKeyForTabName = "View"
 		
 		settingsWindowController = .init(with: [
 			generalPane,
@@ -42,23 +41,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
 		// Case 2. You can also insert additional panes manually.
 		
-		let tabName_updates: String
-		let tabName_developer: String
-		
-		if #available(macOS 12, *) {
-			tabName_updates = String(localized: "Updates")
-			tabName_developer = String(localized: "Developer")
-		}
-		else {
-			tabName_updates = NSLocalizedString("Updates", comment: "")
-			tabName_developer = NSLocalizedString("Developer", comment: "")
-		}
-		
 		guard let settingsWindowController else { return }
 		
 		//   Insert "Updates" tab to "Extensions [HERE] Advanced"
 		settingsWindowController.tabViewController.insert(panes: [
-			UpdateSettingsPaneViewController(tabName: tabName_updates,
+			UpdateSettingsPaneViewController(tabName: String(localized: "Updates"),
 											 tabImage: NSImage(systemSymbolName: "arrow.trianglehead.2.clockwise.rotate.90", accessibilityDescription: nil),
 											 tabIdentifier: "Updates",
 											 isResizableView: false)
@@ -66,7 +53,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		
 		//   Insert "Developer" tab to the last
 		settingsWindowController.tabViewController.add(panes: [
-			DeveloperSettingsPaneViewController(tabName: tabName_developer,
+			DeveloperSettingsPaneViewController(tabName: String(localized: "Developer"),
 												tabImage: NSImage(systemSymbolName: "wrench.and.screwdriver", accessibilityDescription: nil),
 												tabIdentifier: "Developer",
 												isResizableView: true)
@@ -75,10 +62,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
 		// `defaultWindowTitle` is used for the title on the window menu.
 		if #available(macOS 13, *) {
-			settingsWindowController.settingsWindow.defaultWindowTitle = NSLocalizedString("Settings", comment: "")
+			settingsWindowController.settingsWindow.defaultWindowTitle = String(localized: "Settings")
 		}
 		else {
-			settingsWindowController.settingsWindow.defaultWindowTitle = NSLocalizedString("Preferences", comment: "")
+			settingsWindowController.settingsWindow.defaultWindowTitle = String(localized: "Preferences")
 		}
 
 
