@@ -2,7 +2,7 @@
 
 A package for make easier implementing a structure of settings / preferences UI for macOS AppKit-based apps.
 
-<img src="./Guide/screenshot.jpg" width=562>
+<img src="./Guide/general1.jpg" width=562>
 
 ## Design and Features
 
@@ -60,17 +60,17 @@ Building the standard “label on the left, controls on the right” form by han
 | Approach | What you write | Suited for |
 |---|---|---|
 | **Section-based** (recommended) | One call per row | The standard two-column settings form |
-| Layout guide | Your own constraints against shared guides | Layouts that do not fit the two-column form |
+| Guide-based | Your own constraints against shared guides | Layouts that do not fit the two-column form |
 
-The layout guide is not deprecated, but the section-based approach is considerably simpler for ordinary settings panes because it owns the column widths, the spacing and the wrapping of description text for you.
+The guide-based layout is not deprecated, but the section-based approach is considerably simpler for ordinary settings panes because it owns the column widths, the spacing and the wrapping of description text for you.
 
 Both come with a wireframing feature for debugging. See [Building a Pane Layout](#building-a-pane-layout).
 
-Section-based, with wireframes revealing the sections and the two columns:
+**Section-based:**
 
-<img src="./Guide/sectionbasedlayout.jpg" width=562>
+<img src="./Guide/general2.jpg" width=562>
 
-Layout guide, with wireframes revealing the label area and the secondary area:
+**Guide-based:**
 
 <img src="./Guide/layoutguide.jpg" width=692>
 
@@ -98,7 +98,7 @@ Each pane captures its `preferredPaneSize` automatically in `viewDidLoad()`. If 
 ### `SettingsLayoutView`
 The container of the section-based layout. Stack sections into it and it decides the column widths, the spacing between sections and the width at which description text wraps. See [Building a Pane Layout](#building-a-pane-layout).
 
-Please check the “General” and “View” tabs on the demo app, `GeneralSettingsPaneViewController` and `ViewSettingsPaneViewController` in `DemoViewControllers.swift`.
+Please check the “General”, “View” and “Extensions” tabs on the demo app, and the matching view controllers in `DemoViewControllers.swift`. The “Extensions” pane declares no width for the item column, so it shows what a column does when left to hug its content.
 
 ### `SettingsSectionView`
 The base class of every section. It exposes a `contentGuide` holding the section content, and a `widthMode` deciding whether that box follows the two-column block or spans the whole container. See [Section Width](#section-width).
@@ -113,12 +113,15 @@ Sections without the label column. They span the whole container by default, and
 The description label used by sections. It shrinks to its text and wraps only when the text does not fit the column.
 
 ### `SettingsPaneContainerView`
-This is a convenient container view for the layout guide approach. It is disabled by default; if you wish to use it, first enable it using the `setContentContainerView(maximumWidth: labelLayoutGuideWidth:)` method of the `SettingsPaneLayoutGuide`. Then add any contents to this container view.
+This is a convenient container view for the Guide-based layout. It is disabled by default; if you wish to use it, first enable it using the `setContentContainerView(maximumWidth:labelLayoutGuideWidth:)` method of the `SettingsPaneLayoutGuide`. Then add any contents to this container view.
 
 Please check the “Developer” tab on the demo app, `DeveloperSettingsPaneViewController` in `DemoViewControllers.swift` and `SettingsPaneContainerView`.
 
 ### `SettingsPaneLayoutGuide`
-A protocol for a layout guide using `SettingsPaneContainerView`.
+A protocol for the Guide-based layout, backed by `SettingsPaneContainerView`.
+
+### `LayoutDebugWireframes`
+A debugging utility that outlines views and layout guides, draws rules across its host and prints measured widths. The section-based layout is built on it, and it is public so you can use it on your own views. See [Wireframes](#wireframes).
 
 
 ## Install
@@ -238,7 +241,7 @@ layoutView.addButtonSection(title: "Restore Defaults",
 							action: #selector(restoreDefaults(_:)))
 ```
 
-`widthMode` is also a property on `SettingsSectionView`, so a section can be switched over after it has been added.
+The default above is the one the `add…Section` methods pass. `widthMode` is also a property on `SettingsSectionView`, so a section can be switched over after it has been added, and a section you build yourself starts at `.contentBlock`.
 
 
 #### Items in a Two-Column Section
@@ -261,14 +264,29 @@ Items added to the same section stack downward, spaced by `SettingsLayoutMetrics
 
 You do not set the column widths. The label column follows its longest label, and the item column follows whatever its items need — including the width a description label wants before it has to wrap. Whatever is left over becomes equal margins on both sides, so the whole block stays centered.
 
-Two knobs are available.
+Three knobs are available, all of them unset by default.
 
 | Knob | Effect |
 |---|---|
-| `itemColumnMaximumWidth` | Caps the item column. Long descriptions then wrap at that width instead of widening the pane |
-| `SettingsLayoutView.itemColumnMinimumWidth` (default 200) | Floors the item column, which effectively decides the minimum pane width |
+| `itemColumnMaximumWidth` | Declares the width of the item column |
+| `SettingsLayoutView.labelColumnMinimumWidth` | Floors the label column |
+| `SettingsLayoutView.itemColumnMinimumWidth` | Floors the item column |
 
-The item column is shared across every section, so passing `itemColumnMaximumWidth` on any one `addColumnSection` call applies it to the whole pane. It is also available as a property on `SettingsColumnSectionView`.
+`itemColumnMaximumWidth` works in both directions despite its name. It caps the column, so a long description wraps instead of widening the pane, and it floors it as well, so the column keeps that width even when the items are narrower.
+
+Declaring it on any one `addColumnSection` call reaches the whole pane, because the item column is shared across every section. When several sections declare a width, the narrowest one wins — that is the only value all of them can satisfy at once. It is also available as a property on `SettingsColumnSectionView`.
+
+Leaving a column unset lets it hug its content, at the cost of a pane that grows and shrinks with whatever is in it.
+
+`labelColumnMinimumWidth` is worth reaching for when the labels are far shorter than the items. Without it the block is still centered, but it reads as left-heavy: the label column collapses while the item column does not, so the visible content drifts away from the middle of the pane.
+
+The “Extensions” pane of the demo app combines the two. It declares no width for the item column, and floors the label column at 100.
+
+<img src="./Guide/extensions1.jpg" width=562>
+
+The wireframes make the difference plain: the item column settles on its widest item, while the label column sits exactly on the floor rather than on its one-letter labels.
+
+<img src="./Guide/extensions2.jpg" width=562>
 
 
 #### Resolving the Pane Size
@@ -348,10 +366,54 @@ func swapSections(_ first: NSUserInterfaceItemIdentifier, _ second: NSUserInterf
 
 #### Wireframes
 
-`layoutView.debug_setWireframes(true)` outlines each level in its own color: the container, every section, the label column, the item column and the controls. It has no effect outside a `DEBUG` build, and it also reaches sections added after the call.
+`layoutView.debug_setWireframes(true)` reveals the layout. It has no effect outside a `DEBUG` build, and it also reaches sections added after the call.
+
+<img src="./Guide/general2.jpg" width=562>
+
+| What appears | Meaning |
+|---|---|
+| Blue hatching | Section |
+| Red and green areas | Label column, item column |
+| Purple outlines | Labels and controls |
+| Vertical rules | Container edges and center, block edges, label column trailing, item column leading |
+| Numbers along the top | Measured widths of the container, the block and both columns |
+
+The rules run the whole height of the pane and past its margins, so a section whose edge is off shows up at a glance. The numbers carry a decimal, since Auto Layout hands out fractions and a hair of misalignment is worth seeing.
+
+The drawing is done by `LayoutDebugWireframes`, which is public and tied to nothing in particular. You can register your own views and layout guides with it.
+
+```swift
+let wireframes = LayoutDebugWireframes(host: someView)
+wireframes.add(guide: someGuide, color: .systemRed)
+wireframes.addRule(at: .maxX, of: someGuide, color: .systemRed)
+wireframes.isEnabled = true
+
+// From the host’s layout()
+wireframes.updateLayout()
+```
+
+| Registration | Result |
+|---|---|
+| `add(view:color:descendantColor:)` | Border along the view. Passing `descendantColor` outlines the views inside it too |
+| `add(guide:color:)` | Border along the layout guide |
+| `addFill(view:color:)` / `addFill(guide:color:)` | Tint over the area |
+| `addHatch(view:color:)` | Diagonal lines over the area |
+| `addRule(at:of:color:)` | Line spanning the host at one edge of a view or a guide |
+| `addWidthReadout(of:alignedTo:color:)` | Measured width printed above a view or a guide |
+
+A view is bordered through its own layer, so Auto Layout keeps that one in place. Everything else is drawn by layers laid into the host, which is why `updateLayout()` has to run from the host’s `layout()`.
+
+| Member | Result |
+|---|---|
+| `isEnabled` | Shows or hides everything at once. Assigning true does nothing outside a `DEBUG` build |
+| `ruleOverhang` | How far the rules run past the host bounds, letting them reach the edges of the view the host sits in |
+| `refresh()` | Draws again. Call after views were put inside an already registered view |
+| `removeAll()` | Drops every registration and clears what was drawn |
+
+`LayoutDebugWireframeColor` carries the colors the settings panes use. The line width and the alpha values are static properties on `LayoutDebugWireframes` itself.
 
 
-### Layout Guide
+### Guide-Based Layout (experimental)
 
 Enable the container view, set the label column width if you need to, then constrain your own views against `labelLayoutGuide` and `secondaryAreaLayoutGuide`. Setting `maximumWidth` to nil lets the container behave flexibly.
 
@@ -371,6 +433,8 @@ class AdvancedSettingsPaneViewController: SettingsPaneViewController, SettingsPa
 
 }
 ```
+
+<img src="./Guide/layoutguide.jpg" width=692>
 
 
 ## Appearance of Tabs

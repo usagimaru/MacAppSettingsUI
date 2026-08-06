@@ -423,7 +423,7 @@ public final class LayoutDebugWireframes {
 	}
 
 
-	// MARK: -
+	// MARK: - Entries
 
 	/// A view is held weakly, or a host that registers itself would never be released
 	private struct ViewEntry {

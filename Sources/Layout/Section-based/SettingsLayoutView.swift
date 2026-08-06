@@ -33,7 +33,7 @@ public enum SettingsLayoutPriority {
 
 	/// Width a section declares for the item column. Not required, so that wider items can still push the column open
 	public static let itemColumnDeclaredWidth = NSLayoutConstraint.Priority(rawValue: 999)
-	/// Width a description label asks of the item column. Loses to the upper bound, beats the shrink
+	/// Width a description label asks of the item column. Loses to a declared width, beats the shrink
 	public static let descriptionWidthDemand = NSLayoutConstraint.Priority(rawValue: 500)
 	/// Force that hugs the item column to what its items need
 	public static let itemColumnWidthShrink = NSLayoutConstraint.Priority(rawValue: 300)

@@ -20,7 +20,7 @@ open class SettingsColumnSectionView: SettingsSectionView {
 
 	public private(set) var titleLabel: NSTextField!
 
-	/// Width this section asks of the item column. nil lets the column follow whatever its items need
+	/// Width this section asks of the item column. Caps and floors it alike, so the column settles there. nil follows the items instead
 	open var itemColumnMaximumWidth: CGFloat? {
 		didSet {
 			updateItemColumnMaximumWidthConstraint()
