@@ -43,6 +43,12 @@ public enum SettingsLayoutPriority {
 	public static let contentWidthGrow = NSLayoutConstraint.Priority(rawValue: 200)
 	/// Horizontal priority of controls that take no part in deciding a column width
 	public static let nonContributing = NSLayoutConstraint.Priority(rawValue: 50)
+	/// Force that fills the pane vertically. Not required, so a pane dragged shorter bends instead of breaking
+	public static let contentHeightGrow = NSLayoutConstraint.Priority(rawValue: 999)
+	/// Height a stretching section asks for. Beats the shrink, gives way to a shorter pane
+	public static let sectionPreferredHeight = NSLayoutConstraint.Priority(rawValue: 251)
+	/// Force that hugs a stretching section to its lower bound. Weakest of all, so the surplus lands there
+	public static let sectionHeightShrink = NSLayoutConstraint.Priority(rawValue: 1)
 
 }
 
@@ -85,6 +91,10 @@ open class SettingsLayoutView: NSView {
 	/// Holds the narrowest width the sections declared. Inactive while no section declares one
 	private var itemColumnDeclaredWidthConstraint: NSLayoutConstraint?
 	private var itemColumnShrinkConstraint: NSLayoutConstraint?
+	/// Pulls the stack down to the pane bottom. Inactive while no section takes in surplus height
+	private var stackFillConstraint: NSLayoutConstraint?
+	/// Ties the stretching sections to one another. Rebuilt whenever the set of them changes
+	private var flexibleSectionLinkConstraints = [NSLayoutConstraint]()
 
 
 	// MARK: - Initialization
@@ -238,6 +248,10 @@ open class SettingsLayoutView: NSView {
 			stackView.trailingAnchor.constraint(equalTo: trailingAnchor),
 			stackView.bottomAnchor.constraint(lessThanOrEqualTo: bottomAnchor),
 		])
+
+		// Held back until a section asks for the surplus
+		stackFillConstraint = stackView.bottomAnchor.constraint(equalTo: bottomAnchor)
+		stackFillConstraint?.priority = SettingsLayoutPriority.contentHeightGrow
 	}
 
 
@@ -247,6 +261,7 @@ open class SettingsLayoutView: NSView {
 	@discardableResult
 	public func addColumnSection(label: String,
 								 itemColumnMaximumWidth: CGFloat? = nil,
+								 heightMode: SettingsSectionHeightMode = .fitsContent,
 								 identifier: NSUserInterfaceItemIdentifier? = nil) -> SettingsColumnSectionView
 	{
 		let section = SettingsColumnSectionView(labelTitle: label,
@@ -254,8 +269,7 @@ open class SettingsLayoutView: NSView {
 												itemColumnWidthGuide: itemColumnWidthGuide,
 												itemColumnMaximumWidth: itemColumnMaximumWidth,
 												identifier: identifier)
-		section.layoutView = self
-		appendSection(section)
+		appendSection(section, heightMode: heightMode)
 		section.activateColumnWidthConstraints()
 		itemColumnShrinkConstraint?.isActive = true
 		invalidateItemColumnDeclaredWidth()
@@ -314,18 +328,59 @@ open class SettingsLayoutView: NSView {
 	@discardableResult
 	public func addCustomSection(_ view: NSView,
 								 widthMode: SettingsSectionWidthMode = .fullWidth,
+								 heightMode: SettingsSectionHeightMode = .fitsContent,
 								 identifier: NSUserInterfaceItemIdentifier? = nil) -> SettingsCustomSectionView
 	{
 		let section = SettingsCustomSectionView(contentView: view, identifier: identifier)
-		appendSection(section, widthMode: widthMode)
+		appendSection(section, widthMode: widthMode, heightMode: heightMode)
 		return section
 	}
 
-	private func appendSection(_ section: SettingsSectionView, widthMode: SettingsSectionWidthMode = .contentBlock) {
+	private func appendSection(_ section: SettingsSectionView,
+							   widthMode: SettingsSectionWidthMode = .contentBlock,
+							   heightMode: SettingsSectionHeightMode = .fitsContent)
+	{
 		stackView.addArrangedSubview(section)
+		// Assigned before the modes, so a height change reaches this container
+		section.layoutView = self
 		section.adoptContentWidth(from: contentBlockWidthGuide)
 		section.widthMode = widthMode
+		section.heightMode = heightMode
 		section.debug_setWireframes(debugWireframes.isEnabled)
+	}
+
+
+	// MARK: - Section height
+
+	/// Rebuild the vertical setup after a section changed its height mode
+	func invalidateFlexibleSections() {
+		NSLayoutConstraint.deactivate(flexibleSectionLinkConstraints)
+		flexibleSectionLinkConstraints.removeAll()
+
+		let flexibleSections = sections.filter { $0.isVerticallyFlexible }
+
+		// No section takes in the surplus, so the pane keeps stacking upward
+		guard let firstSection = flexibleSections.first else {
+			stackView.setHuggingPriority(.required, for: .vertical)
+			stackFillConstraint?.isActive = false
+			return
+		}
+
+		stackView.setHuggingPriority(.defaultLow, for: .vertical)
+		stackFillConstraint?.isActive = true
+
+		// Sharing the surplus rather than the height keeps each lower bound independent
+		let firstMinimumHeight = firstSection.flexibleMinimumHeight ?? 0
+		flexibleSectionLinkConstraints = flexibleSections.dropFirst().map { section in
+			section.heightAnchor.constraint(equalTo: firstSection.heightAnchor,
+											constant: (section.flexibleMinimumHeight ?? 0) - firstMinimumHeight)
+		}
+		NSLayoutConstraint.activate(flexibleSectionLinkConstraints)
+	}
+
+	/// Drop the height requests while the pane measures its lower bound
+	func setPreferredSectionHeightsActive(_ flag: Bool) {
+		sections.forEach { $0.setPreferredHeightActive(flag) }
 	}
 
 
@@ -372,6 +427,7 @@ open class SettingsLayoutView: NSView {
 
 		stackView.removeArrangedSubview(section)
 		stackView.insertArrangedSubview(section, at: min(index, stackView.arrangedSubviews.count))
+		invalidateFlexibleSections()
 	}
 
 	/// Swap the order of two sections
@@ -392,6 +448,7 @@ open class SettingsLayoutView: NSView {
 		stackView.insertArrangedSubview(latter, at: formerIndex)
 		stackView.removeArrangedSubview(former)
 		stackView.insertArrangedSubview(former, at: latterIndex)
+		invalidateFlexibleSections()
 	}
 
 

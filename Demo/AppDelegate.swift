@@ -34,7 +34,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		let extensionsPane = ExtensionsSettingsPaneViewController(tabName: String(localized: "Extensions"),
 																  tabImage: NSImage(systemSymbolName: "puzzlepiece.extension", accessibilityDescription: nil),
 																  tabIdentifier: "Extensions",
-																  isResizableView: false)
+																  isResizableView: true)
 		
 		settingsWindowController = .init(with: [
 			generalPane,

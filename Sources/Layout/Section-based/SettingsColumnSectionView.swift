@@ -35,8 +35,6 @@ open class SettingsColumnSectionView: SettingsSectionView {
 
 	private unowned let labelColumnWidthGuide: NSLayoutGuide
 	private unowned let itemColumnWidthGuide: NSLayoutGuide
-	/// The container that aggregates the declared widths. Assigned as the section joins one
-	weak var layoutView: SettingsLayoutView?
 
 	private var items = [NSView]()
 	private var bottomConstraint: NSLayoutConstraint?
@@ -200,6 +198,16 @@ open class SettingsColumnSectionView: SettingsSectionView {
 	/// Arbitrary view
 	public func addCustomView(_ view: NSView, verticalAlignment: SettingsItemVerticalAlignment = .firstBaseline) {
 		appendItem(view, verticalAlignment: verticalAlignment, contributesToColumnWidth: true)
+	}
+
+	/// Arbitrary view that fills the item column and takes in the surplus height. The section has to declare a flexible height mode
+	public func addStretchingCustomView(_ view: NSView, verticalAlignment: SettingsItemVerticalAlignment = .top) {
+		appendItem(view, verticalAlignment: verticalAlignment, contributesToColumnWidth: false)
+
+		// A scroll view brings no intrinsic size, so both directions are pinned rather than left to the content
+		view.trailingAnchor.constraint(equalTo: itemBoxGuide.trailingAnchor).isActive = true
+		view.setContentHuggingPriority(SettingsLayoutPriority.sectionHeightShrink, for: .vertical)
+		view.setContentCompressionResistancePriority(SettingsLayoutPriority.sectionHeightShrink, for: .vertical)
 	}
 
 	/// Attach an accessory view next to an item added earlier

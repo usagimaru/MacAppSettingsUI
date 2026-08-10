@@ -119,6 +119,8 @@ open class SettingsWindow: NSWindow {
 			}
 		}
 		else {
+			// Flagged here too, so this resize is not mistaken for a user drag
+			isWindowResizing = true
 			setFrame(newFrame, display: true)
 			postprocess()
 		}

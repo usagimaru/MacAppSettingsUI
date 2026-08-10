@@ -314,8 +314,16 @@ class ExtensionsSettingsPaneViewController: SettingsPaneViewController {
 
 	/// The narrowest width this pane is laid out for
 	private static let minimumPaneWidth: CGFloat = 500
-	
+	private static let extensionNameColumnIdentifier = NSUserInterfaceItemIdentifier("Name")
+
 	private var layoutView: SettingsLayoutView?
+
+	private let installedExtensionNames = [String(localized: "Markdown Preview"),
+										   String(localized: "Image Optimizer"),
+										   String(localized: "Color Picker"),
+										   String(localized: "Snippet Manager"),
+										   String(localized: "Terminal Helper"),
+										   String(localized: "Clipboard History")]
 
 
 	// MARK: -
@@ -326,13 +334,18 @@ class ExtensionsSettingsPaneViewController: SettingsPaneViewController {
 		
 		buildSections()
 		sizePaneToFitContent(minimumWidth: Self.minimumPaneWidth)
+
+		// Only the height is draggable here, so both bounds share the width that settled
+		let fixedWidth = preferredPaneSize?.width ?? Self.minimumPaneWidth
+		minimumPaneSize = NSSize(width: fixedWidth, height: minimumPaneSize?.height ?? 0)
+		maximumPaneSize = NSSize(width: fixedWidth, height: .greatestFiniteMagnitude)
 	}
-	
+
 	private func buildSections() {
 		let layoutView = SettingsLayoutView()
 		layoutView.install(in: view)
 		self.layoutView = layoutView
-		
+
 		// The labels here are far shorter than the items, so the block would sit off-center without a floor
 		layoutView.labelColumnMinimumWidth = 100
 		
@@ -366,14 +379,66 @@ class ExtensionsSettingsPaneViewController: SettingsPaneViewController {
 							   target: self,
 							   action: nil)
 		
+		// Section that takes in the surplus height of the pane, so the list grows as the window is dragged taller
+		let installedList = layoutView.addColumnSection(label: "D",
+														heightMode: .flexible(minimumHeight: 60, preferredHeight: 120),
+														identifier: .init("Installed List"))
+		installedList.addStretchingCustomView(makeExtensionListView())
+
 		layoutView.addSeparatorSection()
-		
+
 		// Section holding an arbitrary control. The switch reveals the debug wireframes of this pane
-		let wireframes = layoutView.addColumnSection(label: "D", identifier: .init("Wireframes"))
+		let wireframes = layoutView.addColumnSection(label: "E", identifier: .init("Wireframes"))
 		let wireframeSwitch = DemoSwitch(sizingWindow: tabViewController?.view.window) { [weak self] isOn in
 			self?.layoutView?.debug_setWireframes(isOn)
 		}
 		wireframes.addCustomView(wireframeSwitch, verticalAlignment: .centerY)
+	}
+
+	private func makeExtensionListView() -> NSScrollView {
+		let tableView = NSTableView()
+		tableView.headerView = nil
+		tableView.style = .plain
+		tableView.rowHeight = 20
+		tableView.usesAlternatingRowBackgroundColors = true
+		tableView.dataSource = self
+		tableView.delegate = self
+		tableView.addTableColumn(NSTableColumn(identifier: Self.extensionNameColumnIdentifier))
+
+		let scrollView = NSScrollView()
+		scrollView.documentView = tableView
+		scrollView.borderType = .bezelBorder
+		scrollView.hasVerticalScroller = true
+		scrollView.autohidesScrollers = true
+
+		return scrollView
+	}
+
+}
+
+extension ExtensionsSettingsPaneViewController: NSTableViewDataSource, NSTableViewDelegate {
+
+	func numberOfRows(in tableView: NSTableView) -> Int {
+		installedExtensionNames.count
+	}
+
+	func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
+		let label = NSTextField(labelWithString: installedExtensionNames[row])
+		label.lineBreakMode = .byTruncatingTail
+		label.translatesAutoresizingMaskIntoConstraints = false
+
+		// A bare label fills the row and draws its text at the top, so it is centered inside a cell view
+		let cellView = NSTableCellView()
+		cellView.addSubview(label)
+		cellView.textField = label
+
+		NSLayoutConstraint.activate([
+			label.leadingAnchor.constraint(equalTo: cellView.leadingAnchor),
+			label.trailingAnchor.constraint(lessThanOrEqualTo: cellView.trailingAnchor),
+			label.centerYAnchor.constraint(equalTo: cellView.centerYAnchor),
+		])
+
+		return cellView
 	}
 
 }

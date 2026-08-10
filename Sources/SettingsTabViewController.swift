@@ -104,10 +104,15 @@ open class SettingsTabViewController: NSTabViewController {
 
 	public private(set) var tabViewSizes: [NSTabViewItem: NSSize] = [:]
 
+	/// Sizes the user left each resizable pane at. Kept only while the app runs
+	public private(set) var userResizedSizes: [NSTabViewItem: NSSize] = [:]
+
 	/// The minimum content width observed from the window after toolbar layout.
 	/// Captured once after the first tab is displayed, then used to clamp pane widths.
 	private var minimumContentWidth: CGFloat = 0
-	
+
+	private var windowDidResizeObserver: NSObjectProtocol?
+
 	
 	// MARK: -
 	
@@ -121,7 +126,13 @@ open class SettingsTabViewController: NSTabViewController {
 		// Set tab style as `toolbar`
 		tabStyle = .toolbar
 	}
-	
+
+	deinit {
+		if let windowDidResizeObserver {
+			NotificationCenter.default.removeObserver(windowDidResizeObserver)
+		}
+	}
+
 	/// Eagerly load all tab views. Call this explicitly if you want to pre-load all panes at once.
 	open func loadAllTabs() {
 		tabView.tabViewItems.forEach {
@@ -166,7 +177,52 @@ open class SettingsTabViewController: NSTabViewController {
 			}
 		}
 	}
-	
+
+	open override func viewDidAppear() {
+		super.viewDidAppear()
+		startObservingWindowResize()
+	}
+
+
+	// MARK: - Pane size memory
+
+	private func startObservingWindowResize() {
+		guard windowDidResizeObserver == nil, let settingsWindow else { return }
+
+		windowDidResizeObserver = NotificationCenter.default.addObserver(forName: NSWindow.didResizeNotification,
+																		 object: settingsWindow,
+																		 queue: .main)
+		{ [weak self] _ in
+			self?.recordUserResizedSize()
+		}
+	}
+
+	/// Keep the size the user dragged the window to. Sizes applied on tab switching are skipped
+	private func recordUserResizedSize() {
+		guard let settingsWindow, !settingsWindow.isWindowResizing,
+			  let tabViewItem = selectedTabViewItem,
+			  tabViewItem.settingsPaneViewController?.isResizableView == true,
+			  let contentSize = settingsWindow.contentView?.frame.size
+		else { return }
+
+		userResizedSizes[tabViewItem] = contentSize
+		tabViewSizes[tabViewItem] = contentSize
+	}
+
+	/// The size the user last left this pane at
+	open func userResizedSize(for pane: SettingsPaneViewController) -> NSSize? {
+		guard let tabViewItem = tabViewItems.first(where: { $0.viewController === pane }) else { return nil }
+		return userResizedSizes[tabViewItem]
+	}
+
+	/// Restore a size recorded earlier. Pass nil to forget it
+	open func setUserResizedSize(_ size: NSSize?, for pane: SettingsPaneViewController) {
+		guard let tabViewItem = tabViewItems.first(where: { $0.viewController === pane }) else { return }
+
+		userResizedSizes[tabViewItem] = size
+		cacheTabViewSize(for: tabViewItem)
+	}
+
 	
 	// MARK: -
 	
@@ -295,9 +351,15 @@ open class SettingsTabViewController: NSTabViewController {
 	/// Falls back to the current view frame or fitting size.
 	open func cacheTabViewSize(for tabViewItem: NSTabViewItem) {
 		var size: NSSize?
-		
+
+		// The size the user left behind wins, so returning to a pane brings it back
+		if let userSize = userResizedSizes[tabViewItem] {
+			size = userSize
+		}
+
 		// Prefer the preferred pane size declared by SettingsPaneViewController
-		if let pane = tabViewItem.settingsPaneViewController,
+		if size == nil,
+		   let pane = tabViewItem.settingsPaneViewController,
 		   let preferredSize = pane.preferredPaneSize,
 		   preferredSize.width > 0 && preferredSize.height > 0 {
 			size = preferredSize
@@ -323,6 +385,18 @@ open class SettingsTabViewController: NSTabViewController {
 			if clampsToToolbarMinimumWidth && minimumContentWidth > 0 {
 				s.width = max(s.width, minimumContentWidth)
 			}
+
+			if let pane = tabViewItem.settingsPaneViewController {
+				if let minimumSize = pane.minimumPaneSize {
+					s.width = max(s.width, minimumSize.width)
+					s.height = max(s.height, minimumSize.height)
+				}
+				if let maximumSize = pane.maximumPaneSize {
+					s.width = min(s.width, maximumSize.width)
+					s.height = min(s.height, maximumSize.height)
+				}
+			}
+
 			tabViewSizes[tabViewItem] = s
 		}
 	}
@@ -330,8 +404,9 @@ open class SettingsTabViewController: NSTabViewController {
 	/// Discard the size cached for a pane and measure it again. The window follows only while that pane is on screen
 	open func invalidateCachedSize(for pane: SettingsPaneViewController) {
 		guard let tabViewItem = tabViewItems.first(where: { $0.viewController === pane }) else { return }
-		
+
 		tabViewSizes[tabViewItem] = nil
+		// The user record survives, and `cacheTabViewSize` lifts it to the new lower bound
 		cacheTabViewSize(for: tabViewItem)
 		
 		if tabViewItem == selectedTabViewItem {
@@ -345,8 +420,31 @@ open class SettingsTabViewController: NSTabViewController {
 			completion?()
 			return
 		}
-		
+
+		// Applied first, or the bounds left by the previous pane would clamp this resize
+		applyContentSizeLimits(of: tabViewItem.settingsPaneViewController)
 		settingsWindow.setWindowSize(size, animateIfPossible: animateIfPossible, completion: completion)
+	}
+
+	/// Keep the window from being dragged past the bounds the pane declared
+	private func applyContentSizeLimits(of pane: SettingsPaneViewController?) {
+		guard let settingsWindow else { return }
+
+		let unbounded = NSSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude)
+
+		guard let pane, pane.isResizableView else {
+			settingsWindow.contentMinSize = .zero
+			settingsWindow.contentMaxSize = unbounded
+			return
+		}
+
+		var minimumSize = pane.minimumPaneSize ?? .zero
+		if clampsToToolbarMinimumWidth && minimumContentWidth > 0 {
+			minimumSize.width = max(minimumSize.width, minimumContentWidth)
+		}
+
+		settingsWindow.contentMinSize = minimumSize
+		settingsWindow.contentMaxSize = pane.maximumPaneSize ?? unbounded
 	}
 
 

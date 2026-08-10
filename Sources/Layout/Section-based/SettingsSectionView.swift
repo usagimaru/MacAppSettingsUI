@@ -16,6 +16,16 @@ public enum SettingsSectionWidthMode {
 
 }
 
+/// Height a section takes
+public enum SettingsSectionHeightMode {
+
+	/// Follow the height of the content
+	case fitsContent
+	/// Take in the surplus height of the pane, never falling below the minimum height
+	case flexible(minimumHeight: CGFloat, preferredHeight: CGFloat)
+
+}
+
 /// A unit of view stacked in a SettingsLayoutView
 open class SettingsSectionView: NSView {
 
@@ -29,13 +39,28 @@ open class SettingsSectionView: NSView {
 		}
 	}
 
+	/// Whether the section takes in surplus height. Switching it swaps the active height constraints
+	open var heightMode: SettingsSectionHeightMode = .fitsContent {
+		didSet {
+			updateHeightConstraints()
+			layoutView?.invalidateFlexibleSections()
+		}
+	}
+
 	/// Outlines of this section and everything inside it. Subclasses add their own boxes to it
 	public lazy var debugWireframes = LayoutDebugWireframes(host: self)
+
+	/// The container this section was added to
+	weak var layoutView: SettingsLayoutView?
 
 	/// Width of the section itself, which the container has already stretched to its full width
 	private var fullWidthConstraint: NSLayoutConstraint?
 	/// Width shared with the two-column block. Absent while the section stands outside a container
 	private var contentBlockWidthConstraint: NSLayoutConstraint?
+	/// Lower bound the section keeps while it takes in surplus height
+	private var minimumHeightConstraint: NSLayoutConstraint?
+	/// Height the section asks for. It gives way once the pane is dragged shorter
+	private var preferredHeightConstraint: NSLayoutConstraint?
 
 	public init(identifier: NSUserInterfaceItemIdentifier? = nil) {
 		super.init(frame: .zero)
@@ -88,6 +113,56 @@ open class SettingsSectionView: NSView {
 			fullWidthConstraint?.isActive = true
 		}
 	}
+
+
+	// MARK: - Height
+
+	/// Whether this section takes in the surplus height of the pane
+	var isVerticallyFlexible: Bool {
+		if case .flexible = heightMode {
+			return true
+		}
+		return false
+	}
+
+	/// Lower bound this section keeps while stretching. nil while it follows its content
+	var flexibleMinimumHeight: CGFloat? {
+		guard case .flexible(let minimumHeight, _) = heightMode else { return nil }
+		return minimumHeight
+	}
+
+	private func updateHeightConstraints() {
+		minimumHeightConstraint?.isActive = false
+		preferredHeightConstraint?.isActive = false
+		minimumHeightConstraint = nil
+		preferredHeightConstraint = nil
+
+		guard case .flexible(let minimumHeight, let preferredHeight) = heightMode else {
+			setContentHuggingPriority(.defaultLow, for: .vertical)
+			return
+		}
+
+		// The stack hands its surplus to the least hugging section
+		setContentHuggingPriority(SettingsLayoutPriority.sectionHeightShrink, for: .vertical)
+
+		let minimum = heightAnchor.constraint(greaterThanOrEqualToConstant: minimumHeight)
+		minimum.isActive = true
+		minimumHeightConstraint = minimum
+
+		// A lower bound, so the tallest request decides the height the pane opens at
+		let preferred = heightAnchor.constraint(greaterThanOrEqualToConstant: preferredHeight)
+		preferred.priority = SettingsLayoutPriority.sectionPreferredHeight
+		preferred.isActive = true
+		preferredHeightConstraint = preferred
+	}
+
+	/// Drop the height request while the pane measures its lower bound
+	func setPreferredHeightActive(_ flag: Bool) {
+		preferredHeightConstraint?.isActive = flag
+	}
+
+
+	// MARK: -
 
 	/// Apply a control size together with the font size that matches it
 	public static func applyControlSize(_ controlSize: NSControl.ControlSize, to control: NSControl) {

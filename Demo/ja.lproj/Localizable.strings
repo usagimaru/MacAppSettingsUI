@@ -80,3 +80,9 @@
 "Beta" = "ベータ版";
 "EXTENSIONS_UPDATE_CHANNEL_DESCRIPTION" = "ベータ版は動作が不安定な場合があります。";
 "Allow unsigned extensions" = "未署名の機能拡張を許可";
+"Markdown Preview" = "Markdownプレビュー";
+"Image Optimizer" = "画像オプティマイザ";
+"Color Picker" = "カラーピッカー";
+"Snippet Manager" = "スニペットマネージャ";
+"Terminal Helper" = "ターミナルヘルパー";
+"Clipboard History" = "クリップボード履歴";

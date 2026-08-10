@@ -36,10 +36,16 @@ open class SettingsPaneViewController: NSViewController {
 	/// `SettingsTabViewController` uses this to determine the window size for each tab.
 	/// Subclasses can override this if the pane size should differ from the initial frame.
 	open var preferredPaneSize: NSSize?
-	
+
+	/// The smallest size this pane can be laid out at
+	open var minimumPaneSize: NSSize?
+
+	/// The largest size this pane allows. nil leaves the pane unbounded
+	open var maximumPaneSize: NSSize?
+
 	/// Lower bound kept so the pane can be measured again
 	public private(set) var minimumPaneWidth: CGFloat = 0
-	
+
 	/// Guard against a layout that never converges
 	private static let paneSizeMeasurementPassLimit = 4
 	
@@ -152,8 +158,35 @@ open class SettingsPaneViewController: NSViewController {
 			}
 			previousFittingSize = fittingSize
 		}
-		
+
 		capturePreferredPaneSize()
+
+		// Measured at the width that settled, or a narrower one would wrap the labels and report a taller pane
+		minimumPaneSize = measureMinimumPaneSize(width: preferredPaneSize?.width ?? minimumWidth)
+	}
+
+	/// Measure the pane with its stretching sections pulled down to their lower bounds
+	private func measureMinimumPaneSize(width: CGFloat) -> NSSize {
+		guard let layoutView = sectionLayoutView else {
+			return NSSize(width: width, height: view.fittingSize.height)
+		}
+
+		let sizeToRestore = view.frame.size
+		layoutView.setPreferredSectionHeightsActive(false)
+		view.setFrameSize(NSSize(width: width, height: 0))
+		view.layoutSubtreeIfNeeded()
+		let minimumSize = NSSize(width: width, height: view.fittingSize.height)
+
+		layoutView.setPreferredSectionHeightsActive(true)
+		view.setFrameSize(sizeToRestore)
+		view.layoutSubtreeIfNeeded()
+
+		return minimumSize
+	}
+
+	/// The section layout view laid into this pane
+	private var sectionLayoutView: SettingsLayoutView? {
+		view.subviews.compactMap { $0 as? SettingsLayoutView }.first
 	}
 	
 	/// Measure the pane again and refresh the cached window size. Call after the content, font size or locale changed

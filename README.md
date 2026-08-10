@@ -195,6 +195,26 @@ layoutView.addButtonSection(title: "Restore Defaults",
 `widthMode` is also a property on `SettingsSectionView`, so a section can be switched over after it has been added, and a section you build yourself starts at `.contentBlock`.
 
 
+#### Section Height
+
+A section follows the height of its content by default. `SettingsSectionHeightMode.flexible(minimumHeight:preferredHeight:)` makes it take in the surplus height of the pane instead, which is what a table or a text view in a resizable pane needs.
+
+```swift
+let installed = layoutView.addColumnSection(label: "Installed",
+											heightMode: .flexible(minimumHeight: 60, preferredHeight: 120),
+											identifier: .init("Installed"))
+installed.addStretchingCustomView(scrollView)
+```
+
+`minimumHeight` is the lower bound the section keeps, so it decides how short the window can be dragged. `preferredHeight` is the height the pane opens at, and it gives way once the window is dragged shorter.
+
+When several sections are flexible, the surplus is shared equally between them. Their lower bounds stay independent, so each falls back to its own minimum when the window is at its shortest.
+
+In a two-column section, add the stretching view with `addStretchingCustomView(_:verticalAlignment:)`. It fills the item column and lines the label up with the top. A custom section stretches its content view on its own.
+
+Vertical resizing also needs `isResizableView` on the pane. See [Controlling Window Resizing Per Pane](#controlling-window-resizing-per-pane).
+
+
 #### Column Widths
 
 You do not set the column widths. The label column follows its longest label, and the item column follows whatever its items need — including the width a description label wants before it has to wrap. Whatever is left over becomes equal margins on both sides, so the whole block stays centered.
@@ -342,6 +362,10 @@ A tab is described by properties on `SettingsPaneViewController`: `tabName` (an 
 ## Controlling Window Resizing Per Pane
 
 Set `isResizableView` on `SettingsPaneViewController` to allow window resizing only while that pane is active. It defaults to false. See the demo implementation and the `Main` storyboard.
+
+`minimumPaneSize` and `maximumPaneSize` bound the drag, and `sizePaneToFitContent(minimumWidth:)` fills in the minimum for you. Giving both the same width leaves a pane resizable in height alone.
+
+`SettingsTabViewController` remembers the size the user left each resizable pane at, so leaving a tab and coming back restores it. The record lives only while the app runs; `userResizedSize(for:)` and `setUserResizedSize(_:for:)` are there if you want to persist it yourself.
 
 
 ## Toolbar Minimum Width Clamping

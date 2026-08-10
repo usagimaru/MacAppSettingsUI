@@ -80,3 +80,9 @@
 "Beta" = "Beta";
 "EXTENSIONS_UPDATE_CHANNEL_DESCRIPTION" = "Beta builds may be unstable.";
 "Allow unsigned extensions" = "Allow unsigned extensions";
+"Markdown Preview" = "Markdown Preview";
+"Image Optimizer" = "Image Optimizer";
+"Color Picker" = "Color Picker";
+"Snippet Manager" = "Snippet Manager";
+"Terminal Helper" = "Terminal Helper";
+"Clipboard History" = "Clipboard History";
