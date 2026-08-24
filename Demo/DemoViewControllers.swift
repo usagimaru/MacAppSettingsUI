@@ -26,9 +26,8 @@ class DemoViewController: NSViewController {
 			guard let self else { return }
 			AppDelegate.shared.settingsWindowController?.centersWindowPositionAlways = self.centerAlways.state == .on
 			
-			// "Loading…" label
+			// "Loading…" label. Shown automatically only while a pane load is actually in flight
 			AppDelegate.shared.settingsWindowController?.tabViewController.loadingLabelText = String(localized: "Loading…")
-			AppDelegate.shared.settingsWindowController?.tabViewController.showsLoadingLabel = true
 		}
 	}
 	
@@ -344,16 +343,30 @@ class ExtensionsSettingsPaneViewController: SettingsPaneViewController {
 	// MARK: -
 	
 	override func loadView() {
-		// Setup the custom content view. The storyboard scene of this pane is left unused
+		// Kept light on purpose. The heavy construction runs in loadPaneContent(completion:)
 		view = NSView()
-		
-		buildSections()
-		sizePaneToFitContent(minimumWidth: Self.minimumPaneWidth)
+	}
 
-		// Only the height is draggable here, so both bounds share the width that settled
-		let fixedWidth = preferredPaneSize?.width ?? Self.minimumPaneWidth
-		minimumPaneSize = NSSize(width: fixedWidth, height: minimumPaneSize?.height ?? 0)
-		maximumPaneSize = NSSize(width: fixedWidth, height: .greatestFiniteMagnitude)
+	// Simulates fetching the extension list, so the loading wait is visible in this demo
+	override func loadPaneContent(completion: @escaping () -> Void) {
+		DispatchQueue.global().asyncAfter(deadline: .now() + 1.0) { [weak self] in
+			DispatchQueue.main.async {
+				guard let self else {
+					completion()
+					return
+				}
+
+				self.buildSections()
+				self.sizePaneToFitContent(minimumWidth: Self.minimumPaneWidth)
+
+				// Only the height is draggable here, so both bounds share the width that settled
+				let fixedWidth = self.preferredPaneSize?.width ?? Self.minimumPaneWidth
+				self.minimumPaneSize = NSSize(width: fixedWidth, height: self.minimumPaneSize?.height ?? 0)
+				self.maximumPaneSize = NSSize(width: fixedWidth, height: .greatestFiniteMagnitude)
+
+				completion()
+			}
+		}
 	}
 
 	private func buildSections() {

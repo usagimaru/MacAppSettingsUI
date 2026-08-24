@@ -70,10 +70,9 @@ open class SettingsPaneViewController: NSViewController {
 		preferredPaneSize = view.frame.size
 	}
 	
-	/// Override this method to perform asynchronous content loading before the pane is displayed.
-	/// Call the completion handler when loading is finished.
-	/// The `isPaneContentLoaded` flag is managed automatically by the caller; subclasses do not need to set it.
-	/// The default implementation calls the completion immediately.
+	/// Override this method to build heavy pane content (table views, SwiftUI hosting views, data loading) and keep `loadView` light.
+	/// Data may be prepared on any queue, but build views and call the completion on the main thread.
+	/// `isPaneContentLoaded` is managed by the caller. The default implementation calls the completion immediately.
 	open func loadPaneContent(completion: @escaping () -> Void) {
 		completion()
 	}

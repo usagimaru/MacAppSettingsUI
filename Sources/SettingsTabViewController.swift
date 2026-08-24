@@ -90,29 +90,37 @@ open class SettingsTabViewController: NSTabViewController {
 			(loadingView.subviews.first { $0.identifier == Self.defaultLabelIdentifier } as? NSTextField)?.stringValue = loadingLabelText
 		}
 	}
-
+	
 	/// Show or hide the loading label in the loading view
 	open var showsLoadingLabel: Bool = false {
 		didSet {
-			loadingView.subviews.first { $0.identifier == Self.defaultLabelIdentifier }?.isHidden = !showsLoadingLabel
+			updateLoadingLabelVisibility()
 		}
 	}
-
+	
+	/// Show the loading label automatically while a pane load is actually in flight
+	open var showsLoadingLabelWhileLoading: Bool = true
+	
 	/// If set to true, clamp all pane widths to the minimum content width imposed by the toolbar.
 	/// This prevents flicker when a pane's preferred width is narrower than the toolbar requires.
 	open var clampsToToolbarMinimumWidth: Bool = true
-
+	
 	public private(set) var tabViewSizes: [NSTabViewItem: NSSize] = [:]
-
+	
 	/// Sizes the user left each resizable pane at. Kept only while the app runs
 	public private(set) var userResizedSizes: [NSTabViewItem: NSSize] = [:]
-
+	
 	/// The minimum content width observed from the window after toolbar layout.
 	/// Captured once after the first tab is displayed, then used to clamp pane widths.
 	private var minimumContentWidth: CGFloat = 0
-
+	
 	private var windowDidResizeObserver: NSObjectProtocol?
-
+	
+	/// Waiters gathered for each pane while its content loads. A key present means the load is in flight
+	private var pendingLoadCompletions = [SettingsPaneViewController: [() -> Void]]()
+	
+	private var isLoadingViewOverlayPresented = false
+	
 	
 	// MARK: -
 	
@@ -264,6 +272,61 @@ open class SettingsTabViewController: NSTabViewController {
 	}
 	
 	
+	// MARK: - Pane content loading
+	
+	/// Load the pane content once and let every caller wait on it. Completions are always delivered on the main thread
+	open func loadContentIfNeeded(for pane: SettingsPaneViewController, completion: @escaping () -> Void) {
+		if pane.isPaneContentLoaded {
+			completion()
+			return
+		}
+		
+		// A load already in flight takes this waiter too, so the content is never built twice
+		if pendingLoadCompletions[pane] != nil {
+			pendingLoadCompletions[pane]?.append(completion)
+			return
+		}
+		
+		pendingLoadCompletions[pane] = [completion]
+		updateLoadingLabelVisibility()
+		
+		pane.loadPaneContent { [weak self, weak pane] in
+			// The pane may call back from a background queue, so the state settles on the main thread
+			DispatchQueue.main.async {
+				guard let self else { return }
+				
+				pane?.isPaneContentLoaded = true
+				
+				let completions = pane.flatMap { self.pendingLoadCompletions.removeValue(forKey: $0) } ?? []
+				self.updateLoadingLabelVisibility()
+				completions.forEach { $0() }
+			}
+		}
+	}
+	
+	private func updateLoadingLabelVisibility() {
+		let isLoading = !pendingLoadCompletions.isEmpty
+		let visible = showsLoadingLabel || (showsLoadingLabelWhileLoading && isLoading)
+		loadingView.subviews.first { $0.identifier == Self.defaultLabelIdentifier }?.isHidden = !visible
+	}
+	
+	/// Cover the visible pane while its first load runs. Transitions place the loading view themselves
+	private func presentLoadingViewOverlay(over pane: SettingsPaneViewController) {
+		guard loadingView.superview == nil, pane.isViewLoaded, let paneSuperview = pane.view.superview else { return }
+		
+		loadingView.frame = pane.view.frame
+		paneSuperview.addSubview(loadingView, positioned: .above, relativeTo: pane.view)
+		isLoadingViewOverlayPresented = true
+	}
+	
+	private func dismissLoadingViewOverlay() {
+		guard isLoadingViewOverlayPresented else { return }
+		
+		loadingView.removeFromSuperview()
+		isLoadingViewOverlayPresented = false
+	}
+	
+	
 	// MARK: - Tab View and Transition
 	
 	open override func tabView(_ tabView: NSTabView, shouldSelect tabViewItem: NSTabViewItem?) -> Bool {
@@ -282,7 +345,9 @@ open class SettingsTabViewController: NSTabViewController {
 	
 	/// Control transition of this tab view controller
 	open override func transition(from fromViewController: NSViewController, to toViewController: NSViewController, options: NSViewController.TransitionOptions = [], completionHandler completion: (() -> Void)? = nil) {
-		guard let superview = fromViewController.view.superview, let selectedTabViewItem
+		// The loading view may already stand in for the view of an interrupted transition
+		guard let selectedTabViewItem,
+			  let superview = fromViewController.view.superview ?? loadingView.superview
 		else {
 			completion?()
 			return
@@ -293,13 +358,22 @@ open class SettingsTabViewController: NSTabViewController {
 		// Apparently mysterious artifacts on animations are related to the Auto Layout system.
 		
 		// 1. Set the loading view instead of current view (A)
-		loadingView.frame = fromViewController.view.frame
-		superview.replaceSubview(fromViewController.view, with: loadingView)
+		if fromViewController.view.superview != nil {
+			dismissLoadingViewOverlay()
+			loadingView.frame = fromViewController.view.frame
+			superview.replaceSubview(fromViewController.view, with: loadingView)
+		}
 		
 		let pane = toViewController as? SettingsPaneViewController
 		
 		let performTransition = { [weak self] in
 			guard let self else {
+				completion?()
+				return
+			}
+			
+			// The user may have moved on during the load, so a stale transition only hands back its completion
+			guard self.selectedTabViewItem === selectedTabViewItem else {
 				completion?()
 				return
 			}
@@ -334,12 +408,9 @@ open class SettingsTabViewController: NSTabViewController {
 			}
 		}
 		
-		// Load pane content lazily if not yet loaded
-		if let pane, !pane.isPaneContentLoaded {
-			pane.loadPaneContent { [weak pane] in
-				pane?.isPaneContentLoaded = true
-				performTransition()
-			}
+		// Wait for the pane content, so heavy construction never runs inside the switch itself
+		if let pane {
+			loadContentIfNeeded(for: pane, completion: performTransition)
 		}
 		else {
 			performTransition()
@@ -453,23 +524,32 @@ open class SettingsTabViewController: NSTabViewController {
 	/// Select tab, fit window size and update window title
 	open func selectTab(with tabViewItem: NSTabViewItem, animateIfPossible: Bool, completion: (() -> Void)? = nil) {
 		let pane = tabViewItem.settingsPaneViewController
-
+		
 		let doSelect = { [weak self] in
 			guard let self else {
 				completion?()
 				return
 			}
+			
+			// The selection may have moved during the load, so a stale request changes nothing
+			guard self.selectedTabViewItem === tabViewItem else {
+				completion?()
+				return
+			}
+			
+			self.dismissLoadingViewOverlay()
 			self.cacheTabViewSize(for: tabViewItem)
 			self.fitWindowSize(to: tabViewItem, animateIfPossible: animateIfPossible)
 			self.updateWindowTitleWithSelectedTab()
 			completion?()
 		}
-
-		if let pane, !pane.isPaneContentLoaded {
-			pane.loadPaneContent { [weak pane] in
-				pane?.isPaneContentLoaded = true
-				doSelect()
+		
+		if let pane {
+			// No transition runs on the initial display, so the wait is covered by the overlay instead
+			if !pane.isPaneContentLoaded {
+				presentLoadingViewOverlay(over: pane)
 			}
+			loadContentIfNeeded(for: pane, completion: doSelect)
 		}
 		else {
 			doSelect()
