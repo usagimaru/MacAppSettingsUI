@@ -95,13 +95,18 @@ open class SettingsCheckboxSectionView: SettingsSectionView {
 	public private(set) var checkbox: NSButton!
 	public private(set) var descriptionLabel: SettingsWrappingLabel?
 
+	private let indentation: CGFloat
+
 	public init(title: String,
 				isOn: Bool = false,
 				description: String? = nil,
+				indentationLevel: Int = 0,
+				indentationPerLevel: CGFloat = SettingsLayoutMetrics.indentationPerLevel,
 				identifier: NSUserInterfaceItemIdentifier? = nil,
 				target: AnyObject?,
 				action: Selector?)
 	{
+		self.indentation = Self.indentation(forLevel: indentationLevel, perLevel: indentationPerLevel)
 		super.init(identifier: identifier)
 
 		checkbox = NSButton(checkboxWithTitle: title, target: target, action: action)
@@ -111,7 +116,7 @@ open class SettingsCheckboxSectionView: SettingsSectionView {
 
 		var constraints = [
 			checkbox.topAnchor.constraint(equalTo: topAnchor),
-			checkbox.leadingAnchor.constraint(equalTo: contentGuide.leadingAnchor),
+			checkbox.leadingAnchor.constraint(equalTo: contentGuide.leadingAnchor, constant: indentation),
 			checkbox.trailingAnchor.constraint(lessThanOrEqualTo: contentGuide.trailingAnchor),
 		]
 
@@ -142,7 +147,8 @@ open class SettingsCheckboxSectionView: SettingsSectionView {
 
 	open override func layout() {
 		super.layout()
-		descriptionLabel?.availableWidth = contentGuide.frame.width
+		// The label starts at the indented leading edge, so the inset comes off its wrapping width
+		descriptionLabel?.availableWidth = contentGuide.frame.width - indentation
 	}
 
 }

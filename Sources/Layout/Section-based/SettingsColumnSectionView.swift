@@ -36,7 +36,7 @@ open class SettingsColumnSectionView: SettingsSectionView {
 	private unowned let labelColumnWidthGuide: NSLayoutGuide
 	private unowned let itemColumnWidthGuide: NSLayoutGuide
 
-	private var items = [NSView]()
+	private var items = [(view: NSView, indentation: CGFloat)]()
 	private var bottomConstraint: NSLayoutConstraint?
 	private var itemColumnMaximumWidthConstraint: NSLayoutConstraint?
 	/// Constraints that let the label decide the height while no item has been added yet
@@ -152,18 +152,33 @@ open class SettingsColumnSectionView: SettingsSectionView {
 
 	/// Checkbox
 	@discardableResult
-	public func addCheckbox(title: String, isOn: Bool = false, target: AnyObject?, action: Selector?) -> NSButton {
+	public func addCheckbox(title: String,
+							isOn: Bool = false,
+							indentationLevel: Int = 0,
+							indentationPerLevel: CGFloat = SettingsLayoutMetrics.indentationPerLevel,
+							target: AnyObject?,
+							action: Selector?) -> NSButton
+	{
 		let checkbox = NSButton(checkboxWithTitle: title, target: target, action: action)
 		checkbox.state = isOn ? .on : .off
-		appendItem(checkbox, verticalAlignment: .firstBaseline, contributesToColumnWidth: true)
+		appendItem(checkbox,
+				   verticalAlignment: .firstBaseline,
+				   contributesToColumnWidth: true,
+				   indentation: Self.indentation(forLevel: indentationLevel, perLevel: indentationPerLevel))
 		return checkbox
 	}
 
 	/// Supplementary description label. Its width comes from the column and it takes no part in deciding the column width
 	@discardableResult
-	public func addDescriptionLabel(_ string: String) -> SettingsWrappingLabel {
+	public func addDescriptionLabel(_ string: String,
+									indentationLevel: Int = 0,
+									indentationPerLevel: CGFloat = SettingsLayoutMetrics.indentationPerLevel) -> SettingsWrappingLabel
+	{
 		let label = SettingsWrappingLabel(string: string)
-		appendItem(label, verticalAlignment: .firstBaseline, contributesToColumnWidth: false)
+		appendItem(label,
+				   verticalAlignment: .firstBaseline,
+				   contributesToColumnWidth: false,
+				   indentation: Self.indentation(forLevel: indentationLevel, perLevel: indentationPerLevel))
 		return label
 	}
 
@@ -171,19 +186,26 @@ open class SettingsColumnSectionView: SettingsSectionView {
 	@discardableResult
 	public func addButton(title: String,
 						  controlSize: NSControl.ControlSize = .regular,
+						  indentationLevel: Int = 0,
+						  indentationPerLevel: CGFloat = SettingsLayoutMetrics.indentationPerLevel,
 						  target: AnyObject?,
 						  action: Selector?) -> NSButton
 	{
 		let button = NSButton(title: title, target: target, action: action)
 		button.bezelStyle = .push
 		Self.applyControlSize(controlSize, to: button)
-		appendItem(button, verticalAlignment: .firstBaseline, contributesToColumnWidth: true)
+		appendItem(button,
+				   verticalAlignment: .firstBaseline,
+				   contributesToColumnWidth: true,
+				   indentation: Self.indentation(forLevel: indentationLevel, perLevel: indentationPerLevel))
 		return button
 	}
 
 	/// Pop-up button
 	@discardableResult
 	public func addPopUpButton(controlSize: NSControl.ControlSize = .regular,
+							   indentationLevel: Int = 0,
+							   indentationPerLevel: CGFloat = SettingsLayoutMetrics.indentationPerLevel,
 							   target: AnyObject?,
 							   action: Selector?) -> NSPopUpButton
 	{
@@ -191,13 +213,23 @@ open class SettingsColumnSectionView: SettingsSectionView {
 		popUpButton.target = target
 		popUpButton.action = action
 		Self.applyControlSize(controlSize, to: popUpButton)
-		appendItem(popUpButton, verticalAlignment: .firstBaseline, contributesToColumnWidth: true)
+		appendItem(popUpButton,
+				   verticalAlignment: .firstBaseline,
+				   contributesToColumnWidth: true,
+				   indentation: Self.indentation(forLevel: indentationLevel, perLevel: indentationPerLevel))
 		return popUpButton
 	}
 
 	/// Arbitrary view
-	public func addCustomView(_ view: NSView, verticalAlignment: SettingsItemVerticalAlignment = .firstBaseline) {
-		appendItem(view, verticalAlignment: verticalAlignment, contributesToColumnWidth: true)
+	public func addCustomView(_ view: NSView,
+							  verticalAlignment: SettingsItemVerticalAlignment = .firstBaseline,
+							  indentationLevel: Int = 0,
+							  indentationPerLevel: CGFloat = SettingsLayoutMetrics.indentationPerLevel)
+	{
+		appendItem(view,
+				   verticalAlignment: verticalAlignment,
+				   contributesToColumnWidth: true,
+				   indentation: Self.indentation(forLevel: indentationLevel, perLevel: indentationPerLevel))
 	}
 
 	/// Arbitrary view that fills the item column and takes in the surplus height. The section has to declare a flexible height mode
@@ -244,18 +276,21 @@ open class SettingsColumnSectionView: SettingsSectionView {
 
 	private func appendItem(_ item: NSView,
 							verticalAlignment: SettingsItemVerticalAlignment,
-							contributesToColumnWidth: Bool)
+							contributesToColumnWidth: Bool,
+							indentation: CGFloat = 0)
 	{
-		let previousItem = items.last
+		let previousItem = items.last?.view
 
 		item.translatesAutoresizingMaskIntoConstraints = false
 		addSubview(item)
 
-		var constraints = [item.leadingAnchor.constraint(equalTo: itemBoxGuide.leadingAnchor)]
+		var constraints = [item.leadingAnchor.constraint(equalTo: itemBoxGuide.leadingAnchor, constant: indentation)]
 
 		if contributesToColumnWidth {
 			constraints.append(item.trailingAnchor.constraint(lessThanOrEqualTo: itemBoxGuide.trailingAnchor))
-			constraints.append(itemColumnWidthGuide.widthAnchor.constraint(greaterThanOrEqualTo: item.widthAnchor))
+			// The inset pushes the item in, so the column has to answer for the item width plus the inset
+			constraints.append(itemColumnWidthGuide.widthAnchor.constraint(greaterThanOrEqualTo: item.widthAnchor,
+																		   constant: indentation))
 		}
 		else {
 			// The wrapping width arrives through `availableWidth`, so the box only needs to stay inside the column
@@ -265,7 +300,7 @@ open class SettingsColumnSectionView: SettingsSectionView {
 			// Round up, or integralizing the box can land a point short of the text and wrap it needlessly
 			if let label = item as? SettingsWrappingLabel {
 				let demand = itemColumnWidthGuide.widthAnchor
-					.constraint(greaterThanOrEqualToConstant: label.naturalTextWidth.rounded(.up))
+					.constraint(greaterThanOrEqualToConstant: label.naturalTextWidth.rounded(.up) + indentation)
 				demand.priority = SettingsLayoutPriority.descriptionWidthDemand
 				constraints.append(demand)
 			}
@@ -292,7 +327,7 @@ open class SettingsColumnSectionView: SettingsSectionView {
 
 		debugWireframes.refresh()
 
-		items.append(item)
+		items.append((item, indentation))
 	}
 
 	private func activateLabelAlignment(to item: NSView, verticalAlignment: SettingsItemVerticalAlignment) {
@@ -314,8 +349,9 @@ open class SettingsColumnSectionView: SettingsSectionView {
 	open override func layout() {
 		super.layout()
 
+		// Each label starts at its own indented leading edge, so its inset comes off the wrapping width
 		let itemColumnWidth = itemBoxGuide.frame.width
-		items.forEach { ($0 as? SettingsWrappingLabel)?.availableWidth = itemColumnWidth }
+		items.forEach { ($0.view as? SettingsWrappingLabel)?.availableWidth = itemColumnWidth - $0.indentation }
 	}
 
 }

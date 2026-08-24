@@ -44,6 +44,7 @@
 "Notifications" = "Notifications";
 "Allow notifications" = "Allow notifications";
 "Play sound" = "Play sound";
+"Show previews" = "Show previews";
 "GENERAL_NOTIFICATIONS_DESCRIPTION" = "Notifications are delivered only for important updates.";
 "Cache" = "Cache";
 "Clear Cache…" = "Clear Cache…";

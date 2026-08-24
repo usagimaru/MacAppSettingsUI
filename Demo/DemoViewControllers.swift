@@ -59,8 +59,11 @@ class GeneralSettingsPaneViewController: SettingsPaneViewController {
 	private static let itemColumnMaximumWidth: CGFloat = 260
 	
 	private var layoutView: SettingsLayoutView?
-
-
+	
+	/// Sub-options that follow the enabled state of "Allow notifications"
+	private var notificationSubOptionCheckboxes = [NSButton]()
+	
+	
 	// MARK: -
 	
 	override func loadView() {
@@ -110,16 +113,23 @@ class GeneralSettingsPaneViewController: SettingsPaneViewController {
 											   String(localized: "Ask Each Time")])
 		downloads.addDescriptionLabel(String(localized: "GENERAL_DOWNLOADS_DESCRIPTION"))
 		
-		// Section with multiple items followed by a description label
+		// Section with indented sub-options. The indentation level insets each item under its parent checkbox
 		let notifications = layoutView.addColumnSection(label: String(localized: "Notifications"),
 														identifier: .init("Notifications"))
 		notifications.addCheckbox(title: String(localized: "Allow notifications"),
 								  isOn: true,
 								  target: self,
-								  action: nil)
-		notifications.addCheckbox(title: String(localized: "Play sound"),
-								  target: self,
-								  action: nil)
+								  action: #selector(toggleAllowNotifications(_:)))
+		let playSound = notifications.addCheckbox(title: String(localized: "Play sound"),
+												  indentationLevel: 1,
+												  target: self,
+												  action: nil)
+		let showPreviews = notifications.addCheckbox(title: String(localized: "Show previews"),
+													 isOn: true,
+													 indentationLevel: 1,
+													 target: self,
+													 action: nil)
+		notificationSubOptionCheckboxes = [playSound, showPreviews]
 		notifications.addDescriptionLabel(String(localized: "GENERAL_NOTIFICATIONS_DESCRIPTION"))
 		
 		layoutView.addSeparatorSection()
@@ -141,6 +151,11 @@ class GeneralSettingsPaneViewController: SettingsPaneViewController {
 			self?.layoutView?.debug_setWireframes(isOn)
 		}
 		wireframes.addCustomView(wireframeSwitch, verticalAlignment: .centerY)
+	}
+
+	@objc private func toggleAllowNotifications(_ sender: Any) {
+		let allowsNotifications = (sender as? NSButton)?.state == .on
+		notificationSubOptionCheckboxes.forEach { $0.isEnabled = allowsNotifications }
 	}
 
 }

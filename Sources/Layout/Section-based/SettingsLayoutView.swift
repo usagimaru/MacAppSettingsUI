@@ -15,6 +15,8 @@ public enum SettingsLayoutMetrics {
 	public static let columnSpacing: CGFloat = 8
 	/// Spacing between items within a section
 	public static let itemSpacing: CGFloat = 6
+	/// Leading inset one indentation level adds to an item
+	public static let indentationPerLevel: CGFloat = 20
 
 }
 
@@ -309,6 +311,8 @@ open class SettingsLayoutView: NSView {
 	public func addCheckboxSection(title: String,
 								   isOn: Bool = false,
 								   description: String? = nil,
+								   indentationLevel: Int = 0,
+								   indentationPerLevel: CGFloat = SettingsLayoutMetrics.indentationPerLevel,
 								   widthMode: SettingsSectionWidthMode = .fullWidth,
 								   identifier: NSUserInterfaceItemIdentifier? = nil,
 								   target: AnyObject?,
@@ -317,6 +321,8 @@ open class SettingsLayoutView: NSView {
 		let section = SettingsCheckboxSectionView(title: title,
 												  isOn: isOn,
 												  description: description,
+												  indentationLevel: indentationLevel,
+												  indentationPerLevel: indentationPerLevel,
 												  identifier: identifier,
 												  target: target,
 												  action: action)

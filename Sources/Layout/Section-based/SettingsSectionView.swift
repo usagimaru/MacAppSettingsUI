@@ -164,6 +164,11 @@ open class SettingsSectionView: NSView {
 
 	// MARK: -
 
+	/// Leading inset for an indentation level. Negative levels count as zero
+	public static func indentation(forLevel level: Int, perLevel: CGFloat = SettingsLayoutMetrics.indentationPerLevel) -> CGFloat {
+		CGFloat(max(level, 0)) * perLevel
+	}
+
 	/// Apply a control size together with the font size that matches it
 	public static func applyControlSize(_ controlSize: NSControl.ControlSize, to control: NSControl) {
 		control.controlSize = controlSize

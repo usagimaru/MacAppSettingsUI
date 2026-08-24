@@ -44,6 +44,7 @@
 "Notifications" = "通知";
 "Allow notifications" = "通知を許可";
 "Play sound" = "サウンドを再生";
+"Show previews" = "プレビューを表示";
 "GENERAL_NOTIFICATIONS_DESCRIPTION" = "重要なアップデートがある場合にのみ通知が届きます。";
 "Cache" = "キャッシュ";
 "Clear Cache…" = "キャッシュを削除…";
