@@ -87,3 +87,25 @@
 "Snippet Manager" = "スニペットマネージャ";
 "Terminal Helper" = "ターミナルヘルパー";
 "Clipboard History" = "クリップボード履歴";
+
+"Schedule" = "スケジュール";
+"Check automatically" = "自動的に確認";
+"Daily" = "毎日";
+"Weekly" = "毎週";
+"Monthly" = "毎月";
+"Download" = "ダウンロード";
+"Download in the background" = "バックグラウンドでダウンロード";
+"Notify when ready" = "準備完了時に通知";
+"Status" = "状況";
+"UPDATE_LAST_CHECKED" = "最後に確認した日時: 未確認";
+"Check Now" = "今すぐ確認";
+
+"UPDATE_AVAILABLE_TITLE" = "新しいバージョンが利用できます";
+"UPDATE_AVAILABLE_DETAIL" = "ダウンロードは自動的に続行されます";
+"Installed Version" = "インストール済み";
+"Available Version" = "利用可能";
+"Downloading" = "ダウンロード中";
+"Update Channel" = "アップデートチャンネル";
+"Allow prerelease builds" = "プレリリースビルドを許可";
+"Keep downloaded installers" = "ダウンロードしたインストーラを保持";
+"UPDATE_ADVANCED_DESCRIPTION" = "プレリリースビルドには未完成の機能が含まれます。保持したインストーラはディスク容量を占有するため、不要になったら削除されます。";

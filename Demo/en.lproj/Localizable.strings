@@ -87,3 +87,25 @@
 "Snippet Manager" = "Snippet Manager";
 "Terminal Helper" = "Terminal Helper";
 "Clipboard History" = "Clipboard History";
+
+"Schedule" = "Schedule";
+"Check automatically" = "Check automatically";
+"Daily" = "Daily";
+"Weekly" = "Weekly";
+"Monthly" = "Monthly";
+"Download" = "Download";
+"Download in the background" = "Download in the background";
+"Notify when ready" = "Notify when ready";
+"Status" = "Status";
+"UPDATE_LAST_CHECKED" = "Last checked: Never";
+"Check Now" = "Check Now";
+
+"UPDATE_AVAILABLE_TITLE" = "A new version is available";
+"UPDATE_AVAILABLE_DETAIL" = "The download continues automatically";
+"Installed Version" = "Installed";
+"Available Version" = "Available";
+"Downloading" = "Downloading";
+"Update Channel" = "Update Channel";
+"Allow prerelease builds" = "Allow prerelease builds";
+"Keep downloaded installers" = "Keep downloaded installers";
+"UPDATE_ADVANCED_DESCRIPTION" = "Prerelease builds contain unfinished features. Kept installers take up disk space, and are removed once they are no longer needed.";

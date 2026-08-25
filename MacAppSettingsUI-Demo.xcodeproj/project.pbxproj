@@ -12,7 +12,8 @@
 		5159E1002B99A72A00F3E575 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5159E0FE2B99A72A00F3E575 /* Main.storyboard */; };
 		5159E1422B9B717100F3E575 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5159E1442B9B717100F3E575 /* Localizable.strings */; };
 		51904F992B9C6D01007A8750 /* Supports.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51904F982B9C6D01007A8750 /* Supports.swift */; };
-		51DA20BA2F1F7CF60049E463 /* DemoViewControllers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DA20B92F1F7CF60049E463 /* DemoViewControllers.swift */; };
+		51C2DD7F303E0B2D00C3BA29 /* DemoOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51C2DD7E303E0B2D00C3BA29 /* DemoOptions.swift */; };
+		51C2DD81303E0B3300C3BA29 /* DemoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51C2DD80303E0B3300C3BA29 /* DemoViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -23,10 +24,12 @@
 		5159E1432B9B717100F3E575 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		5159E1452B9B717A00F3E575 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		51904F982B9C6D01007A8750 /* Supports.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Supports.swift; sourceTree = "<group>"; };
-		51DA20B92F1F7CF60049E463 /* DemoViewControllers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoViewControllers.swift; sourceTree = "<group>"; };
+		51C2DD7E303E0B2D00C3BA29 /* DemoOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoOptions.swift; sourceTree = "<group>"; };
+		51C2DD80303E0B3300C3BA29 /* DemoViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		51C2DD8E303E0E0400C3BA29 /* Panes */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Panes; sourceTree = "<group>"; };
 		51DE6E2C3023C78A000E6501 /* Sources */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Sources; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
@@ -62,11 +65,13 @@
 			isa = PBXGroup;
 			children = (
 				5159E0F82B99A72900F3E575 /* AppDelegate.swift */,
-				51DA20B92F1F7CF60049E463 /* DemoViewControllers.swift */,
 				51904F982B9C6D01007A8750 /* Supports.swift */,
 				5159E0FE2B99A72A00F3E575 /* Main.storyboard */,
 				5159E0FC2B99A72A00F3E575 /* Assets.xcassets */,
 				5159E1442B9B717100F3E575 /* Localizable.strings */,
+				51C2DD8E303E0E0400C3BA29 /* Panes */,
+				51C2DD7E303E0B2D00C3BA29 /* DemoOptions.swift */,
+				51C2DD80303E0B3300C3BA29 /* DemoViewController.swift */,
 			);
 			path = Demo;
 			sourceTree = "<group>";
@@ -87,6 +92,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				51C2DD8E303E0E0400C3BA29 /* Panes */,
 				51DE6E2C3023C78A000E6501 /* Sources */,
 			);
 			name = "MacAppSettingsUI-Demo";
@@ -147,8 +153,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				5159E0F92B99A72900F3E575 /* AppDelegate.swift in Sources */,
-				51DA20BA2F1F7CF60049E463 /* DemoViewControllers.swift in Sources */,
+				51C2DD7F303E0B2D00C3BA29 /* DemoOptions.swift in Sources */,
 				51904F992B9C6D01007A8750 /* Supports.swift in Sources */,
+				51C2DD81303E0B3300C3BA29 /* DemoViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

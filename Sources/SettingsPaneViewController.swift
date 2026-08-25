@@ -28,13 +28,10 @@ open class SettingsPaneViewController: NSViewController {
 	/// Make the window resizable when the view is activated
 	@IBInspectable open var isResizableView: Bool = false
 
-	/// Whether the pane content has been loaded via `loadPaneContent(completion:)`.
-	/// This flag is managed by `SettingsTabViewController`.
+	/// Whether the content has been loaded. Managed by `SettingsTabViewController`
 	open var isPaneContentLoaded: Bool = false
-	
-	/// The preferred size for this pane, captured from the initial view frame set by Storyboard or `loadView()`.
-	/// `SettingsTabViewController` uses this to determine the window size for each tab.
-	/// Subclasses can override this if the pane size should differ from the initial frame.
+
+	/// The size this pane wants, captured from the frame set by Storyboard or `loadView()`
 	open var preferredPaneSize: NSSize?
 
 	/// The smallest size this pane can be laid out at
@@ -56,9 +53,7 @@ open class SettingsPaneViewController: NSViewController {
 	
 	open override func viewDidLoad() {
 		super.viewDidLoad()
-		// Resolve Auto Layout constraints and capture the resulting size as the preferred pane size.
-		// For storyboard-based views, constraints determine the final layout size.
-		// For code-based views, the frame set in loadView() is used as-is if no constraints override it.
+		// A pane that declares no size falls back to what its constraints or its `loadView` frame settle on
 		if preferredPaneSize == nil {
 			capturePreferredPaneSize()
 		}
@@ -70,11 +65,18 @@ open class SettingsPaneViewController: NSViewController {
 		preferredPaneSize = view.frame.size
 	}
 	
-	/// Override this method to build heavy pane content (table views, SwiftUI hosting views, data loading) and keep `loadView` light.
-	/// Data may be prepared on any queue, but build views and call the completion on the main thread.
-	/// `isPaneContentLoaded` is managed by the caller. The default implementation calls the completion immediately.
-	open func loadPaneContent(completion: @escaping () -> Void) {
-		completion()
+	/// Build the pane content here, keeping `loadView` to the bare view
+	open func buildPaneContent() {}
+	
+	/// Called once the content is in place, on the main thread
+	open func paneContentDidLoad() {}
+	
+	/// Called when the content failed to load. Cancellation is not a failure, so it is not reported here
+	open func paneContentDidFailToLoad(_ error: Error) {}
+	
+	/// Override when the content needs awaiting. Returning means the content is built, throwing means none of it is
+	open func loadPaneContent() async throws {
+		buildPaneContent()
 	}
 	
 	/// Create View Controller Manually
@@ -141,11 +143,11 @@ open class SettingsPaneViewController: NSViewController {
 			minimumPaneWidthConstraint = constraint
 		}
 		
-		// The width has to settle before the height, since it decides how many lines the descriptions take
+		// The width settles first, since it decides how many lines the descriptions take
 		view.setFrameSize(NSSize(width: minimumWidth, height: 0))
 		view.layoutSubtreeIfNeeded()
-		
-		// Wrapping widths only settle during layout, so measure until the size stops moving
+
+		// Wrapping widths only settle during layout, so measured until the size stops moving
 		var previousFittingSize = NSSize.zero
 		for _ in 0 ..< Self.paneSizeMeasurementPassLimit {
 			let fittingSize = view.fittingSize
@@ -160,7 +162,7 @@ open class SettingsPaneViewController: NSViewController {
 
 		capturePreferredPaneSize()
 
-		// Measured at the width that settled, or a narrower one would wrap the labels and report a taller pane
+		// Measured at the settled width, or a narrower one would wrap the labels and report a taller pane
 		minimumPaneSize = measureMinimumPaneSize(width: preferredPaneSize?.width ?? minimumWidth)
 	}
 

@@ -72,13 +72,25 @@ Both come with a wireframing feature for debugging. See [Building a Pane Layout]
 <img src="./Guide/layoutguide.jpg" width=692>
 
 
+### Lazy Pane Loading
+
+A pane is built the first time its tab is selected, not when the window is created, and a loading view stands in until it is ready. A tab nobody visits costs nothing.
+
+
+### Awaiting Content with async/await
+
+Building lazily is not the same as building asynchronously. A pane that has to fetch something before it can be built overrides `loadPaneContent() async throws` and awaits it there. Leaving that pane mid-load cancels the task, and the tab is loaded again on the next visit.
+
+See [Loading Pane Content](#loading-pane-content).
+
+
 ## Structure
 
 `SettingsWindow` and `SettingsWindowController` make up the settings window itself. The window controller’s `contentViewController` is a `SettingsTabViewController`, which owns the panes and manages the tab transitions.
 
-Panes are loaded lazily: content is loaded when a tab is first selected rather than all at once, and a loading view is shown during the transition. Call `loadAllTabs()` if you prefer eager loading instead.
+Panes are loaded lazily: content is built when a tab is first selected rather than all at once, and a loading view stands in until it is ready. See [Loading Pane Content](#loading-pane-content).
 
-Every pane is a `SettingsPaneViewController` subclass. Override `loadPaneContent(completion:)` to load content asynchronously before the pane is displayed. Each pane also records its preferred size during `viewDidLoad()`; see [Resolving the Pane Size](#resolving-the-pane-size) if your subclass builds its content there.
+Every pane is a `SettingsPaneViewController` subclass. A pane laid out by a Storyboard or by its own constraints has its size recorded during `viewDidLoad()`, while a pane built in code records it from that build. See [Resolving the Pane Size](#resolving-the-pane-size).
 
 For the section-based layout, a `SettingsLayoutView` holds the sections and decides the geometry. Sections come in two shapes: `SettingsColumnSectionView` for the two-column row (one trailing-aligned label, any number of leading-aligned items), and the label-less ones — separator, button, checkbox and custom — which span the whole container by default. Description text uses `SettingsWrappingLabel`, which wraps only when the text does not fit its column.
 
@@ -86,7 +98,12 @@ For the guide-based layout, the `SettingsPaneLayoutGuide` protocol installs a `S
 
 `LayoutDebugWireframes` draws the debugging overlay. The section-based layout is built on it, and it is public so you can use it on your own views. See [Wireframes](#wireframes).
 
-The demo app covers all of it: the “General”, “View” and “Extensions” tabs for the section-based layout, and the “Developer” tab for the guide-based one. See `DemoViewControllers.swift`.
+The demo app covers all of it: the “General”, “View” and “Extensions” tabs for the section-based layout, and the “Advanced” and “Developer” tabs for the guide-based one. See the pane classes under `Demo/Panes`.
+
+
+## Requirements
+
+macOS 15.6 or later. Panes are loaded through Swift Concurrency, so a pane that loads its content asynchronously is written with `async`/`await`.
 
 
 ## Install
@@ -145,7 +162,9 @@ class GeneralSettingsPaneViewController: SettingsPaneViewController {
 
 	override func loadView() {
 		view = NSView()
+	}
 
+	override func buildPaneContent() {
 		let layoutView = SettingsLayoutView()
 		layoutView.install(in: view)
 		self.layoutView = layoutView
@@ -167,7 +186,7 @@ class GeneralSettingsPaneViewController: SettingsPaneViewController {
 ```
 
 
-#### Sections
+### Sections
 
 Sections are stacked in the order you add them, spaced by `SettingsLayoutMetrics.sectionSpacing`. You never place them yourself.
 
@@ -178,7 +197,7 @@ Items added to a two-column section stack downward, spaced by `SettingsLayoutMet
 When adding an item you can choose how the label lines up with it: `.firstBaseline` (default), `.top` or `.centerY`. Use `.centerY` for controls that have no text baseline, such as a switch or a color well.
 
 
-#### Section Width
+### Section Width
 
 A section without the label column decides the area it is laid out in with `SettingsSectionWidthMode`. `.fullWidth` (the default for the `add…Section` methods) spans the whole container, so the content reaches the pane margins. `.contentBlock` follows the two-column block instead, so the edges line up with the column sections.
 
@@ -195,7 +214,7 @@ layoutView.addButtonSection(title: "Restore Defaults",
 `widthMode` is also a property on `SettingsSectionView`, so a section can be switched over after it has been added, and a section you build yourself starts at `.contentBlock`.
 
 
-#### Section Height
+### Section Height
 
 A section follows the height of its content by default. `SettingsSectionHeightMode.flexible(minimumHeight:preferredHeight:)` makes it take in the surplus height of the pane instead, which is what a table or a text view in a resizable pane needs.
 
@@ -215,7 +234,7 @@ In a two-column section, add the stretching view with `addStretchingCustomView(_
 Vertical resizing also needs `isResizableView` on the pane. See [Controlling Window Resizing Per Pane](#controlling-window-resizing-per-pane).
 
 
-#### Column Widths
+### Column Widths
 
 You do not set the column widths. The label column follows its longest label, and the item column follows whatever its items need — including the width a description label wants before it has to wrap. Whatever is left over becomes equal margins on both sides, so the whole block stays centered.
 
@@ -236,14 +255,12 @@ The wireframes make the difference plain: the item column settles on its widest 
 <img src="./Guide/extensions2.jpg" width=562>
 
 
-#### Resolving the Pane Size
+### Resolving the Pane Size
 
-`SettingsTabViewController` sizes the window from each pane’s `preferredPaneSize`. For a pane built in code, call `sizePaneToFitContent(minimumWidth:)` at the end of `loadView()`. It gives the view a lower bound, shrink-wraps it to the sections and records the result.
+`SettingsTabViewController` sizes the window from each pane’s `preferredPaneSize`. For a pane built in code, call `sizePaneToFitContent(minimumWidth:)` at the end of the build. It gives the view a lower bound, shrink-wraps it to the sections and records the result.
 
 ```swift
-override func loadView() {
-	view = NSView()
-
+override func buildPaneContent() {
 	buildSections()
 	sizePaneToFitContent(minimumWidth: 450)
 }
@@ -254,11 +271,11 @@ Description labels only learn the width they wrap at during layout, so the metho
 For a pane sized by a Storyboard or by your own constraints, call `capturePreferredPaneSize()` instead. It lays the view out and records the resulting frame size, without touching the width.
 
 
-#### Embedding SwiftUI Views
+### Embedding SwiftUI Views
 
-`NSHostingView` resolves its SwiftUI layout only once it belongs to a window. Until then it ignores environment values such as `controlSize` and reports the default size instead. A pane is measured during `loadView()`, before it reaches a window, so that difference is left over as slack at the bottom of the layout.
+`NSHostingView` resolves its SwiftUI layout only once it belongs to a window. Until then it ignores environment values such as `controlSize` and reports the default size instead. A pane is measured while it is being built, before it reaches a window, so that difference is left over as slack at the bottom of the layout.
 
-Settle the size at initialization by putting the hosting view into a window and running a single layout pass. The window is already reachable during `loadView()` through `tabViewController?.view.window`.
+Settle the size at initialization by putting the hosting view into a window and running a single layout pass. The window is already reachable from the pane through `tabViewController?.view.window`.
 
 ```swift
 final class DemoSwitch: NSHostingView<DemoSwitchView> {
@@ -284,7 +301,7 @@ final class DemoSwitch: NSHostingView<DemoSwitchView> {
 Avoid measuring the pane again after it appears. Resizing the window from `viewDidAppear()` competes with the window presentation and the tab transition.
 
 
-#### Re-measuring After a Change
+### Re-measuring After a Change
 
 `preferredPaneSize` is a snapshot, and `SettingsTabViewController` caches it again per tab. Neither notices a later change to the content, the font size or the locale.
 
@@ -296,12 +313,12 @@ invalidatePaneSize()
 ```
 
 
-#### Reaching Sections Afterwards
+### Reaching Sections Afterwards
 
 Pass an `identifier` when adding a section if you want to find it later. `SettingsLayoutView` vends its sections as arrays, looks one up by identifier, and can move or swap them by identifier as well.
 
 
-#### Wireframes
+### Wireframes
 
 `layoutView.debug_setWireframes(true)` reveals the layout. It has no effect outside a `DEBUG` build, and it also reaches sections added after the call.
 
@@ -337,9 +354,7 @@ class AdvancedSettingsPaneViewController: SettingsPaneViewController, SettingsPa
 
 	var contentContainerView: SettingsPaneContainerView?
 
-	override func viewDidLoad() {
-		super.viewDidLoad()
-
+	override func buildPaneContent() {
 		setContentContainerView(maximumWidth: 550)
 		contentContainerView?.labelLayoutGuideWidth = 160
 		contentContainerView?.debug_setWireframes(true)
@@ -371,6 +386,67 @@ Set `isResizableView` on `SettingsPaneViewController` to allow window resizing o
 ## Toolbar Minimum Width Clamping
 
 `SettingsTabViewController` has a `clampsToToolbarMinimumWidth` property, enabled by default. It clamps every pane to at least the content width the toolbar layout requires, which prevents the flicker you would otherwise see when a pane prefers to be narrower than that.
+
+
+## Loading Pane Content
+
+### Lazy Loading
+
+A pane is built the first time its tab is selected, not when the settings window is created. Keep `loadView()` to the bare view and build the content in `buildPaneContent()`, so a tab that is never visited costs nothing.
+
+```swift
+override func loadView() {
+	view = NSView()
+}
+
+override func buildPaneContent() {
+	buildSections()
+	sizePaneToFitContent(minimumWidth: 450)
+}
+```
+
+`SettingsTabViewController` drives the rest: the loading view stands in while the content is built, the window is resized once the pane has measured itself, and the pane is revealed with a dissolve. Call `loadAllTabs()` if you would rather have every pane built up front.
+
+
+### Awaiting the Content with async/await
+
+Override `loadPaneContent()` when the content cannot be built until something has been awaited — a file read, a network call, an actor. It is isolated to the main actor, so the views are built right there without hopping threads.
+
+```swift
+override func loadPaneContent() async throws {
+	let items = try await MyDataSource.load()
+
+	buildSections(with: items)
+	sizePaneToFitContent(minimumWidth: 450)
+}
+```
+
+Its default implementation calls `buildPaneContent()`, so a pane with nothing to await never has to know this method exists.
+
+
+### Cancellation
+
+Leaving a pane before its load has finished cancels the task behind it. The awaited call throws, the pane is left unloaded, and it is built again the next time the tab is visited. Nothing has to be written for that to happen, so let the error propagate rather than swallowing it.
+
+Work with no suspension point of its own can check in between:
+
+```swift
+for batch in batches {
+	try Task.checkCancellation()
+	append(batch)
+}
+```
+
+A resource that lives outside the task is torn down with `withTaskCancellationHandler(operation:onCancel:)`.
+
+Cancellation is cooperative, so a load can still run to completion after it was cancelled. The pane is left unloaded either way, which means `buildPaneContent()` and `loadPaneContent()` have to tolerate running twice — discard whatever the previous pass built before building again.
+
+
+### Failure
+
+Throwing anything else counts as a failure. The pane is left unloaded, an empty view is shown in its place, and `paneContentDidFailToLoad(_:)` is called with the error the pane threw. The library does not wrap it, and it does not report cancellation there. Visiting the tab again loads the pane once more.
+
+Presenting the failure is up to you. Whatever you put into the pane from there has to be cleared by the next build, since the pane is still considered unloaded.
 
 
 ## License

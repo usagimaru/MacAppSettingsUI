@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="25094" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="ZJH-HF-2gP">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="25095" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="ZJH-HF-2gP">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="25094"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="25095"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -374,6 +374,5 @@ DQ
     </scenes>
     <resources>
         <image name="gearshape.2" catalog="system" width="20" height="16"/>
-        <image name="puzzlepiece.extension" catalog="system" width="19" height="15"/>
     </resources>
 </document>

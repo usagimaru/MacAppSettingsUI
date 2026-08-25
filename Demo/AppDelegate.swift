@@ -14,57 +14,79 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 	// ====================================================>>>
 	
 	private(set) var settingsWindowController: SettingsWindowController?
-	
+
 	func setupForSettingsWindow() {
 		// Prepare setting panes
 		
-		// Case 1. Create panes with storyboard (See `DemoViewControllers.swift` and Main.storyboard for details).
+		// Case 1. Create panes and hand them to the window controller (See `DemoViewControllers.swift` for details).
+
+		let generalPane = GeneralSettingsPaneViewController(
+			tabName: String(localized: "General"),
+			tabImage: NSImage(systemSymbolName: "gearshape", accessibilityDescription: nil),
+			tabIdentifier: "General",
+			isResizableView: false)
 		
-		//   The “General”, “View” and “Extensions” panes have no storyboard scene. Their views and sections are built entirely in code.
-		let generalPane = GeneralSettingsPaneViewController(tabName: String(localized: "General"),
-															tabImage: NSImage(systemSymbolName: "gearshape", accessibilityDescription: nil),
-															tabIdentifier: "General",
-															isResizableView: false)
+		let viewPane = ViewSettingsPaneViewController(
+			tabName: String(localized: "View"),
+			tabImage: NSImage(systemSymbolName: "eyeglasses", accessibilityDescription: nil),
+			tabIdentifier: "View",
+			isResizableView: false)
 		
-		let viewPane = ViewSettingsPaneViewController(tabName: String(localized: "View"),
-													  tabImage: NSImage(systemSymbolName: "eyeglasses", accessibilityDescription: nil),
-													  tabIdentifier: "View",
-													  isResizableView: false)
+		let extensionsPane = ExtensionsSettingsPaneViewController(
+			tabName: String(localized: "Extensions"),
+			tabImage: NSImage(systemSymbolName: "puzzlepiece.extension", accessibilityDescription: nil),
+			tabIdentifier: "Extensions",
+			isResizableView: true)
 		
-		let extensionsPane = ExtensionsSettingsPaneViewController(tabName: String(localized: "Extensions"),
-																  tabImage: NSImage(systemSymbolName: "puzzlepiece.extension", accessibilityDescription: nil),
-																  tabIdentifier: "Extensions",
-																  isResizableView: true)
 		
+		// Case 2. Create a pane from storyboard
+		let advancedPane = AdvancedSettingsPaneViewController.fromStoryboard()
+		
+		
+		// Initialize SettingsWindowController
 		settingsWindowController = .init(with: [
 			generalPane,
 			viewPane,
 			extensionsPane,
-			AdvancedSettingsPaneViewController.fromStoryboard(),
-		])
-
-
-		// Case 2. You can also insert additional panes manually.
+			advancedPane,
+		], centersWindowPositionAlways: DemoOptions.centersWindowAlways)
 		
 		guard let settingsWindowController else { return }
 		
-		//   Insert "Updates" tab to "Extensions [HERE] Advanced"
+		
+		// Case 3. You can also insert additional panes manually.
+		
+		//   Insert "Updates" tab to "[Extensions] [HERE] [Advanced]"
 		settingsWindowController.tabViewController.insert(panes: [
-			UpdateSettingsPaneViewController(tabName: String(localized: "Updates"),
-											 tabImage: NSImage(systemSymbolName: "arrow.trianglehead.2.clockwise.rotate.90", accessibilityDescription: nil),
-											 tabIdentifier: "Updates",
-											 isResizableView: false)
+			UpdateSettingsPaneViewController(
+				tabName: String(localized: "Updates"),
+				tabImage: NSImage(systemSymbolName: "arrow.trianglehead.2.clockwise.rotate.90", accessibilityDescription: nil),
+				tabIdentifier: "Updates",
+				isResizableView: false)
 		], at: settingsWindowController.tabViewController.panes.count-1)
 		
 		//   Insert "Developer" tab to the last
 		settingsWindowController.tabViewController.add(panes: [
-			DeveloperSettingsPaneViewController(tabName: String(localized: "Developer"),
-												tabImage: NSImage(systemSymbolName: "wrench.and.screwdriver", accessibilityDescription: nil),
-												tabIdentifier: "Developer",
-												isResizableView: true)
+			DeveloperSettingsPaneViewController(
+				tabName: String(localized: "Developer"),
+				tabImage: NSImage(systemSymbolName: "wrench.and.screwdriver", accessibilityDescription: nil),
+				tabIdentifier: "Developer",
+				isResizableView: true)
 		])
-
-
+		
+		
+		/*
+		 Notes about “Settings” and “Preferences”:
+		 
+		 Starting with macOS Ventura (version 13), Apple began using the label `Settings` instead of `Preferences` in U.S. English to describe a preferences UI.
+		 Therefore, all Mac apps must label preferences as “Settings”.
+		 
+		 If there is a “Preferences…” menu item in the Main Menu, the system automatically relabels it with “Settings…” in the runtime when the app is launched, so we no need to implement an extra program.
+		 Also we can disable this behavior through the “NSMenuShouldUpdateSettingsTitle” as Bool in the environment variables. (Not that we need to.)
+		 
+		 For labels outside of this mechanism on the Main Menu, developers will need to deal with them themselves.
+		 */
+		
 		// `defaultWindowTitle` is used for the title on the window menu.
 		if #available(macOS 13, *) {
 			settingsWindowController.settingsWindow.defaultWindowTitle = String(localized: "Settings")
@@ -72,23 +94,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		else {
 			settingsWindowController.settingsWindow.defaultWindowTitle = String(localized: "Preferences")
 		}
+		
+		
+		// Release the controller once the window closes, so the panes are rebuilt on the next open.
+		// Tab restoration is opt-in, and it keeps the selected tab across that release.
+		settingsWindowController.restoresLastSelectedTab = true
+		settingsWindowController.windowCloseHandler = { [weak self] in
+			self?.settingsWindowController = nil
+		}
 
-
-		/*
-		 Notes about “Settings” and “Preferences”:
-		
-		 Starting with macOS Ventura (version 13), Apple began using the label `Settings` instead of `Preferences` in U.S. English to describe a preferences UI.
-		 Therefore, all Mac apps must label preferences as “Settings”.
-		
-		 If there is a “Preferences…” menu item in the Main Menu, the system automatically relabels it with “Settings…” in the runtime when the app is launched, so we no need to implement an extra program.
-		 Also we can disable this behavior through the “NSMenuShouldUpdateSettingsTitle” as Bool in the environment variables. (Not that we need to.)
-		
-		 For labels outside of this mechanism on the Main Menu, developers will need to deal with them themselves.
-		 */
+		settingsWindowController.settingsWindow.fittingAnimationEnabled = DemoOptions.animationEnabled
+		settingsWindowController.tabViewController.loadingLabelText = String(localized: "Loading…")
 	}
-	
-	// <<<====================================================
 
+	// <<<====================================================
+	
 }
 
 extension AppDelegate {
@@ -103,11 +123,12 @@ extension AppDelegate {
 		localizeMainMenuTitles()
 	}
 	
-	func applicationDidFinishLaunching(_ aNotification: Notification) {
-		setupForSettingsWindow()
-	}
-	
 	@IBAction func openSettings(_ sender: Any) {
+		// Built on demand, since the controller is released every time the window closes
+		if settingsWindowController == nil {
+			setupForSettingsWindow()
+		}
+
 		settingsWindowController?.showWindow(sender)
 	}
 	
@@ -135,5 +156,5 @@ extension AppDelegate {
 		
 		setLocalizedTitle(to: mainMenuItems, isRoot: true)
 	}
-
+	
 }
