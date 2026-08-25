@@ -96,6 +96,8 @@ For the section-based layout, a `SettingsLayoutView` holds the sections and deci
 
 For the guide-based layout, the `SettingsPaneLayoutGuide` protocol installs a `SettingsPaneContainerView` that vends the shared layout guides.
 
+`SettingsTabLayoutView` puts a nested tab view inside a single pane, with either layout on each tab. See [Tabs Inside a Pane](#tabs-inside-a-pane).
+
 `LayoutDebugWireframes` draws the debugging overlay. The section-based layout is built on it, and it is public so you can use it on your own views. See [Wireframes](#wireframes).
 
 The demo app covers all of it: the “General”, “View” and “Extensions” tabs for the section-based layout, and the “Advanced” and “Developer” tabs for the guide-based one. See the pane classes under `Demo/Panes`.
@@ -365,6 +367,34 @@ class AdvancedSettingsPaneViewController: SettingsPaneViewController, SettingsPa
 ```
 
 <img src="./Guide/layoutguide.jpg" width=692>
+
+
+### Tabs Inside a Pane
+
+A pane with more content than fits one screen can put it behind tabs. `SettingsTabLayoutView` lays a nested `NSTabView` into the pane and hands each tab what it needs.
+
+```swift
+override func buildPaneContent() {
+	let tabLayoutView = SettingsTabLayoutView()
+	tabLayoutView.install(in: view)
+
+	let general = tabLayoutView.addSectionTab(label: "General", identifier: "General")
+	general.addColumnSection(label: "Schedule", identifier: .init("Schedule"))
+		.addCheckbox(title: "Check automatically", isOn: true, target: self, action: #selector(toggleItem(_:)))
+
+	tabLayoutView.addHostingTab(label: "Advanced", rootView: AdvancedSettingsView())
+
+	sizePaneToFitContent(minimumWidth: 480)
+}
+```
+
+`addSectionTab` returns the `SettingsLayoutView` laid into that tab, so a tab is filled the same way a whole pane is. `addHostingTab` wraps your SwiftUI view in a `SettingsHostingView` and returns it. `addTab` takes any view you built yourself. The `tabView` property is the `NSTabView` underneath, for whatever the three do not cover.
+
+A nested `NSTabView` says nothing about its size on its own, so the container reports the size the largest tab needs. `sizePaneToFitContent(minimumWidth:)` then works here as it does anywhere else, and `invalidateMeasuredSize()` measures again after the content of a tab changed.
+
+`install(in:margins:)` keeps the tabs closer to the toolbar than the system margin would, since the tab strip reads as part of the toolbar area. Pass `.insets(_:)` to set all four edges yourself.
+
+The “Updates” tab of the demo app is built this way, with the section layout on one tab and SwiftUI on the other.
 
 
 ## Appearance of Tabs

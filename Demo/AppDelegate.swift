@@ -18,7 +18,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 	func setupForSettingsWindow() {
 		// Prepare setting panes
 		
-		// Case 1. Create panes and hand them to the window controller (See `DemoViewControllers.swift` for details).
+		// Case 1. Create panes and hand them to the window controller (See `DemoViewController.swift` for details).
 
 		let generalPane = GeneralSettingsPaneViewController(
 			tabName: String(localized: "General"),

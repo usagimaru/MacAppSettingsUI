@@ -50,7 +50,7 @@ class ExtensionsSettingsPaneViewController: SettingsPaneViewController {
 	}
 
 	private func buildSections() {
-		// A cancelled load can leave this behind, and the next visit builds it again
+		// Guards the pane against a rebuild, in case a load is ever cancelled after it got this far
 		self.layoutView?.removeFromSuperview()
 
 		let layoutView = SettingsLayoutView()

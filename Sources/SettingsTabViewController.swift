@@ -301,12 +301,13 @@ open class SettingsTabViewController: NSTabViewController {
 			return
 		}
 
-		if pendingLoadCompletions[pane] != nil {
-			pendingLoadCompletions[pane]?.append(completion)
+		// A load in flight is waited on even once it has been cancelled, or the content would be built twice over
+		if loadTasks[pane] != nil {
+			pendingLoadCompletions[pane, default: []].append(completion)
 			return
 		}
 
-		pendingLoadCompletions[pane] = [completion]
+		pendingLoadCompletions[pane, default: []].append(completion)
 		updateLoadingLabelVisibility()
 
 		loadTasks[pane] = Task { [weak self, weak pane] in
@@ -314,26 +315,19 @@ open class SettingsTabViewController: NSTabViewController {
 
 			do {
 				try await pane.loadPaneContent()
+
+				// Recorded even for a cancelled load, since returning means the content is built
+				pane.isPaneContentLoaded = true
+				pane.paneContentDidLoad()
+				self?.finishLoad(of: pane, retriesWaiters: false)
 			}
 			catch {
-				// The side that cancelled has already cleaned up
-				guard !Task.isCancelled else { return }
-
-				pane.paneContentDidFailToLoad(error)
-				self?.abandonLoad(of: pane)
-				return
+				// Cancellation is not a failure, and whoever asked while it wound down is owed another attempt
+				if !Task.isCancelled {
+					pane.paneContentDidFailToLoad(error)
+				}
+				self?.finishLoad(of: pane, retriesWaiters: Task.isCancelled)
 			}
-
-			// A cancelled load still gets here, and it must not settle the load that replaced it
-			guard !Task.isCancelled, let self else { return }
-
-			self.loadTasks.removeValue(forKey: pane)
-			pane.isPaneContentLoaded = true
-			pane.paneContentDidLoad()
-
-			let completions = self.pendingLoadCompletions.removeValue(forKey: pane) ?? []
-			self.updateLoadingLabelVisibility()
-			completions.forEach { $0() }
 		}
 	}
 	
@@ -344,20 +338,27 @@ open class SettingsTabViewController: NSTabViewController {
 
 		abandoned.forEach {
 			let waiters = pendingLoadCompletions.removeValue(forKey: $0) ?? []
-			loadTasks.removeValue(forKey: $0)?.cancel()
+			// Left in the table until it winds down, so a return visit cannot start a second one
+			loadTasks[$0]?.cancel()
 			// Handed back, or a caller that passed a completion would wait forever
 			waiters.forEach { $0() }
 		}
 		updateLoadingLabelVisibility()
 	}
 
-	/// Leave the pane unloaded and hand its waiters back
-	private func abandonLoad(of pane: SettingsPaneViewController) {
+	/// Clear the finished load and settle whoever was waiting on it
+	private func finishLoad(of pane: SettingsPaneViewController, retriesWaiters: Bool) {
 		loadTasks.removeValue(forKey: pane)
 
 		let waiters = pendingLoadCompletions.removeValue(forKey: pane) ?? []
 		updateLoadingLabelVisibility()
-		waiters.forEach { $0() }
+
+		guard retriesWaiters, !waiters.isEmpty else {
+			waiters.forEach { $0() }
+			return
+		}
+
+		waiters.forEach { loadContentIfNeeded(for: pane, completion: $0) }
 	}
 
 	private func updateLoadingLabelVisibility() {
