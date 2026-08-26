@@ -291,6 +291,8 @@ open class SettingsLayoutView: NSView {
 	public func addButtonSection(title: String,
 								 controlSize: NSControl.ControlSize = .regular,
 								 alignment: SettingsSectionAlignment = .center,
+								 indentationLevel: Int = 0,
+								 indentationPerLevel: CGFloat = SettingsLayoutMetrics.indentationPerLevel,
 								 widthMode: SettingsSectionWidthMode = .fullWidth,
 								 identifier: NSUserInterfaceItemIdentifier? = nil,
 								 target: AnyObject?,
@@ -299,6 +301,8 @@ open class SettingsLayoutView: NSView {
 		let section = SettingsButtonSectionView(title: title,
 												controlSize: controlSize,
 												alignment: alignment,
+												indentationLevel: indentationLevel,
+												indentationPerLevel: indentationPerLevel,
 												identifier: identifier,
 												target: target,
 												action: action)
@@ -333,11 +337,16 @@ open class SettingsLayoutView: NSView {
 	/// Add an arbitrary view as a section. `widthMode` decides the area the view is fitted to
 	@discardableResult
 	public func addCustomSection(_ view: NSView,
+								 indentationLevel: Int = 0,
+								 indentationPerLevel: CGFloat = SettingsLayoutMetrics.indentationPerLevel,
 								 widthMode: SettingsSectionWidthMode = .fullWidth,
 								 heightMode: SettingsSectionHeightMode = .fitsContent,
 								 identifier: NSUserInterfaceItemIdentifier? = nil) -> SettingsCustomSectionView
 	{
-		let section = SettingsCustomSectionView(contentView: view, identifier: identifier)
+		let section = SettingsCustomSectionView(contentView: view,
+												indentationLevel: indentationLevel,
+												indentationPerLevel: indentationPerLevel,
+												identifier: identifier)
 		appendSection(section, widthMode: widthMode, heightMode: heightMode)
 		return section
 	}

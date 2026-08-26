@@ -13,6 +13,7 @@ class UpdateSettingsPaneViewController: SettingsPaneViewController {
 
 	/// The narrowest width this pane is laid out for
 	private static let minimumPaneWidth: CGFloat = 480
+	private static let advancedTabIdentifier = "Advanced"
 	
 	/// Outlines both tabs, so the margins of the AppKit and the SwiftUI side can be read off against each other
 	private var layoutDebugWireframes: LayoutDebugWireframes?
@@ -41,6 +42,7 @@ class UpdateSettingsPaneViewController: SettingsPaneViewController {
 		buildGeneralTab(in: tabLayoutView)
 		buildAdvancedTab(in: tabLayoutView)
 		
+		tabLayoutView.tabView.delegate = self
 		setUpWireframes(of: tabLayoutView)
 	}
 	
@@ -48,6 +50,28 @@ class UpdateSettingsPaneViewController: SettingsPaneViewController {
 		super.viewDidLayout()
 		// Walked again on every pass, or the views SwiftUI builds later would stay unoutlined
 		layoutDebugWireframes?.refresh()
+	}
+	
+	override func viewDidAppear() {
+		super.viewDidAppear()
+		updateDownloadAnimation()
+	}
+	
+	override func viewWillDisappear() {
+		super.viewWillDisappear()
+		setDownloadAnimating(false)
+	}
+	
+	
+	// MARK: - Download symbol animation
+	
+	private func updateDownloadAnimation() {
+		let selectedIdentifier = tabLayoutView?.tabView.selectedTabViewItem?.identifier as? String
+		setDownloadAnimating(selectedIdentifier == Self.advancedTabIdentifier)
+	}
+	
+	private func setDownloadAnimating(_ flag: Bool) {
+		advancedTabHostingView?.rootView = UpdateAdvancedSettingsView(isDownloadAnimating: flag)
 	}
 	
 	
@@ -88,6 +112,21 @@ class UpdateSettingsPaneViewController: SettingsPaneViewController {
 						 target: self,
 						 action: nil)
 		status.addDescriptionLabel(String(localized: "UPDATE_LAST_CHECKED"))
+		
+		layoutView.addSeparatorSection()
+		
+		// The switch reveals the debug wireframes of both tabs
+		let wireframes = layoutView.addColumnSection(label: String(localized: "Wireframes"),
+													identifier: .init("Wireframes"))
+		let wireframeSwitch = DemoSwitch(sizingWindow: tabViewController?.view.window) { [weak self] isOn in
+			self?.setWireframes(isOn)
+		}
+		wireframes.addCustomView(wireframeSwitch, verticalAlignment: .centerY)
+		
+		// Names the framework this tab is built with, against the SwiftUI tab next to it
+		let builtWithLabel = SettingsWrappingLabel(string: String(localized: "Built with AppKit"))
+		builtWithLabel.alignment = .center
+		layoutView.addCustomSection(builtWithLabel, identifier: .init("Built With"))
 	}
 	
 	
@@ -97,7 +136,7 @@ class UpdateSettingsPaneViewController: SettingsPaneViewController {
 		// Measured against the width it is given, so the SwiftUI side needs no fixed width
 		advancedTabHostingView = tabLayoutView.addHostingTab(label: String(localized: "Advanced"),
 															 rootView: UpdateAdvancedSettingsView(),
-															 identifier: "Advanced")
+															 identifier: Self.advancedTabIdentifier)
 	}
 	
 	
@@ -118,7 +157,6 @@ class UpdateSettingsPaneViewController: SettingsPaneViewController {
 		
 		if let generalTabLayoutView {
 			wireframes.add(view: generalTabLayoutView, color: LayoutDebugWireframeColor.labelColumn)
-			generalTabLayoutView.debug_setWireframes(true)
 		}
 		
 		// Outlined down to the leaves, since a gap inside the hosting view would not show on its own border
@@ -127,9 +165,20 @@ class UpdateSettingsPaneViewController: SettingsPaneViewController {
 						   color: LayoutDebugWireframeColor.labelColumn,
 						   descendantColor: LayoutDebugWireframeColor.control)
 		}
-		
-		// Assigning true has no effect outside a DEBUG build
-		wireframes.isEnabled = true
+	}
+	
+	/// Assigning true has no effect outside a DEBUG build
+	private func setWireframes(_ flag: Bool) {
+		layoutDebugWireframes?.isEnabled = flag
+		generalTabLayoutView?.debug_setWireframes(flag)
 	}
 
 }
+extension UpdateSettingsPaneViewController: NSTabViewDelegate {
+
+	func tabView(_ tabView: NSTabView, didSelect tabViewItem: NSTabViewItem?) {
+		updateDownloadAnimation()
+	}
+
+}
+

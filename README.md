@@ -4,6 +4,33 @@ A package for building settings / preferences UI in macOS AppKit-based apps.
 
 <img src="./Guide/general1.jpg" width=562>
 
+
+## Requirements
+
+`macOS 15.6` or later.
+
+Panes are loaded through Swift Concurrency, so a pane that loads its content asynchronously is written with `async`/`await`.
+
+
+## Install
+Use SwiftPM.
+
+
+## Breaking Changes
+
+### 2.0.0
+
+| 1.x | 2.0.0 (new) |
+|---|---|
+| `loadPaneContent(completion:)` | `loadPaneContent() async throws` |
+
+Pane content is no longer built in `loadView()`. It goes into `buildPaneContent()`, or into `loadPaneContent()` when it has to be awaited, and the library calls whichever you overrode the first time that tab is selected. Keeping the build in `loadView()` still compiles, but the pane is then built up front and measured before it belongs to a window.
+
+Leaving a pane before its load has finished now cancels it. If the awaited call throws, the pane is left unloaded and built again on the next visit. See [Loading Pane Content](#loading-pane-content).
+
+Everything else is additive: `buildPaneContent()`, `paneContentDidLoad()`, `paneContentDidFailToLoad(_:)`, `SettingsTabLayoutView`, `SettingsHostingView`, the indentation arguments, tab restoration and the pane dissolve. Existing calls keep working.
+
+
 ## Design and Features
 
 ### Preferences-Style Toolbar with Animation
@@ -86,30 +113,28 @@ See [Loading Pane Content](#loading-pane-content).
 
 ## Structure
 
-`SettingsWindow` and `SettingsWindowController` make up the settings window itself. The window controller’s `contentViewController` is a `SettingsTabViewController`, which owns the panes and manages the tab transitions.
+| Class | Role |
+|---|---|
+| `SettingsWindowController` | Owns the window, restores its frame and the tab that was selected last |
+| `SettingsWindow` | The settings window itself: the close-only title bar, the zoom button, the resize animation |
+| `SettingsTabViewController` | The `contentViewController`. Owns the panes, drives the transitions, sizes the window to each pane |
+| `SettingsPaneViewController` | One per tab. Subclass it and build the content in `buildPaneContent()`, or in `loadPaneContent()` when it has to be awaited |
+| `SettingsTabLayoutView` | A nested `NSTabView` inside a single pane, with either layout on each tab. See [NSTabView Inside a Pane](#nstabview-inside-a-pane) |
+| `SettingsHostingView` | Hosts a SwiftUI view and measures its height against the width it is given. See [Embedding SwiftUI Views](#embedding-swiftui-views) |
+| `LayoutDebugWireframes` | The debugging overlay. The section-based layout is built on it, and it is public so you can use it on your own views. See [Wireframes](#wireframes) |
 
-Panes are loaded lazily: content is built when a tab is first selected rather than all at once, and a loading view stands in until it is ready. See [Loading Pane Content](#loading-pane-content).
+A pane is built the first time its tab is selected. See [Loading Pane Content](#loading-pane-content). Its size is recorded during `viewDidLoad()` when a Storyboard or its own constraints laid it out, and from the build itself when it was built in code. See [Resolving the Pane Size](#resolving-the-pane-size).
 
-Every pane is a `SettingsPaneViewController` subclass. A pane laid out by a Storyboard or by its own constraints has its size recorded during `viewDidLoad()`, while a pane built in code records it from that build. See [Resolving the Pane Size](#resolving-the-pane-size).
+The demo app has one tab per thing worth showing. See the pane classes under `Demo/Panes`.
 
-For the section-based layout, a `SettingsLayoutView` holds the sections and decides the geometry. Sections come in two shapes: `SettingsColumnSectionView` for the two-column row (one trailing-aligned label, any number of leading-aligned items), and the label-less ones — separator, button, checkbox and custom — which span the whole container by default. Description text uses `SettingsWrappingLabel`, which wraps only when the text does not fit its column.
-
-For the guide-based layout, the `SettingsPaneLayoutGuide` protocol installs a `SettingsPaneContainerView` that vends the shared layout guides.
-
-`SettingsTabLayoutView` puts a nested tab view inside a single pane, with either layout on each tab. See [Tabs Inside a Pane](#tabs-inside-a-pane).
-
-`LayoutDebugWireframes` draws the debugging overlay. The section-based layout is built on it, and it is public so you can use it on your own views. See [Wireframes](#wireframes).
-
-The demo app covers all of it: the “General”, “View” and “Extensions” tabs for the section-based layout, and the “Advanced” and “Developer” tabs for the guide-based one. See the pane classes under `Demo/Panes`.
-
-
-## Requirements
-
-macOS 15.6 or later. Panes are loaded through Swift Concurrency, so a pane that loads its content asynchronously is written with `async`/`await`.
-
-
-## Install
-Use SwiftPM.
+| Tab | What it shows | Built with |
+|---|---|---|
+| General | The two-column form at its plainest, with indented sub-options under a checkbox | Section-based. `addColumnSection`, checkboxes, a pop-up button, description labels, separators |
+| View | The label-less sections next to the two-column ones, and controls that carry no intrinsic width | Section-based. `addButtonSection`, `addCheckboxSection`, `addCustomView` with a color well and a slider |
+| Extensions | A pane that fetches before it can be built, and a table that takes the surplus height as the window is dragged | Section-based with no declared item column width. `loadPaneContent() async throws`, a flexible-height section, `isResizableView` |
+| Updates | One pane divided into tabs, AppKit on one and SwiftUI on the other | `SettingsTabLayoutView`, `SettingsHostingView`, a repeating SF Symbol effect |
+| Advanced | A pane laid out in a Storyboard rather than in code | Guide-based. `SettingsPaneLayoutGuide`, `capturePreferredPaneSize()` |
+| Developer | A resizable pane that declares its own bounds | Guide-based in code, with the width and height limits set by hand |
 
 
 ## Usage
@@ -153,7 +178,12 @@ settingsWindowController.showWindow(nil)
 
 ## Building a Pane Layout
 
+
 ### Section-Based Layout (recommended)
+
+<img src="./Guide/general1.jpg" width=562>
+
+_Section-based layout_
 
 Create a `SettingsLayoutView`, install it into the pane view, then add one section per row. `install(in:margins:)` pins the layout view to the pane view, with the system standard spacing on all four edges unless you pass `.insets(_:)` for your own margins.
 
@@ -197,6 +227,29 @@ Sections are stacked in the order you add them, spaced by `SettingsLayoutMetrics
 Items added to a two-column section stack downward, spaced by `SettingsLayoutMetrics.itemSpacing`. The section vends checkboxes, push buttons and pop-up buttons ready-made, takes description text and arbitrary views, and can place an accessory view on the trailing side of an item you already added.
 
 When adding an item you can choose how the label lines up with it: `.firstBaseline` (default), `.top` or `.centerY`. Use `.centerY` for controls that have no text baseline, such as a switch or a color well.
+
+
+### Indentation
+
+Anything you add can be indented — the items of a two-column section, and the label-less sections as well. Pass `indentationLevel:` when adding it, and `indentationPerLevel:` if the step of `SettingsLayoutMetrics.indentationPerLevel` does not suit you. A separator takes no indentation, since it always spans the container.
+
+Sub-options under a checkbox are the common case.
+
+```swift
+let download = layoutView.addColumnSection(label: "Download", identifier: .init("Download"))
+download.addCheckbox(title: "Download in the background", target: self, action: #selector(toggleItem(_:)))
+download.addCheckbox(title: "Notify when ready",
+					 isOn: true,
+					 indentationLevel: 1,
+					 target: self,
+					 action: #selector(toggleItem(_:)))
+```
+
+In a two-column section the inset counts towards the width the item column asks for, so an indented item is not squeezed for being indented. A description label wraps within whatever the column has left after the inset. `SettingsSectionView.indentation(forLevel:perLevel:)` is public if you want the same inset on a view you place yourself.
+
+<img src="./Guide/indentation.jpg" width=419>
+
+_Checkboxes with indentation._
 
 
 ### Section Width
@@ -257,6 +310,11 @@ The wireframes make the difference plain: the item column settles on its widest 
 <img src="./Guide/extensions2.jpg" width=562>
 
 
+### Reaching Sections Afterwards
+
+Pass an `identifier` when adding a section if you want to find it later. `SettingsLayoutView` vends its sections as arrays, looks one up by identifier, and can move or swap them by identifier as well.
+
+
 ### Resolving the Pane Size
 
 `SettingsTabViewController` sizes the window from each pane’s `preferredPaneSize`. For a pane built in code, call `sizePaneToFitContent(minimumWidth:)` at the end of the build. It gives the view a lower bound, shrink-wraps it to the sections and records the result.
@@ -273,9 +331,97 @@ Description labels only learn the width they wrap at during layout, so the metho
 For a pane sized by a Storyboard or by your own constraints, call `capturePreferredPaneSize()` instead. It lays the view out and records the resulting frame size, without touching the width.
 
 
+### Re-measuring After a Change
+
+`preferredPaneSize` is a snapshot, and `SettingsTabViewController` caches it again per tab. Neither notices a later change to the content, the font size or the locale.
+
+Call `invalidatePaneSize()` on the pane to measure again and refresh both caches. The window resizes to follow only while that pane is the one on screen.
+
+```swift
+layoutView?.addColumnSection(label: "Sync", identifier: .init("Sync"))
+invalidatePaneSize()
+```
+
+
+### Guide-Based Layout (experimental)
+
+<img src="./Guide/layoutguide.jpg" width=692>
+
+_Guide-based layout_
+
+Enable the container view, set the label column width if you need to, then constrain your own views against `labelLayoutGuide` and `secondaryAreaLayoutGuide`. Passing nil for `maximumWidth` lets the container grow freely.
+
+```swift
+class AdvancedSettingsPaneViewController: SettingsPaneViewController, SettingsPaneLayoutGuide {
+
+	var contentContainerView: SettingsPaneContainerView?
+
+	override func buildPaneContent() {
+		setContentContainerView(maximumWidth: 550)
+		contentContainerView?.labelLayoutGuideWidth = 160
+		contentContainerView?.debug_setWireframes(true)
+		capturePreferredPaneSize()
+	}
+
+}
+```
+
+
+### NSTabView Inside a Pane
+
+<img src="./Guide/embedding_swiftui.jpg" width=592>
+
+_Secondary NSTabView_
+
+A pane with more content than fits one screen can put it behind tabs. `SettingsTabLayoutView` lays a nested `NSTabView` into the pane and hands each tab what it needs.
+
+```swift
+override func buildPaneContent() {
+	let tabLayoutView = SettingsTabLayoutView()
+	tabLayoutView.install(in: view)
+
+	let general = tabLayoutView.addSectionTab(label: "General", identifier: "General")
+	general.addColumnSection(label: "Schedule", identifier: .init("Schedule"))
+		.addCheckbox(title: "Check automatically", isOn: true, target: self, action: #selector(toggleItem(_:)))
+
+	tabLayoutView.addHostingTab(label: "Advanced", rootView: AdvancedSettingsView())
+
+	sizePaneToFitContent(minimumWidth: 480)
+}
+```
+
+`addSectionTab` returns the `SettingsLayoutView` laid into that tab, so a tab is filled the same way a whole pane is. `addHostingTab` wraps your SwiftUI view in a `SettingsHostingView` and returns it. `addTab` takes any view you built yourself. The `tabView` property is the `NSTabView` underneath, for whatever the three do not cover.
+
+A nested `NSTabView` says nothing about its size on its own, so the container reports the size the largest tab needs. `sizePaneToFitContent(minimumWidth:)` then works here as it does anywhere else, and `invalidateMeasuredSize()` measures again after the content of a tab changed.
+
+`install(in:margins:)` keeps the tabs closer to the toolbar than the system margin would, since the tab strip reads as part of the toolbar area. Pass `.insets(_:)` to set all four edges yourself.
+
+The “Updates” tab of the demo app is built this way, with the section layout on one tab and SwiftUI on the other.
+
+
 ### Embedding SwiftUI Views
 
-`NSHostingView` resolves its SwiftUI layout only once it belongs to a window. Until then it ignores environment values such as `controlSize` and reports the default size instead. A pane is measured while it is being built, before it reaches a window, so that difference is left over as slack at the bottom of the layout.
+<img src="./Guide/embedding_swiftui.jpg" width=592>
+
+_SettingsHostingView in NSTabView_
+
+`NSHostingView` sizes itself from an unspecified proposal, so content whose height follows its width — text that wraps, most of all — comes out short. `SettingsHostingView` measures the height against the width instead. Hand it a root view and add it like any other view.
+
+```swift
+let section = layoutView.addColumnSection(label: "Notes", identifier: .init("Notes"))
+section.addCustomView(SettingsHostingView(rootView: NotesView()))
+```
+
+It reports the height its content needs at the width it currently has, and asks again whenever that width changes. `addHostingTab(label:rootView:)` wraps your view in one of these for you. Call `invalidateMeasuredSize()` after changing the content from outside the SwiftUI state, and assign `rootView` to replace the content itself.
+
+
+### SwiftUI Controls of a Fixed Size
+
+<img src="./Guide/wireframes_switch.jpg" width=244>
+
+_DemoSwitch_
+
+A switch or a stepper has one size and keeps it, so measuring against a width buys nothing. What it needs instead is for that size to resolve at all: `NSHostingView` resolves its SwiftUI layout only once it belongs to a window, and until then it ignores environment values such as `controlSize` and reports the default size. A pane is measured while it is being built, before it reaches a window, so that difference is left over as slack in the layout.
 
 Settle the size at initialization by putting the hosting view into a window and running a single layout pass. The window is already reachable from the pane through `tabViewController?.view.window`.
 
@@ -303,23 +449,6 @@ final class DemoSwitch: NSHostingView<DemoSwitchView> {
 Avoid measuring the pane again after it appears. Resizing the window from `viewDidAppear()` competes with the window presentation and the tab transition.
 
 
-### Re-measuring After a Change
-
-`preferredPaneSize` is a snapshot, and `SettingsTabViewController` caches it again per tab. Neither notices a later change to the content, the font size or the locale.
-
-Call `invalidatePaneSize()` on the pane to measure again and refresh both caches. The window resizes to follow only while that pane is the one on screen.
-
-```swift
-layoutView?.addColumnSection(label: "Sync", identifier: .init("Sync"))
-invalidatePaneSize()
-```
-
-
-### Reaching Sections Afterwards
-
-Pass an `identifier` when adding a section if you want to find it later. `SettingsLayoutView` vends its sections as arrays, looks one up by identifier, and can move or swap them by identifier as well.
-
-
 ### Wireframes
 
 `layoutView.debug_setWireframes(true)` reveals the layout. It has no effect outside a `DEBUG` build, and it also reaches sections added after the call.
@@ -345,56 +474,6 @@ wireframes.updateLayout()
 A view is bordered through its own layer, so Auto Layout keeps that one in place. Everything else is drawn by layers laid into the host, which is why `updateLayout()` has to run from the host’s `layout()`. Call `refresh()` after putting views inside an already registered view, and `removeAll()` to drop every registration.
 
 `isEnabled` shows or hides everything at once, and assigning true does nothing outside a `DEBUG` build. `LayoutDebugWireframeColor` carries the colors the settings panes use; the line width and the alpha values are static properties on `LayoutDebugWireframes` itself.
-
-
-### Guide-Based Layout (experimental)
-
-Enable the container view, set the label column width if you need to, then constrain your own views against `labelLayoutGuide` and `secondaryAreaLayoutGuide`. Passing nil for `maximumWidth` lets the container grow freely.
-
-```swift
-class AdvancedSettingsPaneViewController: SettingsPaneViewController, SettingsPaneLayoutGuide {
-
-	var contentContainerView: SettingsPaneContainerView?
-
-	override func buildPaneContent() {
-		setContentContainerView(maximumWidth: 550)
-		contentContainerView?.labelLayoutGuideWidth = 160
-		contentContainerView?.debug_setWireframes(true)
-		capturePreferredPaneSize()
-	}
-
-}
-```
-
-<img src="./Guide/layoutguide.jpg" width=692>
-
-
-### Tabs Inside a Pane
-
-A pane with more content than fits one screen can put it behind tabs. `SettingsTabLayoutView` lays a nested `NSTabView` into the pane and hands each tab what it needs.
-
-```swift
-override func buildPaneContent() {
-	let tabLayoutView = SettingsTabLayoutView()
-	tabLayoutView.install(in: view)
-
-	let general = tabLayoutView.addSectionTab(label: "General", identifier: "General")
-	general.addColumnSection(label: "Schedule", identifier: .init("Schedule"))
-		.addCheckbox(title: "Check automatically", isOn: true, target: self, action: #selector(toggleItem(_:)))
-
-	tabLayoutView.addHostingTab(label: "Advanced", rootView: AdvancedSettingsView())
-
-	sizePaneToFitContent(minimumWidth: 480)
-}
-```
-
-`addSectionTab` returns the `SettingsLayoutView` laid into that tab, so a tab is filled the same way a whole pane is. `addHostingTab` wraps your SwiftUI view in a `SettingsHostingView` and returns it. `addTab` takes any view you built yourself. The `tabView` property is the `NSTabView` underneath, for whatever the three do not cover.
-
-A nested `NSTabView` says nothing about its size on its own, so the container reports the size the largest tab needs. `sizePaneToFitContent(minimumWidth:)` then works here as it does anywhere else, and `invalidateMeasuredSize()` measures again after the content of a tab changed.
-
-`install(in:margins:)` keeps the tabs closer to the toolbar than the system margin would, since the tab strip reads as part of the toolbar area. Pass `.insets(_:)` to set all four edges yourself.
-
-The “Updates” tab of the demo app is built this way, with the section layout on one tab and SwiftUI on the other.
 
 
 ## Appearance of Tabs

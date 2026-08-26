@@ -50,11 +50,15 @@ open class SettingsButtonSectionView: SettingsSectionView {
 	public init(title: String,
 				controlSize: NSControl.ControlSize = .regular,
 				alignment: SettingsSectionAlignment = .center,
+				indentationLevel: Int = 0,
+				indentationPerLevel: CGFloat = SettingsLayoutMetrics.indentationPerLevel,
 				identifier: NSUserInterfaceItemIdentifier? = nil,
 				target: AnyObject?,
 				action: Selector?)
 	{
 		super.init(identifier: identifier)
+
+		let indentation = Self.indentation(forLevel: indentationLevel, perLevel: indentationPerLevel)
 
 		button = NSButton(title: title, target: target, action: action)
 		button.bezelStyle = .push
@@ -65,16 +69,19 @@ open class SettingsButtonSectionView: SettingsSectionView {
 		var constraints = [
 			button.topAnchor.constraint(equalTo: topAnchor),
 			button.bottomAnchor.constraint(equalTo: bottomAnchor),
-			button.leadingAnchor.constraint(greaterThanOrEqualTo: contentGuide.leadingAnchor),
+			button.leadingAnchor.constraint(greaterThanOrEqualTo: contentGuide.leadingAnchor, constant: indentation),
 			button.trailingAnchor.constraint(lessThanOrEqualTo: contentGuide.trailingAnchor),
 		]
 
 		switch alignment {
 			case .leading:
-				constraints.append(button.leadingAnchor.constraint(equalTo: contentGuide.leadingAnchor))
+				constraints.append(button.leadingAnchor.constraint(equalTo: contentGuide.leadingAnchor,
+																  constant: indentation))
 
 			case .center:
-				constraints.append(button.centerXAnchor.constraint(equalTo: contentGuide.centerXAnchor))
+				// The inset shifts the centre, or an indented button would sit where an unindented one does
+				constraints.append(button.centerXAnchor.constraint(equalTo: contentGuide.centerXAnchor,
+																  constant: indentation / 2))
 
 			case .trailing:
 				constraints.append(button.trailingAnchor.constraint(equalTo: contentGuide.trailingAnchor))

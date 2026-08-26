@@ -30,6 +30,8 @@ struct UpdateAdvancedSettingsView: View {
 	/// Keeps the wrapping description from stretching along with a resized window
 	private static let contentMaximumWidth: CGFloat = 320
 	
+	var isDownloadAnimating: Bool = false
+	
 	@State private var channel: Channel = .stable
 	@State private var allowsPrerelease = false
 	@State private var keepsInstallers = true
@@ -51,10 +53,8 @@ struct UpdateAdvancedSettingsView: View {
 	
 	private var availabilityHeader: some View {
 		HStack(alignment: .top, spacing: 10) {
-			Image(systemName: "arrow.down.circle.fill")
-				.font(.system(size: 26))
-				.symbolRenderingMode(.hierarchical)
-				.foregroundStyle(.tint)
+			UpdateDownloadIcon(isAnimating: isDownloadAnimating)
+				.id(isDownloadAnimating)
 			
 			VStack(alignment: .leading, spacing: 2) {
 				Text(String(localized: "UPDATE_AVAILABLE_TITLE"))
@@ -66,6 +66,7 @@ struct UpdateAdvancedSettingsView: View {
 		}
 	}
 	
+
 	private var channelBox: some View {
 		GroupBox(String(localized: "Update Channel")) {
 			VStack(alignment: .leading, spacing: 8) {
@@ -104,10 +105,42 @@ struct UpdateAdvancedSettingsView: View {
 	
 	private var descriptionText: some View {
 		// Wrapping text ties the height to the width, which is the case the pane measurement has to cope with
-		Text(String(localized: "UPDATE_ADVANCED_DESCRIPTION"))
-			.font(.callout)
+		Text(String(localized: "Built with SwiftUI"))
+			.font(.subheadline)
 			.foregroundStyle(.secondary)
 			.fixedSize(horizontal: false, vertical: true)
+			.frame(maxWidth: .infinity, alignment: .center)
 	}
 	
 }
+/// Kept apart so that switching tabs discards the effect in flight along with the view
+private struct UpdateDownloadIcon: View {
+	
+	let isAnimating: Bool
+	
+	@State private var isCleared = true
+	
+	var body: some View {
+		let icon = Image(systemName: "arrow.down.circle.fill")
+			.font(.system(size: 26))
+			.symbolRenderingMode(.hierarchical)
+			.foregroundStyle(.tint)
+		
+		if #available(macOS 26, *), isAnimating {
+			icon.symbolEffect(.drawOn.individually, isActive: isCleared)
+				.task {
+					await Task.yield()
+					
+					while !Task.isCancelled {
+						isCleared.toggle()
+						try? await Task.sleep(for: .seconds(1))
+					}
+				}
+		}
+		else {
+			icon
+		}
+	}
+	
+}
+

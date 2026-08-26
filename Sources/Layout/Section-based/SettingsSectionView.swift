@@ -204,9 +204,15 @@ open class SettingsCustomSectionView: SettingsSectionView {
 
 	public private(set) var contentView: NSView
 
-	public init(contentView: NSView, identifier: NSUserInterfaceItemIdentifier? = nil) {
+	public init(contentView: NSView,
+				indentationLevel: Int = 0,
+				indentationPerLevel: CGFloat = SettingsLayoutMetrics.indentationPerLevel,
+				identifier: NSUserInterfaceItemIdentifier? = nil)
+	{
 		self.contentView = contentView
 		super.init(identifier: identifier)
+
+		let indentation = Self.indentation(forLevel: indentationLevel, perLevel: indentationPerLevel)
 
 		contentView.translatesAutoresizingMaskIntoConstraints = false
 		addSubview(contentView)
@@ -214,7 +220,7 @@ open class SettingsCustomSectionView: SettingsSectionView {
 		NSLayoutConstraint.activate([
 			contentView.topAnchor.constraint(equalTo: topAnchor),
 			contentView.bottomAnchor.constraint(equalTo: bottomAnchor),
-			contentView.leadingAnchor.constraint(equalTo: contentGuide.leadingAnchor),
+			contentView.leadingAnchor.constraint(equalTo: contentGuide.leadingAnchor, constant: indentation),
 			contentView.trailingAnchor.constraint(equalTo: contentGuide.trailingAnchor),
 		])
 	}

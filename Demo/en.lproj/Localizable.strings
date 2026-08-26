@@ -108,4 +108,5 @@
 "Update Channel" = "Update Channel";
 "Allow prerelease builds" = "Allow prerelease builds";
 "Keep downloaded installers" = "Keep downloaded installers";
-"UPDATE_ADVANCED_DESCRIPTION" = "Prerelease builds contain unfinished features. Kept installers take up disk space, and are removed once they are no longer needed.";
+"Built with SwiftUI" = "Built with SwiftUI";
+"Built with AppKit" = "Built with AppKit";

@@ -108,4 +108,5 @@
 "Update Channel" = "アップデートチャンネル";
 "Allow prerelease builds" = "プレリリースビルドを許可";
 "Keep downloaded installers" = "ダウンロードしたインストーラを保持";
-"UPDATE_ADVANCED_DESCRIPTION" = "プレリリースビルドには未完成の機能が含まれます。保持したインストーラはディスク容量を占有するため、不要になったら削除されます。";
+"Built with SwiftUI" = "SwiftUIで構築";
+"Built with AppKit" = "AppKitで構築";
