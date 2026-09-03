@@ -55,7 +55,6 @@ open class SettingsTabLayoutView: NSView {
 					topAnchor.constraint(equalTo: parentView.topAnchor, constant: Self.defaultTopMargin),
 					leadingAnchor.constraint(equalToSystemSpacingAfter: parentView.leadingAnchor, multiplier: 1),
 					parentView.trailingAnchor.constraint(equalToSystemSpacingAfter: trailingAnchor, multiplier: 1),
-					parentView.bottomAnchor.constraint(equalToSystemSpacingBelow: bottomAnchor, multiplier: 1),
 				])
 				
 			case .insets(let insets):
@@ -63,9 +62,10 @@ open class SettingsTabLayoutView: NSView {
 					topAnchor.constraint(equalTo: parentView.topAnchor, constant: insets.top),
 					leadingAnchor.constraint(equalTo: parentView.leadingAnchor, constant: insets.leading),
 					parentView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: insets.trailing),
-					parentView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: insets.bottom),
 				])
 		}
+		
+		NSLayoutConstraint.activate(margins.bottomConstraints(pinning: self, in: parentView))
 	}
 	
 	
@@ -116,14 +116,31 @@ open class SettingsTabLayoutView: NSView {
 	open func addTab(label: String, contentView: NSView, identifier: String? = nil) -> NSTabViewItem {
 		let item = identifier.map { NSTabViewItem(identifier: $0) } ?? NSTabViewItem()
 		item.label = label
-		item.view = contentView
+		item.view = tabContainerView(wrapping: contentView)
 		
-		// Settled before the item goes in, or a still collapsed tab view would hand it the height of the tab strip alone
+		// The tabs already added measure against a real width only once they have been laid out
 		layoutSubtreeIfNeeded()
 		tabView.addTabViewItem(item)
 		invalidateIntrinsicContentSize()
 		
 		return item
+	}
+	
+	/// Takes the squeeze the tab view puts on the item, so the content keeps its own height and needs no constraint of its own relaxed
+	private func tabContainerView(wrapping contentView: NSView) -> NSView {
+		let containerView = NSView()
+		contentView.translatesAutoresizingMaskIntoConstraints = false
+		containerView.addSubview(contentView)
+		
+		NSLayoutConstraint.activate([
+			contentView.topAnchor.constraint(equalTo: containerView.topAnchor),
+			contentView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+			contentView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+		])
+		let noMargins = SettingsLayoutMargins.insets(NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+		NSLayoutConstraint.activate(noMargins.bottomConstraints(pinning: contentView, in: containerView))
+		
+		return containerView
 	}
 	
 	

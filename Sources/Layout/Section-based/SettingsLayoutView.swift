@@ -45,12 +45,38 @@ public enum SettingsLayoutPriority {
 	public static let contentWidthGrow = NSLayoutConstraint.Priority(rawValue: 200)
 	/// Horizontal priority of controls that take no part in deciding a column width
 	public static let nonContributing = NSLayoutConstraint.Priority(rawValue: 50)
+	/// Bottom margin a view keeps to its container. Not required, so content too tall runs over instead of breaking
+	public static let paneBottomMargin = NSLayoutConstraint.Priority(rawValue: 999)
 	/// Force that fills the pane vertically. Not required, so a pane dragged shorter bends instead of breaking
 	public static let contentHeightGrow = NSLayoutConstraint.Priority(rawValue: 999)
 	/// Height a stretching section asks for. Beats the shrink, gives way to a shorter pane
 	public static let sectionPreferredHeight = NSLayoutConstraint.Priority(rawValue: 251)
 	/// Force that hugs a stretching section to its lower bound. Weakest of all, so the surplus lands there
 	public static let sectionHeightShrink = NSLayoutConstraint.Priority(rawValue: 1)
+
+}
+
+extension SettingsLayoutMargins {
+
+	/// Bottom pinning where only the margin gives way, so content too tall for its container runs over instead of breaking
+	func bottomConstraints(pinning view: NSView, in parentView: NSView) -> [NSLayoutConstraint] {
+		let fill: NSLayoutConstraint
+		let margin: NSLayoutConstraint
+
+		switch self {
+			case .systemSpacing:
+				fill = parentView.bottomAnchor.constraint(lessThanOrEqualToSystemSpacingBelow: view.bottomAnchor, multiplier: 1)
+				margin = parentView.bottomAnchor.constraint(equalToSystemSpacingBelow: view.bottomAnchor, multiplier: 1)
+
+			case .insets(let insets):
+				fill = parentView.bottomAnchor.constraint(lessThanOrEqualTo: view.bottomAnchor, constant: insets.bottom)
+				margin = parentView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: insets.bottom)
+		}
+
+		margin.priority = SettingsLayoutPriority.paneBottomMargin
+
+		return [fill, margin]
+	}
 
 }
 
@@ -124,7 +150,6 @@ open class SettingsLayoutView: NSView {
 					topAnchor.constraint(equalToSystemSpacingBelow: parentView.topAnchor, multiplier: 1),
 					leadingAnchor.constraint(equalToSystemSpacingAfter: parentView.leadingAnchor, multiplier: 1),
 					parentView.trailingAnchor.constraint(equalToSystemSpacingAfter: trailingAnchor, multiplier: 1),
-					parentView.bottomAnchor.constraint(equalToSystemSpacingBelow: bottomAnchor, multiplier: 1),
 				])
 
 			case .insets(let insets):
@@ -132,9 +157,10 @@ open class SettingsLayoutView: NSView {
 					topAnchor.constraint(equalTo: parentView.topAnchor, constant: insets.top),
 					leadingAnchor.constraint(equalTo: parentView.leadingAnchor, constant: insets.leading),
 					parentView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: insets.trailing),
-					parentView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: insets.bottom),
 				])
 		}
+
+		NSLayoutConstraint.activate(margins.bottomConstraints(pinning: self, in: parentView))
 	}
 
 	private func setUpGuides() {
