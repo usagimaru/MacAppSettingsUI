@@ -118,7 +118,7 @@ open class SettingsTabLayoutView: NSView {
 		item.label = label
 		item.view = tabContainerView(wrapping: contentView)
 		
-		// The tabs already added measure against a real width only once they have been laid out
+		// The tabs already added measure against no width until they are laid out
 		layoutSubtreeIfNeeded()
 		tabView.addTabViewItem(item)
 		invalidateIntrinsicContentSize()
@@ -126,7 +126,7 @@ open class SettingsTabLayoutView: NSView {
 		return item
 	}
 	
-	/// Takes the squeeze the tab view puts on the item, so the content keeps its own height and needs no constraint of its own relaxed
+	/// Takes the squeeze from the tab view, so the content keeps its own height
 	private func tabContainerView(wrapping contentView: NSView) -> NSView {
 		let containerView = NSView()
 		contentView.translatesAutoresizingMaskIntoConstraints = false

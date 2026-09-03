@@ -58,7 +58,7 @@ public enum SettingsLayoutPriority {
 
 extension SettingsLayoutMargins {
 
-	/// Bottom pinning where only the margin gives way, so content too tall for its container runs over instead of breaking
+	/// Bottom pinning that lets taller content run over instead of breaking
 	func bottomConstraints(pinning view: NSView, in parentView: NSView) -> [NSLayoutConstraint] {
 		let fill: NSLayoutConstraint
 		let margin: NSLayoutConstraint
