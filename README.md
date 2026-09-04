@@ -99,6 +99,13 @@ Both come with a wireframing feature for debugging. See [Building a Pane Layout]
 <img src="./Guide/layoutguide.jpg" width=692>
 
 
+### Panes with Little Content
+
+A pane holding two checkboxes shrink-wraps into a window barely taller than its toolbar. Such a pane can declare a minimum height instead, and place its content in the middle of the room that leaves.
+
+See [Minimum Height and Centered Content](#minimum-height-and-centered-content).
+
+
 ### Lazy Pane Loading
 
 A pane is built the first time its tab is selected, not when the window is created, and a loading view stands in until it is ready. A tab nobody visits costs nothing.
@@ -131,6 +138,7 @@ The demo app has one tab per thing worth showing. See the pane classes under `De
 |---|---|---|
 | General | The two-column form at its plainest, with indented sub-options under a checkbox | Section-based. `addColumnSection`, checkboxes, a pop-up button, description labels, separators |
 | View | The label-less sections next to the two-column ones, and controls that carry no intrinsic width | Section-based. `addButtonSection`, `addCheckboxSection`, `addCustomView` with a color well and a slider |
+| Account | A pane with almost nothing in it, held at a minimum height with its content centered in the surplus | Section-based. `sizePaneToFitContent(minimumWidth:minimumHeight:)`, `verticalAlignment` |
 | Extensions | A pane that fetches before it can be built, and a table that takes the surplus height as the window is dragged | Section-based with no declared item column width. `loadPaneContent() async throws`, a flexible-height section, `isResizableView` |
 | Updates | One pane divided into tabs, AppKit on one and SwiftUI on the other | `SettingsTabLayoutView`, `SettingsHostingView`, a repeating SF Symbol effect |
 | Advanced | A pane laid out in a Storyboard rather than in code | Guide-based. `SettingsPaneLayoutGuide`, `capturePreferredPaneSize()` |
@@ -317,7 +325,7 @@ Pass an `identifier` when adding a section if you want to find it later. `Settin
 
 ### Resolving the Pane Size
 
-`SettingsTabViewController` sizes the window from each pane’s `preferredPaneSize`. For a pane built in code, call `sizePaneToFitContent(minimumWidth:)` at the end of the build. It gives the view a lower bound, shrink-wraps it to the sections and records the result.
+`SettingsTabViewController` sizes the window from each pane’s `preferredPaneSize`. For a pane built in code, call `sizePaneToFitContent(minimumWidth:minimumHeight:)` at the end of the build. It gives the view its lower bounds, shrink-wraps it to the sections and records the result.
 
 ```swift
 override func buildPaneContent() {
@@ -326,9 +334,40 @@ override func buildPaneContent() {
 }
 ```
 
-Description labels only learn the width they wrap at during layout, so the method measures repeatedly until the size stops changing. It is safe to call again with a different lower bound.
+Both bounds are optional, and an axis you leave out follows the content alone. See [Minimum Height and Centered Content](#minimum-height-and-centered-content) for the height.
 
-For a pane sized by a Storyboard or by your own constraints, call `capturePreferredPaneSize()` instead. It lays the view out and records the resulting frame size, without touching the width.
+Description labels only learn the width they wrap at during layout, so the method measures repeatedly until the size stops changing. It is safe to call again with different lower bounds.
+
+For a pane sized by a Storyboard or by your own constraints, call `capturePreferredPaneSize()` instead. It lays the view out and records the resulting frame size, without touching the width. Note that a pane is handed the frame of the pane before it when the tab is switched, so declare the size yourself before capturing it.
+
+
+### Minimum Height and Centered Content
+
+Shrink-wrapping is the wrong answer for a pane with two rows in it: the window comes out barely taller than the toolbar. Pass `minimumHeight:` to hold the pane at a height of your choosing, and the measured size is lifted to that floor.
+
+The room this leaves lands below the sections, since a pane stacks from the top. `verticalAlignment` splits it above and below instead.
+
+```swift
+override func buildPaneContent() {
+	buildSections()
+	sizePaneToFitContent(minimumWidth: 530, minimumHeight: 300)
+}
+
+private func buildSections() {
+	let layoutView = SettingsLayoutView()
+	layoutView.install(in: view)
+	layoutView.verticalAlignment = .center
+
+	let account = layoutView.addColumnSection(label: "Account", identifier: .init("Account"))
+	account.addCheckbox(title: "Sync with iCloud", isOn: true, target: self, action: #selector(toggleItem(_:)))
+}
+```
+
+`SettingsLayoutVerticalAlignment` is either `.top`, the default, or `.center`. It can be assigned at any time, and the “Account” tab of the demo app is built this way.
+
+A section that takes in the surplus height leaves nothing to center, so the centering steps aside on its own while one is present. See [Section Height](#section-height).
+
+`SettingsTabLayoutView` carries the same property for the content of its tabs, and assigning it reaches the tabs already added. Centering there is what a pane wants when one tab is far shorter than the others, since every tab is handed the height the tallest one needs.
 
 
 ### Re-measuring After a Change
@@ -392,7 +431,9 @@ override func buildPaneContent() {
 
 `addSectionTab` returns the `SettingsLayoutView` laid into that tab, so a tab is filled the same way a whole pane is. `addHostingTab` wraps your SwiftUI view in a `SettingsHostingView` and returns it. `addTab` takes any view you built yourself. The `tabView` property is the `NSTabView` underneath, for whatever the three do not cover.
 
-A nested `NSTabView` says nothing about its size on its own, so the container reports the size the largest tab needs. `sizePaneToFitContent(minimumWidth:)` then works here as it does anywhere else, and `invalidateMeasuredSize()` measures again after the content of a tab changed.
+A nested `NSTabView` says nothing about its size on its own, so the container reports the size the largest tab needs. `sizePaneToFitContent(minimumWidth:minimumHeight:)` then works here as it does anywhere else, and `invalidateMeasuredSize()` measures again after the content of a tab changed.
+
+Every tab is handed the height of the tallest one, which leaves the shorter tabs with room below their content. `verticalAlignment` splits that room above and below instead. See [Minimum Height and Centered Content](#minimum-height-and-centered-content).
 
 `install(in:margins:)` keeps the tabs closer to the toolbar than the system margin would, since the tab strip reads as part of the toolbar area. Pass `.insets(_:)` to set all four edges yourself.
 
@@ -487,7 +528,7 @@ A tab is described by properties on `SettingsPaneViewController`: `tabName` (an 
 
 Set `isResizableView` on `SettingsPaneViewController` to allow window resizing only while that pane is active. It defaults to false. See the demo implementation and the `Main` storyboard.
 
-`minimumPaneSize` and `maximumPaneSize` bound the drag, and `sizePaneToFitContent(minimumWidth:)` fills in the minimum for you. Giving both the same width leaves a pane resizable in height alone.
+`minimumPaneSize` and `maximumPaneSize` bound the drag, and `sizePaneToFitContent(minimumWidth:minimumHeight:)` fills in the minimum for you. Giving both the same width leaves a pane resizable in height alone.
 
 `SettingsTabViewController` remembers the size the user left each resizable pane at, so leaving a tab and coming back restores it. The record lives only while the app runs; `userResizedSize(for:)` and `setUserResizedSize(_:for:)` are there if you want to persist it yourself.
 

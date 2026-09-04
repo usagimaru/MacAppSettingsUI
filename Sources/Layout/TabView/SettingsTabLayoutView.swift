@@ -16,6 +16,16 @@ open class SettingsTabLayoutView: NSView {
 	/// The tab view this container owns
 	public let tabView = NSTabView()
 	
+	/// Vertical placement of the content in every tab
+	open var verticalAlignment: SettingsLayoutVerticalAlignment = .top {
+		didSet {
+			tabContentPinnings.forEach { $0.activate(verticalAlignment) }
+		}
+	}
+	
+	/// Kept so the alignment can be switched after the tabs were added
+	private var tabContentPinnings = [TabContentPinning]()
+	
 	
 	// MARK: -
 	
@@ -133,12 +143,12 @@ open class SettingsTabLayoutView: NSView {
 		containerView.addSubview(contentView)
 		
 		NSLayoutConstraint.activate([
-			contentView.topAnchor.constraint(equalTo: containerView.topAnchor),
 			contentView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
 			contentView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
 		])
-		let noMargins = SettingsLayoutMargins.insets(NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-		NSLayoutConstraint.activate(noMargins.bottomConstraints(pinning: contentView, in: containerView))
+		let pinning = TabContentPinning(pinning: contentView, in: containerView)
+		pinning.activate(verticalAlignment)
+		tabContentPinnings.append(pinning)
 		
 		return containerView
 	}
@@ -186,6 +196,35 @@ open class SettingsTabLayoutView: NSView {
 		
 		return NSSize(width: alignmentRect.width - contentRect.width,
 					  height: alignmentRect.height - contentRect.height)
+	}
+	
+}
+
+
+// MARK: -
+
+/// The two vertical pinnings of a tab content view. Only the pair matching the current alignment is active
+private struct TabContentPinning {
+
+	let topAligned: [NSLayoutConstraint]
+	let centerAligned: [NSLayoutConstraint]
+	
+	init(pinning contentView: NSView, in containerView: NSView) {
+		let noMargins = SettingsLayoutMargins.insets(NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+		topAligned = [contentView.topAnchor.constraint(equalTo: containerView.topAnchor)]
+			+ noMargins.bottomConstraints(pinning: contentView, in: containerView)
+			
+		// Centering splits the surplus, so the content keeps its own height instead of being pulled to both edges
+		let topMargin = contentView.topAnchor.constraint(greaterThanOrEqualTo: containerView.topAnchor)
+		topMargin.priority = SettingsLayoutPriority.paneTopMargin
+		centerAligned = [topMargin,
+						 contentView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor)]
+	}
+	
+	func activate(_ alignment: SettingsLayoutVerticalAlignment) {
+		let (active, inactive) = alignment == .center ? (centerAligned, topAligned) : (topAligned, centerAligned)
+		NSLayoutConstraint.deactivate(inactive)
+		NSLayoutConstraint.activate(active)
 	}
 	
 }

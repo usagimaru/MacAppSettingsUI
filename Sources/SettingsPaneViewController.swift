@@ -40,13 +40,19 @@ open class SettingsPaneViewController: NSViewController {
 	/// The largest size this pane allows. nil leaves the pane unbounded
 	open var maximumPaneSize: NSSize?
 
-	/// Lower bound kept so the pane can be measured again
-	public private(set) var minimumPaneWidth: CGFloat = 0
+	/// Lower bound of the pane width. nil lets the width follow the content
+	public private(set) var minimumPaneWidth: CGFloat?
+	
+	/// Lower bound of the pane height. nil lets the height follow the content
+	public private(set) var minimumPaneHeight: CGFloat?
 
 	/// Guard against a layout that never converges
 	private static let paneSizeMeasurementPassLimit = 4
 	
 	private var minimumPaneWidthConstraint: NSLayoutConstraint?
+	
+	/// Whether the pane was shrink-wrapped, so it can be measured again the same way
+	private var fitsPaneToContent = false
 	
 	
 	// MARK: -
@@ -129,22 +135,19 @@ open class SettingsPaneViewController: NSViewController {
 		return vc
 	}
 	
-	/// Give the pane a lower bound and shrink-wrap it to its sections. Call at the end of `loadView()` or `viewDidLoad()`
-	open func sizePaneToFitContent(minimumWidth: CGFloat) {
+	/// Give the pane its lower bounds and shrink-wrap it to its sections. Call at the end of `loadView()` or `viewDidLoad()`
+	/// - Parameters:
+	///   - minimumWidth: Lower bound of the pane width. Leaving it out lets the pane follow its content
+	///   - minimumHeight: Lower bound of the pane height. Leaving it out lets the pane follow its content
+	open func sizePaneToFitContent(minimumWidth: CGFloat? = nil, minimumHeight: CGFloat? = nil) {
 		minimumPaneWidth = minimumWidth
+		minimumPaneHeight = minimumHeight
+		fitsPaneToContent = true
 		
-		// Reusing one constraint keeps repeated calls from stacking lower bounds
-		if let minimumPaneWidthConstraint {
-			minimumPaneWidthConstraint.constant = minimumWidth
-		}
-		else {
-			let constraint = view.widthAnchor.constraint(greaterThanOrEqualToConstant: minimumWidth)
-			constraint.isActive = true
-			minimumPaneWidthConstraint = constraint
-		}
+		updateMinimumPaneWidthConstraint()
 		
 		// The width settles first, since it decides how many lines the descriptions take
-		view.setFrameSize(NSSize(width: minimumWidth, height: 0))
+		view.setFrameSize(NSSize(width: minimumWidth ?? view.frame.width, height: 0))
 		view.layoutSubtreeIfNeeded()
 
 		// Wrapping widths only settle during layout, so measured until the size stops moving
@@ -160,23 +163,49 @@ open class SettingsPaneViewController: NSViewController {
 			previousFittingSize = fittingSize
 		}
 
+		// Sparse content would leave the pane tiny, so the floor is taken before the size is captured
+		if let minimumPaneHeight, view.frame.height < minimumPaneHeight {
+			view.setFrameSize(NSSize(width: view.frame.width, height: minimumPaneHeight))
+			view.layoutSubtreeIfNeeded()
+		}
+		
 		capturePreferredPaneSize()
 
 		// Measured at the settled width, or a narrower one would wrap the labels and report a taller pane
-		minimumPaneSize = measureMinimumPaneSize(width: preferredPaneSize?.width ?? minimumWidth)
+		minimumPaneSize = measureMinimumPaneSize(width: preferredPaneSize?.width ?? view.frame.width)
+	}
+	
+	private func updateMinimumPaneWidthConstraint() {
+		guard let minimumPaneWidth else {
+			minimumPaneWidthConstraint?.isActive = false
+			return
+		}
+		
+		// Reusing one constraint keeps repeated calls from stacking lower bounds
+		if let minimumPaneWidthConstraint {
+			minimumPaneWidthConstraint.constant = minimumPaneWidth
+			minimumPaneWidthConstraint.isActive = true
+		}
+		else {
+			let constraint = view.widthAnchor.constraint(greaterThanOrEqualToConstant: minimumPaneWidth)
+			constraint.isActive = true
+			minimumPaneWidthConstraint = constraint
+		}
 	}
 
 	/// Measure the pane with its stretching sections pulled down to their lower bounds
 	private func measureMinimumPaneSize(width: CGFloat) -> NSSize {
+		let heightFloor = minimumPaneHeight ?? 0
+		
 		guard let layoutView = sectionLayoutView else {
-			return NSSize(width: width, height: view.fittingSize.height)
+			return NSSize(width: width, height: max(view.fittingSize.height, heightFloor))
 		}
 
 		let sizeToRestore = view.frame.size
 		layoutView.setPreferredSectionHeightsActive(false)
 		view.setFrameSize(NSSize(width: width, height: 0))
 		view.layoutSubtreeIfNeeded()
-		let minimumSize = NSSize(width: width, height: view.fittingSize.height)
+		let minimumSize = NSSize(width: width, height: max(view.fittingSize.height, heightFloor))
 
 		layoutView.setPreferredSectionHeightsActive(true)
 		view.setFrameSize(sizeToRestore)
@@ -194,8 +223,8 @@ open class SettingsPaneViewController: NSViewController {
 	open func invalidatePaneSize() {
 		guard isViewLoaded else { return }
 		
-		if minimumPaneWidthConstraint != nil {
-			sizePaneToFitContent(minimumWidth: minimumPaneWidth)
+		if fitsPaneToContent {
+			sizePaneToFitContent(minimumWidth: minimumPaneWidth, minimumHeight: minimumPaneHeight)
 		}
 		else {
 			capturePreferredPaneSize()

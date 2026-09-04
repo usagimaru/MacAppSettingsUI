@@ -10,13 +10,16 @@ import Cocoa
 // Guide-based layout
 class DeveloperSettingsPaneViewController: SettingsPaneViewController, SettingsPaneLayoutGuide {
 
+	/// The size this pane opens at
+	private static let defaultPaneSize = NSSize(width: 530, height: 280)
+
 	var contentContainerView: SettingsPaneContainerView?
-	
+
 	override func loadView() {
 		// Setup the custom content view
-		
+
 		// View with default pane size
-		view = NSView(frame: NSMakeRect(0, 0, 500, 280))
+		view = NSView(frame: NSRect(origin: .zero, size: Self.defaultPaneSize))
 		
 		// Set minimum / maximum size of this pane
 		NSLayoutConstraint.activate([
@@ -39,6 +42,8 @@ class DeveloperSettingsPaneViewController: SettingsPaneViewController, SettingsP
 		buildUI()
 		
 		// 3: Update preferred pane size
+		// Switching tabs hands this pane the frame of the previous one, so the size is declared again before it is captured
+		view.setFrameSize(Self.defaultPaneSize)
 		capturePreferredPaneSize()
 	}
 	
@@ -59,6 +64,22 @@ class DeveloperSettingsPaneViewController: SettingsPaneViewController, SettingsP
 		// Add toggle switch
 		let label4 = setDemoLabel(topView: separator, label: "Wireframes:")
 		setDemoSwitch(leadingView: label4, state: .on)
+
+		setDemoNoteLabel()
+	}
+
+	/// Names the layout this pane is built with
+	private func setDemoNoteLabel() {
+		// Matches the notes the section-based panes carry
+		let label = NSTextField(labelWithString: String(localized: "Guide-based layout"))
+		label.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
+		label.textColor = .secondaryLabelColor
+		label.alignment = .center
+
+		view.addSubview(label)
+		label.translatesAutoresizingMaskIntoConstraints = false
+		label.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+		view.bottomAnchor.constraint(equalTo: label.bottomAnchor, constant: 40).isActive = true
 	}
 	
 	private func setDemoLabel(topView: NSView?, label: String) -> NSTextField {

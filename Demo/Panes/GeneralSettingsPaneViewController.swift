@@ -11,7 +11,7 @@ import Cocoa
 class GeneralSettingsPaneViewController: SettingsPaneViewController {
 
 	/// The narrowest width this pane is laid out for
-	private static let minimumPaneWidth: CGFloat = 500
+	private static let minimumPaneWidth: CGFloat = 530
 	
 	/// Keeps the item column from stretching across the whole pane
 	private static let itemColumnMaximumWidth: CGFloat = 260
@@ -113,6 +113,10 @@ class GeneralSettingsPaneViewController: SettingsPaneViewController {
 			self?.layoutView?.debug_setWireframes(isOn)
 		}
 		wireframes.addCustomView(wireframeSwitch, verticalAlignment: .centerY)
+
+		let layoutNoteLabel = SettingsWrappingLabel(string: String(localized: "Section-based layout 1"))
+		layoutNoteLabel.alignment = .center
+		layoutView.addCustomSection(layoutNoteLabel, identifier: .init("Layout Note"))
 	}
 
 	@objc private func toggleAllowNotifications(_ sender: Any) {

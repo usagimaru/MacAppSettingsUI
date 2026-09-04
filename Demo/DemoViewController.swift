@@ -9,6 +9,7 @@ import Cocoa
 
 class DemoViewController: NSViewController {
 
+	@IBOutlet var openSettings: NSButton!
 	@IBOutlet var centerAlways: NSButton!
 	@IBOutlet var enablesAnimation: NSButton!
 	
@@ -20,6 +21,7 @@ class DemoViewController: NSViewController {
 
 		DispatchQueue.main.async {
 			self.view.window?.isMovableByWindowBackground = true
+			self.view.window?.makeFirstResponder(self.openSettings)
 		}
 	}
 
@@ -30,7 +32,7 @@ class DemoViewController: NSViewController {
 
 	@IBAction func toggleAnimation(_ sender: NSButton) {
 		DemoOptions.animationEnabled = sender.state == .on
-		AppDelegate.shared.settingsWindowController?.settingsWindow.fittingAnimationEnabled = sender.state == .on
+		AppDelegate.shared.settingsWindowController?.applyAnimationOption()
 	}
 	
 	@IBAction func removeAutosaveFrame(_ sender: Any) {

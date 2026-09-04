@@ -18,6 +18,7 @@
 "Settings" = "設定";
 
 "General" = "一般";
+"Account" = "アカウント";
 "Extensions" = "機能拡張";
 "Advanced" = "詳細";
 "Updates" = "アップデート";
@@ -74,6 +75,10 @@
 "Leading in the container" = "コンテナ内で先頭寄せ";
 "Trailing in the container" = "コンテナ内で末尾寄せ";
 
+"Sync with iCloud" = "iCloudと同期";
+"Manage Account…" = "アカウントを管理…";
+"Sparse content, centered" = "内容サイズ小・中央寄せ";
+
 "Quick Look" = "クイックルック";
 "Share Menu" = "共有メニュー";
 "Finder Sync" = "Finder同期";
@@ -81,6 +86,7 @@
 "Beta" = "ベータ版";
 "EXTENSIONS_UPDATE_CHANNEL_DESCRIPTION" = "ベータ版は動作が不安定な場合があります。";
 "Allow unsigned extensions" = "未署名の機能拡張を許可";
+"Resizable height, 100 pt label column, 1000 ms deferred load" = "縦リサイズ可能・ラベル幅100pt固定・遅延ロード1000ms待機";
 "Markdown Preview" = "Markdownプレビュー";
 "Image Optimizer" = "画像オプティマイザ";
 "Color Picker" = "カラーピッカー";
@@ -108,5 +114,9 @@
 "Update Channel" = "アップデートチャンネル";
 "Allow prerelease builds" = "プレリリースビルドを許可";
 "Keep downloaded installers" = "ダウンロードしたインストーラを保持";
-"Built with SwiftUI" = "SwiftUIで構築";
-"Built with AppKit" = "AppKitで構築";
+"Section-based layout 1" = "Section-based layout 1";
+"Section-based layout 2" = "Section-based layout 2";
+"Guide-based layout" = "Guide-based layout";
+
+"Secondary tab view, built with SwiftUI" = "セカンダリタブビュー・SwiftUIで構築";
+"Secondary tab view, built with AppKit" = "セカンダリタブビュー・AppKitで構築";

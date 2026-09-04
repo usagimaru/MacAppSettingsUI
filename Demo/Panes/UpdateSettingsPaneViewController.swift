@@ -12,7 +12,7 @@ import SwiftUI
 class UpdateSettingsPaneViewController: SettingsPaneViewController {
 
 	/// The narrowest width this pane is laid out for
-	private static let minimumPaneWidth: CGFloat = 480
+	private static let minimumPaneWidth: CGFloat = 530
 	private static let advancedTabIdentifier = "Advanced"
 	
 	/// Outlines both tabs, so the margins of the AppKit and the SwiftUI side can be read off against each other
@@ -124,7 +124,7 @@ class UpdateSettingsPaneViewController: SettingsPaneViewController {
 		wireframes.addCustomView(wireframeSwitch, verticalAlignment: .centerY)
 		
 		// Names the framework this tab is built with, against the SwiftUI tab next to it
-		let builtWithLabel = SettingsWrappingLabel(string: String(localized: "Built with AppKit"))
+		let builtWithLabel = SettingsWrappingLabel(string: String(localized: "Secondary tab view, built with AppKit"))
 		builtWithLabel.alignment = .center
 		layoutView.addCustomSection(builtWithLabel, identifier: .init("Built With"))
 	}

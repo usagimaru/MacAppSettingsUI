@@ -18,6 +18,7 @@
 "Settings" = "Settings";
 
 "General" = "General";
+"Account" = "Account";
 "Extensions" = "Extensions";
 "Advanced" = "Advanced";
 "Updates" = "Updates";
@@ -74,6 +75,10 @@
 "Leading in the container" = "Leading in the container";
 "Trailing in the container" = "Trailing in the container";
 
+"Sync with iCloud" = "Sync with iCloud";
+"Manage Account…" = "Manage Account…";
+"Sparse content, centered" = "Sparse content, centered";
+
 "Quick Look" = "Quick Look";
 "Share Menu" = "Share Menu";
 "Finder Sync" = "Finder Sync";
@@ -81,6 +86,7 @@
 "Beta" = "Beta";
 "EXTENSIONS_UPDATE_CHANNEL_DESCRIPTION" = "Beta builds may be unstable.";
 "Allow unsigned extensions" = "Allow unsigned extensions";
+"Resizable height, 100 pt label column, 1000 ms deferred load" = "Resizable height, 100 pt label column, 1000 ms deferred load";
 "Markdown Preview" = "Markdown Preview";
 "Image Optimizer" = "Image Optimizer";
 "Color Picker" = "Color Picker";
@@ -108,5 +114,9 @@
 "Update Channel" = "Update Channel";
 "Allow prerelease builds" = "Allow prerelease builds";
 "Keep downloaded installers" = "Keep downloaded installers";
-"Built with SwiftUI" = "Built with SwiftUI";
-"Built with AppKit" = "Built with AppKit";
+"Section-based layout 1" = "Section-based layout 1";
+"Section-based layout 2" = "Section-based layout 2";
+"Guide-based layout" = "Guide-based layout";
+
+"Secondary tab view, built with SwiftUI" = "Secondary tab view, built with SwiftUI";
+"Secondary tab view, built with AppKit" = "Secondary tab view, built with AppKit";

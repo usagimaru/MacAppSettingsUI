@@ -30,6 +30,16 @@ public enum SettingsLayoutMargins {
 
 }
 
+/// Vertical placement of the content in a settings pane
+public enum SettingsLayoutVerticalAlignment {
+
+	/// Stack from the top edge, taking in the surplus height downward
+	case top
+	/// Center in the height available, splitting the surplus above and below
+	case center
+
+}
+
 /// Ladder of layout priorities of a settings pane
 public enum SettingsLayoutPriority {
 
@@ -47,6 +57,8 @@ public enum SettingsLayoutPriority {
 	public static let nonContributing = NSLayoutConstraint.Priority(rawValue: 50)
 	/// Bottom margin a view keeps to its container. Not required, so content too tall runs over instead of breaking
 	public static let paneBottomMargin = NSLayoutConstraint.Priority(rawValue: 999)
+	/// Top margin a centered view keeps to its container. Not required for the same reason as the bottom margin
+	public static let paneTopMargin = NSLayoutConstraint.Priority(rawValue: 999)
 	/// Force that fills the pane vertically. Not required, so a pane dragged shorter bends instead of breaking
 	public static let contentHeightGrow = NSLayoutConstraint.Priority(rawValue: 999)
 	/// Height a stretching section asks for. Beats the shrink, gives way to a shorter pane
@@ -107,6 +119,13 @@ open class SettingsLayoutView: NSView {
 		}
 	}
 
+	/// Vertical placement of the sections. Ignored while a section takes in the surplus height
+	open var verticalAlignment: SettingsLayoutVerticalAlignment = .top {
+		didSet {
+			updateVerticalAlignment()
+		}
+	}
+
 	private let stackView = NSStackView()
 	/// Stands in for the item column next to the label column, so the block width can be read off its trailing edge
 	private let itemColumnMeasuringGuide = NSLayoutGuide()
@@ -121,6 +140,9 @@ open class SettingsLayoutView: NSView {
 	private var itemColumnShrinkConstraint: NSLayoutConstraint?
 	/// Pulls the stack down to the pane bottom. Inactive while no section takes in surplus height
 	private var stackFillConstraint: NSLayoutConstraint?
+	/// Pins the stack to the top edge. Swapped for the centering constraint by the vertical alignment
+	private var stackTopConstraint: NSLayoutConstraint?
+	private var stackCenterYConstraint: NSLayoutConstraint?
 	/// Ties the stretching sections to one another. Rebuilt whenever the set of them changes
 	private var flexibleSectionLinkConstraints = [NSLayoutConstraint]()
 
@@ -271,15 +293,35 @@ open class SettingsLayoutView: NSView {
 		addSubview(stackView)
 
 		NSLayoutConstraint.activate([
-			stackView.topAnchor.constraint(equalTo: topAnchor),
 			stackView.leadingAnchor.constraint(equalTo: leadingAnchor),
 			stackView.trailingAnchor.constraint(equalTo: trailingAnchor),
 			stackView.bottomAnchor.constraint(lessThanOrEqualTo: bottomAnchor),
 		])
 
+		stackTopConstraint = stackView.topAnchor.constraint(equalTo: topAnchor)
+		stackTopConstraint?.isActive = true
+
+		// Held back until the alignment centers the stack
+		stackCenterYConstraint = stackView.centerYAnchor.constraint(equalTo: centerYAnchor)
+
 		// Held back until a section asks for the surplus
 		stackFillConstraint = stackView.bottomAnchor.constraint(equalTo: bottomAnchor)
 		stackFillConstraint?.priority = SettingsLayoutPriority.contentHeightGrow
+	}
+
+	/// A section taking in the surplus height leaves nothing to center, so the centering steps aside
+	private func updateVerticalAlignment() {
+		let centersStack = verticalAlignment == .center && !sections.contains { $0.isVerticallyFlexible }
+
+		// Swapped one at a time, or the stack would be over-constrained in between
+		if centersStack {
+			stackTopConstraint?.isActive = false
+			stackCenterYConstraint?.isActive = true
+		}
+		else {
+			stackCenterYConstraint?.isActive = false
+			stackTopConstraint?.isActive = true
+		}
 	}
 
 
@@ -404,11 +446,13 @@ open class SettingsLayoutView: NSView {
 		guard let firstSection = flexibleSections.first else {
 			stackView.setHuggingPriority(.required, for: .vertical)
 			stackFillConstraint?.isActive = false
+			updateVerticalAlignment()
 			return
 		}
 
 		stackView.setHuggingPriority(.defaultLow, for: .vertical)
 		stackFillConstraint?.isActive = true
+		updateVerticalAlignment()
 
 		// Sharing the surplus rather than the height keeps each lower bound independent
 		let firstMinimumHeight = firstSection.flexibleMinimumHeight ?? 0

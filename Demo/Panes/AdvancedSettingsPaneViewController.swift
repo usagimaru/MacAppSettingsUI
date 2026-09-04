@@ -22,7 +22,7 @@ class AdvancedSettingsPaneViewController: SettingsPaneViewController, SettingsPa
 		contentContainerView?.labelLayoutGuideWidth = 160
 		
 		// 3: If necessary, enable wireframes for debugging. (Only effective in `DEBUG` build.)
-		contentContainerView?.debug_setWireframes(true)
+		contentContainerView?.debug_setWireframes(false)
 		
 		// 4: Update preferred pane size
 		capturePreferredPaneSize()

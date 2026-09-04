@@ -105,7 +105,7 @@ struct UpdateAdvancedSettingsView: View {
 	
 	private var descriptionText: some View {
 		// Wrapping text ties the height to the width, which is the case the pane measurement has to cope with
-		Text(String(localized: "Built with SwiftUI"))
+		Text(String(localized: "Secondary tab view, built with SwiftUI"))
 			.font(.subheadline)
 			.foregroundStyle(.secondary)
 			.fixedSize(horizontal: false, vertical: true)

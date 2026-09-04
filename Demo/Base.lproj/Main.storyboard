@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="25095" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="ZJH-HF-2gP">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="25098" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="ZJH-HF-2gP">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="25095"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="25098"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -108,6 +108,7 @@ DQ
                     <connections>
                         <outlet property="centerAlways" destination="C4Y-jS-9Uq" id="onm-xW-eAy"/>
                         <outlet property="enablesAnimation" destination="sdG-sO-oWY" id="qLi-tR-4Sj"/>
+                        <outlet property="openSettings" destination="e3W-fr-jRo" id="Ngg-Dr-lzg"/>
                     </connections>
                 </viewController>
                 <customObject id="nz4-s4-BZC" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
@@ -336,8 +337,8 @@ DQ
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="jpD-5J-dXp">
-                                            <rect key="frame" x="366" y="142" width="69" height="16"/>
-                                            <textFieldCell key="cell" lineBreakMode="clipping" title="Advanced" id="KQ0-Va-YCY">
+                                            <rect key="frame" x="329" y="142" width="142" height="16"/>
+                                            <textFieldCell key="cell" lineBreakMode="clipping" title="Built with Storyboard" id="KQ0-Va-YCY">
                                                 <font key="font" metaFont="systemBold"/>
                                                 <color key="textColor" name="tertiaryLabelColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>

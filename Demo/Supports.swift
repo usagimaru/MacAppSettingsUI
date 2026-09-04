@@ -57,6 +57,16 @@ final class DemoSwitch: NSHostingView<DemoSwitchView> {
 
 }
 
+extension SettingsWindowController {
+
+	/// Hands the animation option to both the window resize and the pane dissolve
+	func applyAnimationOption() {
+		settingsWindow.fittingAnimationEnabled = DemoOptions.animationEnabled
+		tabViewController.paneDissolveAnimationEnabled = DemoOptions.animationEnabled
+	}
+
+}
+
 extension NSButton {
 
 	@IBInspectable var titleLocalizable: String {

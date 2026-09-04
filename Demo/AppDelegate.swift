@@ -32,6 +32,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 			tabIdentifier: "View",
 			isResizableView: false)
 		
+		let accountPane = AccountSettingsPaneViewController(
+			tabName: String(localized: "Account"),
+			tabImage: NSImage(systemSymbolName: "person.crop.circle", accessibilityDescription: nil),
+			tabIdentifier: "Account",
+			isResizableView: false)
+
 		let extensionsPane = ExtensionsSettingsPaneViewController(
 			tabName: String(localized: "Extensions"),
 			tabImage: NSImage(systemSymbolName: "puzzlepiece.extension", accessibilityDescription: nil),
@@ -47,6 +53,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		settingsWindowController = .init(with: [
 			generalPane,
 			viewPane,
+			accountPane,
 			extensionsPane,
 			advancedPane,
 		], centersWindowPositionAlways: DemoOptions.centersWindowAlways)
@@ -103,8 +110,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 			self?.settingsWindowController = nil
 		}
 
-		settingsWindowController.settingsWindow.fittingAnimationEnabled = DemoOptions.animationEnabled
+		settingsWindowController.applyAnimationOption()
 		settingsWindowController.tabViewController.loadingLabelText = String(localized: "Loading…")
+
+		// The loading view stands in for every pane, so the label is left to the pane that actually waits
+		settingsWindowController.tabViewController.showsLoadingLabelWhileLoading = false
 	}
 
 	// <<<====================================================

@@ -11,7 +11,7 @@ import Cocoa
 class ExtensionsSettingsPaneViewController: SettingsPaneViewController {
 
 	/// The narrowest width this pane is laid out for
-	private static let minimumPaneWidth: CGFloat = 500
+	private static let minimumPaneWidth: CGFloat = 530
 	private static let extensionNameColumnIdentifier = NSUserInterfaceItemIdentifier("Name")
 
 	private var layoutView: SettingsLayoutView?
@@ -38,6 +38,10 @@ class ExtensionsSettingsPaneViewController: SettingsPaneViewController {
 
 	// Simulates fetching the extension list, so the loading wait is visible in this demo
 	override func loadPaneContent() async throws {
+		// Raised for this pane alone, or the panes that need no wait would flash the label
+		tabViewController?.showsLoadingLabel = true
+		defer { tabViewController?.showsLoadingLabel = false }
+
 		try await Task.sleep(for: .seconds(1))
 
 		buildSections()
@@ -104,6 +108,10 @@ class ExtensionsSettingsPaneViewController: SettingsPaneViewController {
 			self?.layoutView?.debug_setWireframes(isOn)
 		}
 		wireframes.addCustomView(wireframeSwitch, verticalAlignment: .centerY)
+
+		let layoutNoteLabel = SettingsWrappingLabel(string: String(localized: "Resizable height, 100 pt label column, 1000 ms deferred load"))
+		layoutNoteLabel.alignment = .center
+		layoutView.addCustomSection(layoutNoteLabel, identifier: .init("Layout Note"))
 	}
 
 	private func makeExtensionListView() -> NSScrollView {
