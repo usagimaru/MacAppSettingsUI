@@ -16,12 +16,9 @@ class DeveloperSettingsPaneViewController: SettingsPaneViewController, SettingsP
 	var contentContainerView: SettingsPaneContainerView?
 
 	override func loadView() {
-		// Setup the custom content view
-
-		// View with default pane size
 		view = NSView(frame: NSRect(origin: .zero, size: Self.defaultPaneSize))
-		
-		// Set minimum / maximum size of this pane
+
+		// Bounds this pane can be dragged within
 		NSLayoutConstraint.activate([
 			view.widthAnchor.constraint(greaterThanOrEqualToConstant: 300), // Minimum width
 			view.heightAnchor.constraint(greaterThanOrEqualToConstant: 280), // Minimum height
@@ -41,14 +38,12 @@ class DeveloperSettingsPaneViewController: SettingsPaneViewController, SettingsP
 		
 		buildUI()
 		
-		// 3: Update preferred pane size
-		// Switching tabs hands this pane the frame of the previous one, so the size is declared again before it is captured
+		// 3: Update preferred pane size. Switching tabs hands over the previous pane frame, so the size is declared again
 		view.setFrameSize(Self.defaultPaneSize)
 		capturePreferredPaneSize()
 	}
 	
 	private func buildUI() {
-		// Insert labels and items
 		let label1 = setDemoLabel(topView: nil, label: "Setting item 1:")
 		setDemoItem(leadingView: label1, title: "This is a checkbox")
 		
@@ -58,10 +53,8 @@ class DeveloperSettingsPaneViewController: SettingsPaneViewController, SettingsP
 		let label3 = setDemoLabel(topView: label2, label: "Pineapple pen + Apple pen:")
 		setDemoItem(leadingView: label3, title: "Pen-pineapple-apple-pen")
 		
-		// Add separator
 		let separator = setDemoSeparator(topView: label3)
-		
-		// Add toggle switch
+
 		let label4 = setDemoLabel(topView: separator, label: "Wireframes:")
 		setDemoSwitch(leadingView: label4, state: .on)
 
@@ -70,7 +63,6 @@ class DeveloperSettingsPaneViewController: SettingsPaneViewController, SettingsP
 
 	/// Names the layout this pane is built with
 	private func setDemoNoteLabel() {
-		// Matches the notes the section-based panes carry
 		let label = NSTextField(labelWithString: String(localized: "Guide-based layout"))
 		label.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
 		label.textColor = .secondaryLabelColor
@@ -106,7 +98,7 @@ class DeveloperSettingsPaneViewController: SettingsPaneViewController, SettingsP
 				label.topAnchor.constraint(equalTo: contentContainerView.labelLayoutGuide.topAnchor).isActive = true
 			}
 			
-			// Set the weak priority for the horizontal resistance
+			// Weak enough that the container width wins over the intrinsic width
 			let p = NSLayoutConstraint.Priority(NSLayoutConstraint.Priority.defaultLow.rawValue - 10)
 			label.setContentCompressionResistancePriority(p, for: .horizontal)
 		}
@@ -125,7 +117,7 @@ class DeveloperSettingsPaneViewController: SettingsPaneViewController, SettingsP
 			item.leadingAnchor.constraint(equalToSystemSpacingAfter: leadingView.trailingAnchor, multiplier: 1).isActive = true
 			contentContainerView.trailingAnchor.constraint(greaterThanOrEqualToSystemSpacingAfter: item.trailingAnchor, multiplier: 1).isActive = true
 			
-			// Set the weak priority for the horizontal resistance
+			// Weak enough that the container width wins over the intrinsic width
 			let p = NSLayoutConstraint.Priority(NSLayoutConstraint.Priority.defaultLow.rawValue - 10)
 			item.setContentCompressionResistancePriority(p, for: .horizontal)
 		}
@@ -145,7 +137,7 @@ class DeveloperSettingsPaneViewController: SettingsPaneViewController, SettingsP
 			item.leadingAnchor.constraint(equalToSystemSpacingAfter: leadingView.trailingAnchor, multiplier: 1).isActive = true
 			contentContainerView.trailingAnchor.constraint(greaterThanOrEqualToSystemSpacingAfter: item.trailingAnchor, multiplier: 1).isActive = true
 			
-			// Set the weak priority for the horizontal resistance
+			// Weak enough that the container width wins over the intrinsic width
 			let p = NSLayoutConstraint.Priority(NSLayoutConstraint.Priority.defaultLow.rawValue - 10)
 			item.setContentCompressionResistancePriority(p, for: .horizontal)
 		}

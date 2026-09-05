@@ -11,20 +11,25 @@ public enum LayoutDebugWireframeColor {
 
 	/// Whole container
 	public static let container = NSColor.systemBlue
+	
 	/// Section border
 	public static let section = NSColor.systemOrange
-	/// Section area. Told apart from the border, so both can be read at once
+	
+	/// Section area, told apart from the section border
 	public static let sectionFill = NSColor.systemBlue
+	
 	/// Label column box
 	public static let labelColumn = NSColor.systemRed
+	
 	/// Item column box
 	public static let itemColumn = NSColor.systemGreen
+	
 	/// Labels and controls
 	public static let control = NSColor.systemPurple
 
 }
 
-/// Edge a rule follows. Read off the frame, so it does not flip with the writing direction
+/// Edge a rule follows. Read off the frame, so it never flips with the writing direction
 public enum LayoutDebugWireframeEdge {
 
 	case minX
@@ -36,26 +41,31 @@ public enum LayoutDebugWireframeEdge {
 
 }
 
-/// Outlines views and layout guides for debugging, and draws rules that tell whether edges line up.
-/// A view is outlined through its own layer, while a guide has a layer laid into the host on its behalf
+/// Outlines views and layout guides for debugging, and draws rules that tell whether edges line up
 public final class LayoutDebugWireframes {
 
 	/// Line width shared by every outline and rule
 	public static let lineWidth: CGFloat = 1
+	
 	/// Alpha applied to the colors, so a line never hides what sits under it
 	public static let colorAlpha: CGFloat = 0.5
-	/// Alpha of a filled area. Kept far lighter than a line, since it covers the content rather than bordering it
+	
+	/// Alpha of a filled area. Lighter than a line, since it covers the content rather than bordering it
 	public static let fillAlpha: CGFloat = 0.12
+	
 	/// Alpha of a readout. Glyphs are thin, so they need more weight than a line to stay legible
 	public static let textAlpha: CGFloat = 0.85
+	
 	/// Gap between a readout and the rect it measures
 	public static let readoutSpacing: CGFloat = 2
-	/// Alpha of a hatch. Lines leave the content visible between them, so they can carry more weight than a flat fill
+	
+	/// Alpha of a hatch. Heavier than a flat fill, since the content stays visible between the lines
 	public static let hatchAlpha: CGFloat = 0.15
+	
 	/// Gap between the hatch lines
 	public static let hatchSpacing: CGFloat = 6
 
-	/// How far a rule runs past the host bounds. Lets a rule reach the edges of the view the host was laid into
+	/// How far a rule runs past the host bounds, so it can reach the edges of the parent view
 	public var ruleOverhang: CGFloat = 0 {
 		didSet {
 			updateLayout()
@@ -64,9 +74,7 @@ public final class LayoutDebugWireframes {
 
 	/// Whether the wireframes are visible. Assigning true has no effect outside a DEBUG build
 	public var isEnabled: Bool {
-		get {
-			isVisible
-		}
+		get { isVisible }
 		set {
 #if DEBUG
 			isVisible = newValue
@@ -84,9 +92,10 @@ public final class LayoutDebugWireframes {
 	private var ruleEntries = [LayerEntry]()
 	private var readoutEntries = [ReadoutEntry]()
 
-	/// Holds the boxes and fills. A container keeps them stacked in the order they were registered
+	/// Holds the boxes and fills, stacked in the order they were registered
 	private lazy var backdropLayer = makeContainerLayer(zPosition: -1000)
-	/// Holds the rules. A thin line would be lost behind a control, so it is pulled to the very front
+	
+	/// Holds the rules. Pulled to the very front, or a thin line would be lost behind a control
 	private lazy var overlayLayer = makeContainerLayer(zPosition: 1000)
 
 
@@ -99,19 +108,18 @@ public final class LayoutDebugWireframes {
 
 	// MARK: - Registration
 
-	/// Outline a view through its own layer. Auto Layout keeps the border in place, so it needs no update.
-	/// Passing `descendantColor` outlines the views inside it as well
+	/// Outline a view through its own layer. Passing `descendantColor` outlines the views inside it as well
 	public func add(view: NSView, color: NSColor, descendantColor: NSColor? = nil) {
 		viewEntries.append(ViewEntry(view: view, color: color, descendantColor: descendantColor))
 		applyVisibility()
 	}
 
-	/// Outline a layout guide. A guide owns no view, so a layer stands in for it behind the content
+	/// Outline a layout guide. A guide owns no view, so a layer stands in for it
 	public func add(guide: NSLayoutGuide, color: NSColor) {
 		addBox(style: .outline, resolver: frameResolver(for: guide), color: color)
 	}
 
-	/// Tint the area a view occupies. The fill goes behind the content, so the view keeps its own background
+	/// Tint the area a view occupies, behind the content
 	public func addFill(view: NSView, color: NSColor) {
 		addBox(style: .fill, resolver: frameResolver(for: view), color: color)
 	}
@@ -121,7 +129,7 @@ public final class LayoutDebugWireframes {
 		addBox(style: .fill, resolver: frameResolver(for: guide), color: color)
 	}
 
-	/// Hatch the area a view occupies with 45-degree lines. Tells a wide area apart from the flat fills inside it
+	/// Hatch the area a view occupies with 45-degree lines, telling it apart from the flat fills inside
 	public func addHatch(view: NSView, color: NSColor) {
 		addBox(style: .hatch, resolver: frameResolver(for: view), color: color)
 	}
@@ -136,8 +144,7 @@ public final class LayoutDebugWireframes {
 		addRule(at: edge, resolver: frameResolver(for: view), color: color)
 	}
 
-	/// Print the measured width of a layout guide just above the guide rect.
-	/// Only the horizontal cases of `alignedTo` are read, since the readout always sits on top
+	/// Print the measured width of a layout guide just above the guide rect
 	public func addWidthReadout(of guide: NSLayoutGuide,
 								alignedTo edge: LayoutDebugWireframeEdge,
 								color: NSColor)
@@ -153,7 +160,7 @@ public final class LayoutDebugWireframes {
 		addWidthReadout(resolver: frameResolver(for: view), alignedTo: edge, color: color)
 	}
 
-	/// Draw the wireframes again. Call after views were put inside an already registered view
+	/// Draw the wireframes again, after views were put inside an already registered view
 	public func refresh() {
 		applyVisibility()
 	}
@@ -173,7 +180,7 @@ public final class LayoutDebugWireframes {
 
 	// MARK: - Layout
 
-	/// Write the current frames into the layers. Call this from the host’s `layout()`
+	/// Write the current frames into the layers. Call it from the host layout pass
 	public func updateLayout() {
 		guard !boxEntries.isEmpty || !ruleEntries.isEmpty || !readoutEntries.isEmpty else { return }
 
@@ -207,7 +214,7 @@ public final class LayoutDebugWireframes {
 		readoutEntries.forEach { entry in
 			guard let rect = entry.frameInHost() else { return }
 
-			// Auto Layout hands out fractions, so a decimal is kept to expose a hair of misalignment
+			// A decimal is kept, or a fractional misalignment would be rounded out of sight
 			entry.layer.string = String(format: "%.1f", rect.width)
 			entry.layer.contentsScale = scale
 
@@ -254,7 +261,7 @@ public final class LayoutDebugWireframes {
 		applyVisibility()
 	}
 
-	/// zPosition decides the depth, so a subview added later cannot slip in front of a rule
+	/// The depth comes from zPosition, so a subview added later cannot slip in front of a rule
 	private func makeContainerLayer(zPosition: CGFloat) -> CALayer {
 		host.wantsLayer = true
 
@@ -265,7 +272,7 @@ public final class LayoutDebugWireframes {
 		return layer
 	}
 
-	/// Follow the side the measured column is aligned to, so the number sits over the content it describes
+	/// Follow the side the column is aligned to, so the number sits over the content it describes
 	private func readoutOriginX(for alignment: LayoutDebugWireframeEdge, of rect: CGRect, width: CGFloat) -> CGFloat {
 		switch alignment {
 			case .maxX:
@@ -376,7 +383,7 @@ public final class LayoutDebugWireframes {
 
 			setBorder(to: view, color: entry.color)
 
-			// Walked on every pass, so views added after the registration are outlined as well
+			// Walked every time, so views added after the registration are outlined as well
 			if let descendantColor = entry.descendantColor {
 				view.subviews.forEach { setBorderRecursively(to: $0, color: descendantColor) }
 			}
@@ -405,7 +412,7 @@ public final class LayoutDebugWireframes {
 
 	// MARK: - Resolving frames
 
-	/// `self` is captured weakly, or the host that owns this object would never be released
+	// `self` is captured weakly, or the host that owns this object would never be released
 	private func frameResolver(for guide: NSLayoutGuide) -> () -> CGRect? {
 		{ [weak self] in
 			guard let self, let owningView = guide.owningView else { return nil }

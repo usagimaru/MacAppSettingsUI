@@ -15,7 +15,7 @@ class UpdateSettingsPaneViewController: SettingsPaneViewController {
 	private static let minimumPaneWidth: CGFloat = 530
 	private static let advancedTabIdentifier = "Advanced"
 	
-	/// Outlines both tabs, so the margins of the AppKit and the SwiftUI side can be read off against each other
+	/// Outlines both tabs, so the AppKit and the SwiftUI margins can be compared
 	private var layoutDebugWireframes: LayoutDebugWireframes?
 	
 	private var tabLayoutView: SettingsTabLayoutView?
@@ -48,7 +48,7 @@ class UpdateSettingsPaneViewController: SettingsPaneViewController {
 	
 	override func viewDidLayout() {
 		super.viewDidLayout()
-		// Walked again on every pass, or the views SwiftUI builds later would stay unoutlined
+		// Refreshed on every pass, or the views SwiftUI builds later would stay unoutlined
 		layoutDebugWireframes?.refresh()
 	}
 	
@@ -123,7 +123,6 @@ class UpdateSettingsPaneViewController: SettingsPaneViewController {
 		}
 		wireframes.addCustomView(wireframeSwitch, verticalAlignment: .centerY)
 		
-		// Names the framework this tab is built with, against the SwiftUI tab next to it
 		let builtWithLabel = SettingsWrappingLabel(string: String(localized: "Secondary tab view, built with AppKit"))
 		builtWithLabel.alignment = .center
 		layoutView.addCustomSection(builtWithLabel, identifier: .init("Built With"))
@@ -142,7 +141,6 @@ class UpdateSettingsPaneViewController: SettingsPaneViewController {
 	
 	// MARK: - Debug wireframes
 	
-	/// Only view outlines are registered, so Auto Layout keeps them in place without a layout hook
 	private func setUpWireframes(of tabLayoutView: SettingsTabLayoutView) {
 		let wireframes = LayoutDebugWireframes(host: view)
 		layoutDebugWireframes = wireframes
@@ -150,7 +148,7 @@ class UpdateSettingsPaneViewController: SettingsPaneViewController {
 		wireframes.add(view: view, color: LayoutDebugWireframeColor.container)
 		wireframes.add(view: tabLayoutView.tabView, color: LayoutDebugWireframeColor.container)
 		
-		// The content area each tab is handed. Both tabs get the same rect, so the margins can be compared
+		// The content area each tab is handed. Both tabs get the same rect
 		tabLayoutView.tabView.tabViewItems.compactMap { $0.view }.forEach {
 			wireframes.add(view: $0, color: LayoutDebugWireframeColor.section)
 		}
@@ -159,7 +157,7 @@ class UpdateSettingsPaneViewController: SettingsPaneViewController {
 			wireframes.add(view: generalTabLayoutView, color: LayoutDebugWireframeColor.labelColumn)
 		}
 		
-		// Outlined down to the leaves, since a gap inside the hosting view would not show on its own border
+		// Outlined down to the leaves, since a gap inside would not show on the hosting view border
 		if let advancedTabHostingView {
 			wireframes.add(view: advancedTabHostingView,
 						   color: LayoutDebugWireframeColor.labelColumn,

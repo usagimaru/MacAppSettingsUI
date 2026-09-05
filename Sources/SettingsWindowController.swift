@@ -18,6 +18,7 @@ open class SettingsWindowController: NSWindowController {
 	
 	/// Set window position to center of the screen
 	open var centersWindowPositionAlways: Bool!
+	
 	/// Do not want to close window with Escape key, set this flag to false
 	open var closesWindowWithEscapeKey: Bool!
 	
@@ -52,8 +53,6 @@ open class SettingsWindowController: NSWindowController {
 			&& ($0.target as? NSWindow) == window
 			&& $0.action == #selector(NSWindow.makeKeyAndOrderFront(_:))
 		}.first
-		
-		// Note: This NSMenuItem is `NSWindowRepresentingMenuItem` under private.
 	}
 	
 	open var tabViewController: SettingsTabViewController! { didSet {
@@ -65,7 +64,7 @@ open class SettingsWindowController: NSWindowController {
 	}
 	
 	open override var shouldCascadeWindows: Bool {
-		// When if use `windowFrameAutosaveName`, We have to disable `shouldCascadeWindows`
+		// Cascading has to stay off while the window frame is autosaved
 		// https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/WinPanel/Tasks/SavingWindowPosition.html
 		get { false }
 		set { super.shouldCascadeWindows = false }
@@ -74,7 +73,6 @@ open class SettingsWindowController: NSWindowController {
 	
 	// MARK: -
 	
-	/// Initializer
 	required convenience public init(with panes: [SettingsPaneViewController],
 									 centersWindowPositionAlways: Bool = false,
 									 closesWindowWithEscapeKey: Bool = true) {
@@ -85,8 +83,9 @@ open class SettingsWindowController: NSWindowController {
 		self.closesWindowWithEscapeKey = closesWindowWithEscapeKey
 		
 		tabViewController = SettingsTabViewController()
-		// Linked by hand, because `didSet` does not fire for an assignment made inside an initializer
+		// Linked by hand, because an observer does not fire for an assignment made inside an initializer
 		tabViewController.settingsWindowController = self
+		
 		window = SettingsWindow(contentViewController: tabViewController)
 		initialWindowSetup()
 		
@@ -111,8 +110,7 @@ open class SettingsWindowController: NSWindowController {
 		shouldCascadeWindows = false
 		windowFrameAutosaveName = Keys.lastWindowFrame
 		
-		// The macOS settings/preferences window is generally styled to apply basically only with a close button. The minimize button should be disabled in the design.
-		// However, depending on a contents of a pane, resizing can be enabled as in Xcode.
+		// A settings window carries only a close button by design. Resizing is opted in per pane, as in Xcode
 		window?.styleMask = [
 			.titled,
 			.closable,
@@ -125,8 +123,7 @@ open class SettingsWindowController: NSWindowController {
 			NotificationCenter.default.removeObserver(obs_NSApplication)
 		}
 		
-		// If window restoration is enabled, `showWindow(_:)` is not called by the system.
-		// This is done to grab the first displaying of windows under the window restoration process.
+		// Window restoration shows the window without asking this controller, so the first display is caught here
 		obs_NSApplication = NotificationCenter.default
 			.addObserver(forName: NSApplication.didFinishRestoringWindowsNotification,
 						 object: NSApp,
@@ -149,7 +146,7 @@ open class SettingsWindowController: NSWindowController {
 						 using: { [weak self] _ in
 				// Deferred past the close itself, or the handler could release the window mid-close
 				DispatchQueue.main.async {
-					// Held locally, so the handler survives releasing this controller
+					// Held locally, so it survives releasing this controller
 					guard let handler = self?.windowCloseHandler else { return }
 					handler()
 				}
@@ -158,7 +155,6 @@ open class SettingsWindowController: NSWindowController {
 	
 	private func resetBehaviors() {
 		if window?.isVisible == true {
-			// Update window title (also window menu item title, Dock tile title)
 			tabViewController.updateWindowTitleWithSelectedTab()
 			settingsWindow.setZoomButton()
 		}
@@ -167,16 +163,15 @@ open class SettingsWindowController: NSWindowController {
 	
 	// MARK: -
 	
-	// This implementation does not use nib,
-	// so `windowWillLoad()`, `windowDidLoad()` and `loadWindow()` are not called by the system
-	
+	// No nib is used here, so the nib loading callbacks are never called by the system
+
 	open override func showWindow(_ sender: Any?) {
 		// Restored ahead of the first appearance, so the stored tab is the one that shows up
 		restoreLastSelectedTabIfNeeded()
 
 		super.showWindow(sender)
 
-		// Try to restore the window position with an autosave name. If that fails, set the window position to center.
+		// Centered when the autosaved position cannot be restored
 		if centersWindowPositionAlways || !restoreWindowPosition() {
 			window?.center()
 		}
@@ -204,10 +199,9 @@ open class SettingsWindowController: NSWindowController {
 		window.saveFrame(usingName: windowFrameAutosaveName)
 	}
 
-	/// Close window to press Escape key
+	/// Close the window on the Escape key or Cmd-Period, through a hidden responder action
+	/// Ref: https://web.archive.org/web/20140603045053/http://developer.apple.com/library/mac/documentation/Cocoa/Reference/ApplicationKit/Classes/NSResponder_Class/Reference/Reference.html#//apple_ref/occ/instm/NSResponder/cancelOperation:
 	@objc open func cancel(_ sender: Any?) {
-		// We can use the hidden method `cancel(_:)` to close the window with Escape key or Cmd-PERIOD pressing
-		// Ref: https://web.archive.org/web/20140603045053/http://developer.apple.com/library/mac/documentation/Cocoa/Reference/ApplicationKit/Classes/NSResponder_Class/Reference/Reference.html#//apple_ref/occ/instm/NSResponder/cancelOperation:
 		if closesWindowWithEscapeKey {
 			close()
 		}

@@ -79,7 +79,7 @@ open class SettingsButtonSectionView: SettingsSectionView {
 																  constant: indentation))
 
 			case .center:
-				// The inset shifts the centre, or an indented button would sit where an unindented one does
+				// The inset shifts the center, or an indented button would sit where an unindented one does
 				constraints.append(button.centerXAnchor.constraint(equalTo: contentGuide.centerXAnchor,
 																  constant: indentation / 2))
 

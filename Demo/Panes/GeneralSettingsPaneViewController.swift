@@ -34,8 +34,6 @@ class GeneralSettingsPaneViewController: SettingsPaneViewController {
 	}
 	
 	private func buildSections() {
-		// Layout with section stack
-		
 		let layoutView = SettingsLayoutView()
 		layoutView.install(in: view)
 		self.layoutView = layoutView

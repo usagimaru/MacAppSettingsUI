@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-/// The SwiftUI side of the “Updates” pane, hosted by `SettingsHostingView`. Pane sizing is tested against this view
+/// The SwiftUI side of the “Updates” pane. Pane sizing is tested against this view
 struct UpdateAdvancedSettingsView: View {
 	
 	/// Release channel offered in this demo
@@ -104,7 +104,7 @@ struct UpdateAdvancedSettingsView: View {
 	}
 	
 	private var descriptionText: some View {
-		// Wrapping text ties the height to the width, which is the case the pane measurement has to cope with
+		// Wrapping text ties the height to the width, the case the pane measurement has to cope with
 		Text(String(localized: "Secondary tab view, built with SwiftUI"))
 			.font(.subheadline)
 			.foregroundStyle(.secondary)

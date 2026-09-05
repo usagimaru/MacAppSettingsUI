@@ -11,10 +11,13 @@ public enum SettingsLayoutMetrics {
 
 	/// Spacing between sections
 	public static let sectionSpacing: CGFloat = 20
+	
 	/// Spacing between the label column and the item column
 	public static let columnSpacing: CGFloat = 8
+	
 	/// Spacing between items within a section
 	public static let itemSpacing: CGFloat = 6
+	
 	/// Leading inset one indentation level adds to an item
 	public static let indentationPerLevel: CGFloat = 20
 
@@ -25,6 +28,7 @@ public enum SettingsLayoutMargins {
 
 	/// System standard spacing on all four edges
 	case systemSpacing
+	
 	/// Fixed insets. The leading and trailing sides follow the writing direction
 	case insets(NSDirectionalEdgeInsets)
 
@@ -35,6 +39,7 @@ public enum SettingsLayoutVerticalAlignment {
 
 	/// Stack from the top edge, taking in the surplus height downward
 	case top
+	
 	/// Center in the height available, splitting the surplus above and below
 	case center
 
@@ -43,26 +48,36 @@ public enum SettingsLayoutVerticalAlignment {
 /// Ladder of layout priorities of a settings pane
 public enum SettingsLayoutPriority {
 
-	/// Width a section declares for the item column. Not required, so that wider items can still push the column open
+	/// Width a section declares for the item column. Not required, so wider items can still push it open
 	public static let itemColumnDeclaredWidth = NSLayoutConstraint.Priority(rawValue: 999)
+	
 	/// Width a description label asks of the item column. Loses to a declared width, beats the shrink
 	public static let descriptionWidthDemand = NSLayoutConstraint.Priority(rawValue: 500)
+	
 	/// Force that hugs the item column to what its items need
 	public static let itemColumnWidthShrink = NSLayoutConstraint.Priority(rawValue: 300)
+	
 	/// Force that hugs the label column to its longest label
 	public static let labelColumnWidthShrink = NSLayoutConstraint.Priority(rawValue: 250)
-	/// Force that fills the container. Weakest of the three, so it only takes effect while no column shrinks it
+	
+	/// Force that fills the container. Weakest of the three, so a shrinking column always wins
 	public static let contentWidthGrow = NSLayoutConstraint.Priority(rawValue: 200)
+	
 	/// Horizontal priority of controls that take no part in deciding a column width
 	public static let nonContributing = NSLayoutConstraint.Priority(rawValue: 50)
+	
 	/// Bottom margin a view keeps to its container. Not required, so content too tall runs over instead of breaking
 	public static let paneBottomMargin = NSLayoutConstraint.Priority(rawValue: 999)
+	
 	/// Top margin a centered view keeps to its container. Not required for the same reason as the bottom margin
 	public static let paneTopMargin = NSLayoutConstraint.Priority(rawValue: 999)
+	
 	/// Force that fills the pane vertically. Not required, so a pane dragged shorter bends instead of breaking
 	public static let contentHeightGrow = NSLayoutConstraint.Priority(rawValue: 999)
+	
 	/// Height a stretching section asks for. Beats the shrink, gives way to a shorter pane
 	public static let sectionPreferredHeight = NSLayoutConstraint.Priority(rawValue: 251)
+	
 	/// Force that hugs a stretching section to its lower bound. Weakest of all, so the surplus lands there
 	public static let sectionHeightShrink = NSLayoutConstraint.Priority(rawValue: 1)
 
@@ -92,13 +107,15 @@ extension SettingsLayoutMargins {
 
 }
 
-/// A container that builds a settings pane out of sections. Column widths come from the content and this view owns the section spacing
+/// A container that builds a settings pane out of sections, owning the column widths and the section spacing
 open class SettingsLayoutView: NSView {
 
 	/// Guide that aggregates the label column width. It carries no position, only a shared width
 	public private(set) var labelColumnWidthGuide = NSLayoutGuide()
+	
 	/// Guide that aggregates the item column width. It carries no position, only a shared width
 	public private(set) var itemColumnWidthGuide = NSLayoutGuide()
+	
 	/// Guide that aggregates the width of both columns plus the spacing. Every section matches it, so their edges line up
 	public private(set) var contentBlockWidthGuide = NSLayoutGuide()
 
@@ -129,20 +146,28 @@ open class SettingsLayoutView: NSView {
 	private let stackView = NSStackView()
 	/// Stands in for the item column next to the label column, so the block width can be read off its trailing edge
 	private let itemColumnMeasuringGuide = NSLayoutGuide()
+	
 	/// Content block where it really appears. The width guides carry no position, so the debug rules read these instead
 	private let blockPositionGuide = NSLayoutGuide()
+	
 	private let labelColumnPositionGuide = NSLayoutGuide()
 	private let itemColumnPositionGuide = NSLayoutGuide()
 	private var labelColumnMinimumWidthConstraint: NSLayoutConstraint?
 	private var itemColumnMinimumWidthConstraint: NSLayoutConstraint?
+	
 	/// Holds the narrowest width the sections declared. Inactive while no section declares one
 	private var itemColumnDeclaredWidthConstraint: NSLayoutConstraint?
+	
 	private var itemColumnShrinkConstraint: NSLayoutConstraint?
+	
 	/// Pulls the stack down to the pane bottom. Inactive while no section takes in surplus height
 	private var stackFillConstraint: NSLayoutConstraint?
+	
 	/// Pins the stack to the top edge. Swapped for the centering constraint by the vertical alignment
 	private var stackTopConstraint: NSLayoutConstraint?
+	
 	private var stackCenterYConstraint: NSLayoutConstraint?
+	
 	/// Ties the stretching sections to one another. Rebuilt whenever the set of them changes
 	private var flexibleSectionLinkConstraints = [NSLayoutConstraint]()
 
@@ -161,7 +186,7 @@ open class SettingsLayoutView: NSView {
 		fatalError("init(coder:) has not been implemented")
 	}
 
-	/// Lay this view into a pane view. Leaving `margins` out gives the system standard spacing on all four edges
+	/// Lay this view into a pane view, with the system standard spacing on all four edges by default
 	open func install(in parentView: NSView, margins: SettingsLayoutMargins = .systemSpacing) {
 		translatesAutoresizingMaskIntoConstraints = false
 		parentView.addSubview(self, positioned: .below, relativeTo: nil)
@@ -189,7 +214,7 @@ open class SettingsLayoutView: NSView {
 		[labelColumnWidthGuide, itemColumnWidthGuide].forEach { guide in
 			addLayoutGuide(guide)
 
-			// Only the width matters, but an undefined position counts as ambiguous, so pin the guide to the origin
+			// Only the width matters, but an undefined position counts as ambiguous
 			NSLayoutConstraint.activate([
 				guide.leadingAnchor.constraint(equalTo: leadingAnchor),
 				guide.topAnchor.constraint(equalTo: topAnchor),
@@ -201,14 +226,14 @@ open class SettingsLayoutView: NSView {
 		labelColumnShrink.priority = SettingsLayoutPriority.labelColumnWidthShrink
 		labelColumnShrink.isActive = true
 
-		// Held back until a column section exists, or a pane of full-width sections alone would collapse to the minimum
+		// Held back until a column section exists, or a full-width-only pane would collapse to the minimum
 		itemColumnShrinkConstraint = itemColumnWidthGuide.widthAnchor.constraint(equalToConstant: 0)
 		itemColumnShrinkConstraint?.priority = SettingsLayoutPriority.itemColumnWidthShrink
 
 		labelColumnWidthGuide.identifier = .init("SettingsLayoutView.LabelColumnWidthGuide")
 		itemColumnWidthGuide.identifier = .init("SettingsLayoutView.ItemColumnWidthGuide")
 
-		// A declaration only caps the column, so the same value comes back as a lower bound and the column stops hugging narrower
+		// A declaration only caps the column, so the same value comes back as a lower bound
 		itemColumnDeclaredWidthConstraint = itemColumnWidthGuide.widthAnchor.constraint(greaterThanOrEqualToConstant: 0)
 		itemColumnDeclaredWidthConstraint?.priority = SettingsLayoutPriority.itemColumnDeclaredWidth
 
@@ -232,7 +257,7 @@ open class SettingsLayoutView: NSView {
 	private func setUpContentBlockWidthGuide() {
 		[itemColumnMeasuringGuide, contentBlockWidthGuide].forEach { addLayoutGuide($0) }
 
-		// Anchors cannot be summed, so lay a stand-in guide after the label column and read the total off its trailing edge
+		// Anchors cannot be summed, so the total is read off the trailing edge of a stand-in guide
 		NSLayoutConstraint.activate([
 			itemColumnMeasuringGuide.topAnchor.constraint(equalTo: topAnchor),
 			itemColumnMeasuringGuide.heightAnchor.constraint(equalToConstant: 0),
@@ -246,7 +271,7 @@ open class SettingsLayoutView: NSView {
 			contentBlockWidthGuide.trailingAnchor.constraint(equalTo: itemColumnMeasuringGuide.trailingAnchor),
 		])
 
-		// The single force that fills the container. Keeping it here stops separators and other sections from voting on the width
+		// The single force that fills the container, so no section votes on the width on its own
 		let blockGrow = contentBlockWidthGuide.trailingAnchor.constraint(equalTo: trailingAnchor)
 		blockGrow.priority = SettingsLayoutPriority.contentWidthGrow
 		blockGrow.isActive = true
@@ -254,8 +279,7 @@ open class SettingsLayoutView: NSView {
 		setUpPositionGuides()
 	}
 
-	/// The width guides sit at the origin, so they say nothing about where the columns appear.
-	/// These guides stand where the content really is, which is what the debug rules need
+	/// The width guides sit at the origin, so these stand where the content really is, for the debug rules
 	private func setUpPositionGuides() {
 		[blockPositionGuide, labelColumnPositionGuide, itemColumnPositionGuide].forEach { addLayoutGuide($0) }
 
@@ -286,7 +310,7 @@ open class SettingsLayoutView: NSView {
 		stackView.distribution = .fill
 		stackView.detachesHiddenViews = true
 		stackView.setHuggingPriority(.defaultLow, for: .horizontal)
-		// Tying the bottom with an equality spreads the slack into the sections and stretches the controls vertically
+		// Otherwise the slack would spread into the sections and stretch the controls vertically
 		stackView.setHuggingPriority(.required, for: .vertical)
 
 		stackView.translatesAutoresizingMaskIntoConstraints = false
@@ -471,7 +495,7 @@ open class SettingsLayoutView: NSView {
 
 	// MARK: - Item column width
 
-	/// Take in the widths the sections declared. Only the narrowest one satisfies every declaration at once, so that becomes the column width
+	/// Take in the widths the sections declared. The narrowest is the only one that satisfies them all
 	func invalidateItemColumnDeclaredWidth() {
 		guard let narrowestDeclaredWidth = columnSections.compactMap({ $0.itemColumnMaximumWidth }).min()
 		else {
@@ -486,7 +510,7 @@ open class SettingsLayoutView: NSView {
 
 	// MARK: - Handling sections
 
-	/// The sections already added, in order. Separators and buttons are included
+	/// The sections already added, in order, separators and buttons included
 	public var sections: [SettingsSectionView] {
 		stackView.arrangedSubviews.compactMap { $0 as? SettingsSectionView }
 	}
@@ -528,7 +552,7 @@ open class SettingsLayoutView: NSView {
 		let former = stackView.arrangedSubviews[formerIndex]
 		let latter = stackView.arrangedSubviews[latterIndex]
 
-		// Inserting the latter section first shifts the remaining sections back by one and frees its original slot
+		// Inserting the latter one first shifts the rest back by one and frees its original slot
 		stackView.removeArrangedSubview(latter)
 		stackView.insertArrangedSubview(latter, at: formerIndex)
 		stackView.removeArrangedSubview(former)
@@ -542,7 +566,7 @@ open class SettingsLayoutView: NSView {
 	private func setUpDebugRules() {
 		debugWireframes.add(view: self, color: LayoutDebugWireframeColor.container)
 
-		// Rules run the height of the pane, so a section whose edge is off shows up at a glance
+		// A rule runs the height of the pane, so a section whose edge is off shows up at a glance
 		debugWireframes.addRule(at: .minX, of: self, color: LayoutDebugWireframeColor.container)
 		debugWireframes.addRule(at: .maxX, of: self, color: LayoutDebugWireframeColor.container)
 		debugWireframes.addRule(at: .centerX, of: self, color: LayoutDebugWireframeColor.container)
@@ -551,23 +575,26 @@ open class SettingsLayoutView: NSView {
 		debugWireframes.addRule(at: .maxX, of: labelColumnPositionGuide, color: LayoutDebugWireframeColor.labelColumn)
 		debugWireframes.addRule(at: .minX, of: itemColumnPositionGuide, color: LayoutDebugWireframeColor.itemColumn)
 
-		// Each readout takes the side its column is aligned to, so it reads against the content below it
+		// Each readout takes the side its column is aligned to, so it reads against the content below
 		debugWireframes.addWidthReadout(of: labelColumnPositionGuide,
 										alignedTo: .maxX,
 										color: LayoutDebugWireframeColor.labelColumn)
+		
 		debugWireframes.addWidthReadout(of: itemColumnPositionGuide,
 										alignedTo: .minX,
 										color: LayoutDebugWireframeColor.itemColumn)
+		
 		debugWireframes.addWidthReadout(of: blockPositionGuide,
 										alignedTo: .maxX,
 										color: LayoutDebugWireframeColor.section)
+		
 		// Kept on the left, or it would land on the block width that shares the same right edge
 		debugWireframes.addWidthReadout(of: self,
 										alignedTo: .minX,
 										color: LayoutDebugWireframeColor.container)
 	}
 
-	/// Visualize the boxes of every level as wireframes. Calling it before adding sections still affects sections added later
+	/// Visualize the boxes of every level as wireframes. It reaches the sections added later as well
 	open func debug_setWireframes(_ flag: Bool) {
 		debugWireframes.isEnabled = flag
 		sections.forEach { $0.debug_setWireframes(debugWireframes.isEnabled) }
@@ -587,16 +614,17 @@ open class SettingsLayoutView: NSView {
 		debugWireframes.updateLayout()
 	}
 
-	/// Widest margin between this view and the view it was laid into.
-	/// System spacing settles during layout, so it is measured from the frames rather than read off the constraints
+	/// Widest margin to the parent view. Measured from the frames, since system spacing settles during layout
 	private func marginToParentView() -> CGFloat {
 		guard let superview else { return 0 }
-
-		let margins = [frame.minX - superview.bounds.minX,
-					   superview.bounds.maxX - frame.maxX,
-					   frame.minY - superview.bounds.minY,
-					   superview.bounds.maxY - frame.maxY]
-
+		
+		let margins = [
+			frame.minX - superview.bounds.minX,
+			superview.bounds.maxX - frame.maxX,
+			frame.minY - superview.bounds.minY,
+			superview.bounds.maxY - frame.maxY
+		]
+		
 		return max(margins.max() ?? 0, 0)
 	}
 

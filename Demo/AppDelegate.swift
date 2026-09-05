@@ -16,9 +16,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 	private(set) var settingsWindowController: SettingsWindowController?
 
 	func setupForSettingsWindow() {
-		// Prepare setting panes
-		
-		// Case 1. Create panes and hand them to the window controller (See `DemoViewController.swift` for details).
+		// Case 1. Create panes and hand them to the window controller
 
 		let generalPane = GeneralSettingsPaneViewController(
 			tabName: String(localized: "General"),
@@ -49,7 +47,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		let advancedPane = AdvancedSettingsPaneViewController.fromStoryboard()
 		
 		
-		// Initialize SettingsWindowController
 		settingsWindowController = .init(with: [
 			generalPane,
 			viewPane,
@@ -103,8 +100,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		}
 		
 		
-		// Release the controller once the window closes, so the panes are rebuilt on the next open.
-		// Tab restoration is opt-in, and it keeps the selected tab across that release.
+		// Released on close, so the panes are rebuilt on the next open. Tab restoration survives that release
 		settingsWindowController.restoresLastSelectedTab = true
 		settingsWindowController.windowCloseHandler = { [weak self] in
 			self?.settingsWindowController = nil
@@ -113,7 +109,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		settingsWindowController.applyAnimationOption()
 		settingsWindowController.tabViewController.loadingLabelText = String(localized: "Loading…")
 
-		// The loading view stands in for every pane, so the label is left to the pane that actually waits
+		// Only the pane that actually waits shows the label
 		settingsWindowController.tabViewController.showsLoadingLabelWhileLoading = false
 	}
 
@@ -128,13 +124,12 @@ extension AppDelegate {
 	}
 	
 	func applicationWillFinishLaunching(_ notification: Notification) {
-		// Localize the menu bar
-		// `applicationDidFinishLaunching(_:)` is too late
+		// Localizing after the launch finished is too late for the menu bar
 		localizeMainMenuTitles()
 	}
 	
 	@IBAction func openSettings(_ sender: Any) {
-		// Built on demand, since the controller is released every time the window closes
+		// Built on demand, since it is released every time the window closes
 		if settingsWindowController == nil {
 			setupForSettingsWindow()
 		}

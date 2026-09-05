@@ -15,15 +15,13 @@ public extension NSTabViewItem {
 
 open class SettingsTabViewController: NSTabViewController {
 	
-	/// Reference to SettingsWindowController
 	open weak var settingsWindowController: SettingsWindowController?
-	
-	/// Reference to SettingsWindow (getter)
+
 	open var settingsWindow: SettingsWindow? {
 		(view.window as? SettingsWindow)
 	}
-	
-	/// If set to true, use pane’s `tabName` to set tab name
+
+	/// If set to true, the tab name comes from the pane itself rather than from its localization key
 	open var disablesLocalizationWithTabNameLocalizeKey: Bool = false { didSet {
 		updateTabNames()
 	}}
@@ -45,7 +43,6 @@ open class SettingsTabViewController: NSTabViewController {
 		}
 	}
 	
-	/// Get the selected tab if it exist. (Only getter)
 	open var selectedTabViewItem: NSTabViewItem? {
 		if let selectedTabIndex {
 			return tabViewItems[selectedTabIndex]
@@ -58,7 +55,6 @@ open class SettingsTabViewController: NSTabViewController {
 		selectedTabViewItem?.identifier as? String
 	}
 	
-	/// Get all panes
 	open var panes: [SettingsPaneViewController] {
 		tabViewItems.compactMap {
 			$0.settingsPaneViewController
@@ -115,7 +111,7 @@ open class SettingsTabViewController: NSTabViewController {
 	/// Duration of the dissolve that reveals a pane
 	open var paneDissolveDuration: CFTimeInterval = 0.08
 
-	/// Set the custom timing function if you want. nil is default.
+	/// Custom timing function for the dissolve. nil uses the default
 	open var animationTimingFunctionForPaneDissolve: CAMediaTimingFunction?
 
 	/// Clamp all pane widths to the minimum content width the toolbar imposes, avoiding flicker on narrower panes
@@ -160,11 +156,11 @@ open class SettingsTabViewController: NSTabViewController {
 			NotificationCenter.default.removeObserver(windowDidResizeObserver)
 		}
 
-		// A load in flight would otherwise run on past this controller
+		// A load in flight would otherwise outlive this controller
 		loadTasks.values.forEach { $0.cancel() }
 	}
 	
-	/// Eagerly load all tab views. Call this explicitly if you want to pre-load all panes at once.
+	/// Eagerly load every tab view. Call it to pre-load all panes at once
 	open func loadAllTabs() {
 		tabView.tabViewItems.forEach {
 			if #available(macOS 14.0, *) {
@@ -211,7 +207,7 @@ open class SettingsTabViewController: NSTabViewController {
 	
 	/// Keep the size the user dragged the window to. Sizes applied on tab switching are skipped
 	private func recordUserResizedSize() {
-		// The notification arrives a turn late, and an uncached pane still shows another pane’s frame
+		// The notification arrives a turn late, so an uncached pane still shows another pane’s frame
 		guard let settingsWindow, !settingsWindow.isWindowResizing,
 			  let tabViewItem = selectedTabViewItem,
 			  tabViewItem.settingsPaneViewController?.isResizableView == true,
@@ -280,7 +276,7 @@ open class SettingsTabViewController: NSTabViewController {
 	}
 
 	open override func removeTabViewItem(_ tabViewItem: NSTabViewItem) {
-		// Cleared here, or the caches would keep the item and its pane alive past the removal
+		// Cleared here, or the caches would keep the item and its pane alive
 		tabViewSizes[tabViewItem] = nil
 		userResizedSizes[tabViewItem] = nil
 
@@ -314,7 +310,7 @@ open class SettingsTabViewController: NSTabViewController {
 			return
 		}
 
-		// A load in flight is waited on even once it has been cancelled, or the content would be built twice over
+		// A load in flight is waited on even once cancelled, or the content would be built twice
 		if loadTasks[pane] != nil {
 			pendingLoadCompletions[pane, default: []].append(completion)
 			return
@@ -335,7 +331,7 @@ open class SettingsTabViewController: NSTabViewController {
 				self?.finishLoad(of: pane, retriesWaiters: false)
 			}
 			catch {
-				// Cancellation is not a failure, and whoever asked while it wound down is owed another attempt
+				// Cancellation is not a failure, and whoever asked meanwhile is owed another attempt
 				if !Task.isCancelled {
 					pane.paneContentDidFailToLoad(error)
 				}
@@ -437,7 +433,7 @@ open class SettingsTabViewController: NSTabViewController {
 		super.tabView(tabView, didSelect: tabViewItem)
 		guard let tabViewItem else { return }
 
-		// Driven from here, since `NSTabViewController` skips the transition when the outgoing pane view was never placed
+		// Driven from here, since the system skips the transition when the outgoing pane view was never placed
 		selectTab(with: tabViewItem, animateIfPossible: hasViewAppeared)
 	}
 
@@ -453,7 +449,7 @@ open class SettingsTabViewController: NSTabViewController {
 			standInLoadingView(in: paneContainer, replacing: fromViewController.view)
 		}
 
-		// The incoming pane is placed by `revealPane`, once its content is ready behind the loading view
+		// The incoming pane is placed once its content is ready behind the loading view
 		completion?()
 	}
 	
@@ -466,7 +462,7 @@ open class SettingsTabViewController: NSTabViewController {
 							 animateIfPossible: Bool,
 							 completion: (() -> Void)?)
 	{
-		// Set once the load is left to a later turn, which tells a wait apart from content built on the spot
+		// Tells a load left to a later turn apart from content built on the spot
 		var loadWasDeferred = false
 		
 		let present = { [weak self] in
@@ -483,7 +479,6 @@ open class SettingsTabViewController: NSTabViewController {
 			
 			self.cacheTabViewSize(for: tabViewItem)
 			
-			// Read here, not at call time, since a slow load can finish after the pane appeared
 			// The pane the window opens on has nothing to dissolve from, unless the load kept it waiting
 			let dissolves = self.hasViewAppeared || loadWasDeferred
 			let animates = animateIfPossible || dissolves

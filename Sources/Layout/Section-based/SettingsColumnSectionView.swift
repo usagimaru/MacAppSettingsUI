@@ -20,7 +20,7 @@ open class SettingsColumnSectionView: SettingsSectionView {
 
 	public private(set) var titleLabel: NSTextField!
 
-	/// Width this section asks of the item column. Caps and floors it alike, so the column settles there. nil follows the items instead
+	/// Width this section asks of the item column, as a cap and a floor alike. nil follows the items instead
 	open var itemColumnMaximumWidth: CGFloat? {
 		didSet {
 			updateItemColumnMaximumWidthConstraint()
@@ -30,6 +30,7 @@ open class SettingsColumnSectionView: SettingsSectionView {
 
 	/// Box of the label column. Its width comes from the container guide
 	private let labelBoxGuide = NSLayoutGuide()
+	
 	/// Box of the item column. It sits on the trailing side of the label column
 	private let itemBoxGuide = NSLayoutGuide()
 
@@ -39,6 +40,7 @@ open class SettingsColumnSectionView: SettingsSectionView {
 	private var items = [(view: NSView, indentation: CGFloat)]()
 	private var bottomConstraint: NSLayoutConstraint?
 	private var itemColumnMaximumWidthConstraint: NSLayoutConstraint?
+	
 	/// Constraints that let the label decide the height while no item has been added yet
 	private var labelOnlyVerticalConstraints = [NSLayoutConstraint]()
 
@@ -74,7 +76,7 @@ open class SettingsColumnSectionView: SettingsSectionView {
 	private func setUpGuides() {
 		[labelBoxGuide, itemBoxGuide].forEach { addLayoutGuide($0) }
 
-		// The two columns fill the content box exactly, so centering and width are left to the base class
+		// The two columns fill the content box, so centering and width are left to the base class
 		NSLayoutConstraint.activate([
 			labelBoxGuide.topAnchor.constraint(equalTo: topAnchor),
 			labelBoxGuide.bottomAnchor.constraint(equalTo: bottomAnchor),
@@ -87,7 +89,7 @@ open class SettingsColumnSectionView: SettingsSectionView {
 		])
 	}
 
-	/// The container shares the item column width guide across every section, so the narrowest declaration wins for the whole layout
+	/// The width guide is shared across sections, so the narrowest declaration wins for the whole layout
 	private func updateItemColumnMaximumWidthConstraint() {
 		itemColumnMaximumWidthConstraint?.isActive = false
 		itemColumnMaximumWidthConstraint = nil
@@ -101,7 +103,7 @@ open class SettingsColumnSectionView: SettingsSectionView {
 	}
 
 	private func setUpTitleLabel(_ title: String) {
-		// The colon comes from here so that a localization key holds the wording alone
+		// The colon is appended here, so a localization key holds the wording alone
 		titleLabel = NSTextField()
 		titleLabel.stringValue = "\(title):"
 		titleLabel.isEditable = false
@@ -112,13 +114,13 @@ open class SettingsColumnSectionView: SettingsSectionView {
 		titleLabel.alignment = .right
 		titleLabel.font = .systemFont(ofSize: NSFont.systemFontSize)
 
-		// Left in wrapping mode the label gains no intrinsic width and the column collapses to zero
+		// In wrapping mode the label gains no intrinsic width and the column collapses to zero
 		titleLabel.usesSingleLineMode = true
 		// Truncating in the middle keeps the trailing colon, so a shortened label still reads as a label
 		titleLabel.lineBreakMode = .byTruncatingMiddle
 		titleLabel.cell?.isScrollable = false
 
-		// Recovers a truncated label on hover, so a narrow pane never hides the wording outright
+		// Recovers a truncated label on hover, so a narrow pane never hides the wording
 		titleLabel.allowsExpansionToolTips = true
 
 		titleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -138,7 +140,7 @@ open class SettingsColumnSectionView: SettingsSectionView {
 		NSLayoutConstraint.activate(labelOnlyVerticalConstraints)
 	}
 
-	/// Activate the constraints that cross into the container column width guides. Call it after joining the view hierarchy
+	/// Activate the constraints that reach the container column width guides. Call it after joining the hierarchy
 	public func activateColumnWidthConstraints() {
 		NSLayoutConstraint.activate([
 			labelBoxGuide.widthAnchor.constraint(equalTo: labelColumnWidthGuide.widthAnchor),
@@ -168,7 +170,7 @@ open class SettingsColumnSectionView: SettingsSectionView {
 		return checkbox
 	}
 
-	/// Supplementary description label. Its width comes from the column and it takes no part in deciding the column width
+	/// Supplementary description label. Its width comes from the column, which it does not vote on
 	@discardableResult
 	public func addDescriptionLabel(_ string: String,
 									indentationLevel: Int = 0,
@@ -251,7 +253,7 @@ open class SettingsColumnSectionView: SettingsSectionView {
 		accessoryView.translatesAutoresizingMaskIntoConstraints = false
 		addSubview(accessoryView)
 
-		// A guide across both is needed to demand the combined width of the item and the accessory view from the column
+		// A guide across both is needed to demand their combined width from the column
 		let pairGuide = NSLayoutGuide()
 		addLayoutGuide(pairGuide)
 
@@ -288,16 +290,15 @@ open class SettingsColumnSectionView: SettingsSectionView {
 
 		if contributesToColumnWidth {
 			constraints.append(item.trailingAnchor.constraint(lessThanOrEqualTo: itemBoxGuide.trailingAnchor))
-			// The inset pushes the item in, so the column has to answer for the item width plus the inset
+			// The inset pushes the item in, so the column answers for the item width plus the inset
 			constraints.append(itemColumnWidthGuide.widthAnchor.constraint(greaterThanOrEqualTo: item.widthAnchor,
 																		   constant: indentation))
 		}
 		else {
-			// The wrapping width arrives through `availableWidth`, so the box only needs to stay inside the column
+			// The wrapping width is handed down later, so the box only needs to stay inside the column
 			constraints.append(item.trailingAnchor.constraint(lessThanOrEqualTo: itemBoxGuide.trailingAnchor))
 
-			// Asking with the box width would be circular, because that width is what this demand decides.
-			// Round up, or integralizing the box can land a point short of the text and wrap it needlessly
+			// A constant, since asking with the box width would be circular. Rounded up, or the box can land a point short and wrap needlessly
 			if let label = item as? SettingsWrappingLabel {
 				let demand = itemColumnWidthGuide.widthAnchor
 					.constraint(greaterThanOrEqualToConstant: label.naturalTextWidth.rounded(.up) + indentation)

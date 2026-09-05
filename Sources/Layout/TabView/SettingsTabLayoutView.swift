@@ -7,7 +7,7 @@
 import Cocoa
 import SwiftUI
 
-/// A container that lays a nested tab view into a settings pane. It owns the tab geometry and reports the size the largest tab needs
+/// A container that lays a nested tab view into a settings pane, reporting the size the largest tab needs
 open class SettingsTabLayoutView: NSView {
 	
 	/// Tighter than the system margin, so the tabs sit close under the toolbar
@@ -41,7 +41,7 @@ open class SettingsTabLayoutView: NSView {
 	
 	private func setUpTabView() {
 		tabView.controlSize = .small
-		// `controlSize` alone leaves the labels at the default size, so the font is set as well
+		// The control size alone leaves the labels at the default size
 		tabView.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
 		tabView.translatesAutoresizingMaskIntoConstraints = false
 		addSubview(tabView)
@@ -54,7 +54,7 @@ open class SettingsTabLayoutView: NSView {
 		])
 	}
 	
-	/// Lay this container into the pane view. The top edge is tighter than the system margin unless you pass your own insets
+	/// Lay this container into the pane view. Without your own insets the top edge is tighter than the system margin
 	open func install(in parentView: NSView, margins: SettingsLayoutMargins = .systemSpacing) {
 		translatesAutoresizingMaskIntoConstraints = false
 		parentView.addSubview(self, positioned: .below, relativeTo: nil)
@@ -104,7 +104,7 @@ open class SettingsTabLayoutView: NSView {
 		let hostingView = SettingsHostingView(rootView: rootView)
 		hostingView.translatesAutoresizingMaskIntoConstraints = false
 		
-		// The hosting view measures itself against the width it is given, so it is centered rather than pinned
+		// The hosting view measures itself against the given width, so it is centered rather than pinned
 		let contentView = NSView()
 		contentView.addSubview(hostingView)
 		
@@ -136,7 +136,7 @@ open class SettingsTabLayoutView: NSView {
 		return item
 	}
 	
-	/// Takes the squeeze from the tab view, so the content keeps its own height
+	/// Absorbs the squeeze from the tab view, so the content keeps its own height
 	private func tabContainerView(wrapping contentView: NSView) -> NSView {
 		let containerView = NSView()
 		contentView.translatesAutoresizingMaskIntoConstraints = false
@@ -190,7 +190,7 @@ open class SettingsTabLayoutView: NSView {
 	
 	/// The frame the tab view draws around its content area, in the terms Auto Layout solves for
 	private func tabViewChromeSize() -> NSSize {
-		// Both rects carry their edges as insets, so the difference holds before the tab view has been laid out
+		// Both rects carry their edges as insets, so the difference holds before any layout pass
 		let alignmentRect = tabView.alignmentRect(forFrame: tabView.frame)
 		let contentRect = tabView.contentRect
 		

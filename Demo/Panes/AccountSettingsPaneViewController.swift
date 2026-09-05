@@ -29,7 +29,7 @@ class AccountSettingsPaneViewController: SettingsPaneViewController {
 		let layoutView = SettingsLayoutView()
 		layoutView.install(in: view)
 		
-		// The surplus height the floor leaves is split above and below the sections
+		// Surplus height is split above and below the sections
 		layoutView.verticalAlignment = .center
 		self.layoutView = layoutView
 		

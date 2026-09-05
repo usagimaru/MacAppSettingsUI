@@ -29,17 +29,17 @@ public enum SettingsSectionHeightMode {
 /// A unit of view stacked in a SettingsLayoutView
 open class SettingsSectionView: NSView {
 
-	/// Box holding the section content. Its width follows the width mode and it stays centered
+	/// Box holding the section content. It stays centered and its width follows the width mode
 	public let contentGuide = NSLayoutGuide()
 
-	/// Which width the content box follows. Switching it swaps the active width constraint
+	/// Which width the content box follows
 	open var widthMode: SettingsSectionWidthMode = .contentBlock {
 		didSet {
 			updateContentWidthConstraint()
 		}
 	}
 
-	/// Whether the section takes in surplus height. Switching it swaps the active height constraints
+	/// Whether the section takes in surplus height
 	open var heightMode: SettingsSectionHeightMode = .fitsContent {
 		didSet {
 			updateHeightConstraints()
@@ -47,7 +47,7 @@ open class SettingsSectionView: NSView {
 		}
 	}
 
-	/// Outlines of this section and everything inside it. Subclasses add their own boxes to it
+	/// Outlines of this section and everything inside it
 	public lazy var debugWireframes = LayoutDebugWireframes(host: self)
 
 	/// The container this section was added to
@@ -67,7 +67,7 @@ open class SettingsSectionView: NSView {
 		self.identifier = identifier
 		setUpContentGuide()
 
-		// Hatched rather than filled, so the flat column tints inside it stay readable
+		// Hatched rather than filled, so the flat column tints inside stay readable
 		debugWireframes.addHatch(view: self, color: LayoutDebugWireframeColor.sectionFill)
 		debugWireframes.add(view: self,
 							color: LayoutDebugWireframeColor.section,
@@ -93,17 +93,17 @@ open class SettingsSectionView: NSView {
 		updateContentWidthConstraint()
 	}
 
-	/// Take over the container's shared block width. Whether the section actually follows it is up to the width mode
+	/// Take over the shared block width of the container. Following it is up to the width mode
 	func adoptContentWidth(from widthGuide: NSLayoutGuide) {
 		contentBlockWidthConstraint = contentGuide.widthAnchor.constraint(equalTo: widthGuide.widthAnchor)
 		updateContentWidthConstraint()
 	}
 
 	private func updateContentWidthConstraint() {
-		// Outside a container there is no block to follow, so the section width stays the only width available
+		// Outside a container there is no block to follow, so the section width is the only one available
 		let followsContentBlock = (widthMode == .contentBlock && contentBlockWidthConstraint != nil)
 
-		// Drop the old width before putting up the new one, so the two never coexist
+		// Swapped one at a time, so the two widths never coexist
 		if followsContentBlock {
 			fullWidthConstraint?.isActive = false
 			contentBlockWidthConstraint?.isActive = true

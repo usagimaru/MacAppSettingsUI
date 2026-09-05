@@ -14,7 +14,7 @@ open class SettingsWindow: NSWindow {
 	/// If set to false, disables fitting animation
 	open var fittingAnimationEnabled: Bool = true
 	
-	/// Set the custom timing function if you want. nil is default.
+	/// Custom timing function for resizing. nil uses the default
 	open var animationTimingFunctionForResizing: CAMediaTimingFunction?
 	
 	/// Get “Reduce Motion” accessibility setting
@@ -66,7 +66,7 @@ open class SettingsWindow: NSWindow {
 			}
 		}
 		
-		// Change the title of the window menu item on Window menu if it is visible
+		// The Window menu lists this window only while it is visible
 		if isVisible {
 			NSApp.changeWindowsItem(self, title: windowTitle, filename: false)
 		}
@@ -74,8 +74,7 @@ open class SettingsWindow: NSWindow {
 			NSApp.removeWindowsItem(self)
 		}
 		
-		// Set Dock tile title.
-		// It makes little sense because minimization is basically disabled.
+		// Dock tile title. Minimization is basically disabled, so it rarely shows
 		miniwindowTitle = windowTitle
 	}
 	
@@ -103,7 +102,7 @@ open class SettingsWindow: NSWindow {
 		if animateIfPossible && fittingAnimationEnabled && !reduceMotionIfNeeded {
 			isWindowResizing = true
 			
-			// A tracked mouse switches the run loop mode and stalls an implicit animation, so this form runs to the end
+			// A tracked mouse switches the run loop mode and stalls an implicit animation
 			setFrame(newFrame, display: true, animate: true)
 			postprocess()
 		}
@@ -125,7 +124,7 @@ open class SettingsWindow: NSWindow {
 		let heightDiff = abs(newFrame.height - frame.height)
 		let maxDiff = max(widthDiff, heightDiff)
 		
-		// Use screen size as the reference for normalization
+		// Normalized against the screen size
 		let referenceLength = NSScreen.main?.frame.height ?? 800
 		let ratio = min(maxDiff / referenceLength, 1.0)
 		

@@ -36,7 +36,7 @@ class DemoViewController: NSViewController {
 	}
 	
 	@IBAction func removeAutosaveFrame(_ sender: Any) {
-		// The type method works even while no window controller is alive
+		// Works even while no window controller is alive
 		SettingsWindowController.removeAutosavedWindowFrame()
 	}
 	

@@ -6,7 +6,7 @@
 
 import Cocoa
 
-/// This protocol conforms to NSView and NSViewController
+/// Adopted by a view or a view controller that lays out a pane with layout guides
 public protocol SettingsPaneLayoutGuide: NSResponder {
 	
 	var contentContainerView: SettingsPaneContainerView? { get set }
@@ -15,7 +15,7 @@ public protocol SettingsPaneLayoutGuide: NSResponder {
 
 public extension SettingsPaneLayoutGuide {
 	
-	/// Prepare container view if you want
+	/// Prepare the container view in the adopter’s own view
 	func setContentContainerView(maximumWidth: CGFloat?, labelLayoutGuideWidth: CGFloat? = nil) {
 		let targetView: NSView?
 		if let vc = self as? NSViewController {

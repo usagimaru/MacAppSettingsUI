@@ -10,7 +10,7 @@ open class SettingsPaneViewController: NSViewController {
 	
 	open weak var tabViewController: SettingsTabViewController?
 	
-	/// The alias for view contrller’s `title`. Pass to NSTabViewItem.label. If when use `tabNameLocalizeKey`, this property can be nil
+	/// Tab name passed to NSTabViewItem.label. Can be nil when a localization key is given instead
 	@IBInspectable open var tabName: String? {
 		get { title }
 		set { title = newValue }
@@ -49,17 +49,17 @@ open class SettingsPaneViewController: NSViewController {
 	/// Guard against a layout that never converges
 	private static let paneSizeMeasurementPassLimit = 4
 	
-	private var minimumPaneWidthConstraint: NSLayoutConstraint?
-	
 	/// Whether the pane was shrink-wrapped, so it can be measured again the same way
 	private var fitsPaneToContent = false
+	
+	private var minimumPaneWidthConstraint: NSLayoutConstraint?
 	
 	
 	// MARK: -
 	
 	open override func viewDidLoad() {
 		super.viewDidLoad()
-		// A pane that declares no size falls back to what its constraints or its `loadView` frame settle on
+		// A pane that declares no size falls back to what its constraints or its initial frame settle on
 		if preferredPaneSize == nil {
 			capturePreferredPaneSize()
 		}
@@ -85,13 +85,13 @@ open class SettingsPaneViewController: NSViewController {
 		buildPaneContent()
 	}
 	
-	/// Create View Controller Manually
+	/// Create a pane manually
 	/// - Parameters:
-	///   - tabViewController: Parent tab view controller if you will use it in the pane.
+	///   - tabViewController: Parent tab view controller, if the pane needs it
 	///   - tabName: Default tab name
 	///   - tabImage: Tab image
 	///   - tabIdentifier: Unique tab identifier
-	///   - isResizableView: Flag for resizable attribute (Default: false)
+	///   - isResizableView: Whether the window becomes resizable on this pane
 	public convenience init(tabViewController: SettingsTabViewController? = nil,
 							tabName: String? = nil,
 							tabImage: NSImage? = nil,
@@ -163,7 +163,7 @@ open class SettingsPaneViewController: NSViewController {
 			previousFittingSize = fittingSize
 		}
 
-		// Sparse content would leave the pane tiny, so the floor is taken before the size is captured
+		// Sparse content would leave the pane tiny, so the floor is applied first
 		if let minimumPaneHeight, view.frame.height < minimumPaneHeight {
 			view.setFrameSize(NSSize(width: view.frame.width, height: minimumPaneHeight))
 			view.layoutSubtreeIfNeeded()

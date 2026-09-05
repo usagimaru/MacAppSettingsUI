@@ -17,12 +17,12 @@ open class SettingsPaneContainerView: NSView {
 		"MacAppSettingsUI"
 	}
 	
-	/// Set maximum width of the container. Setting it to nil allows the container to behave flexibly.
+	/// Upper bound of the container width. nil lets the container behave flexibly
 	open var containerMaximumWidth: CGFloat? { didSet {
 		updateConstraints()
 	}}
 	
-	/// Set width of the label layout guide.
+	/// Width of the label layout guide
 	open var labelLayoutGuideWidth: CGFloat = 200 { didSet {
 		updateConstraints()
 	}}
@@ -51,7 +51,7 @@ open class SettingsPaneContainerView: NSView {
 		}
 	}
 	
-	/// Set this view to specific parent view and prepare guides
+	/// Lay this view into a parent view and prepare the guides
 	open func setView(to superview: NSView) {
 		translatesAutoresizingMaskIntoConstraints = false
 		
@@ -122,12 +122,11 @@ open class SettingsPaneContainerView: NSView {
 			secondaryAreaLayoutGuide.identifier = .init("\(Self.idscope).SecondaryAreaLayoutGuide")
 			secondaryAreaLayoutGuide.topAnchor.constraint(equalToSystemSpacingBelow: topAnchor, multiplier: 1).isActive = true
 			bottomAnchor.constraint(equalToSystemSpacingBelow: secondaryAreaLayoutGuide.bottomAnchor, multiplier: 1).isActive = true
-			//secondaryAreaLayoutGuide.leadingAnchor.constraint(equalToSystemSpacingAfter: labelLayoutGuide.trailingAnchor, multiplier: 1).isActive = true // crash
+			// System spacing between two guides crashes, so a constant stands in for it
 			secondaryAreaLayoutGuide.leadingAnchor.constraint(equalTo: labelLayoutGuide.trailingAnchor, constant: spacingOfHorizontalAreas).isActive = true
 			trailingAnchor.constraint(equalToSystemSpacingAfter: secondaryAreaLayoutGuide.trailingAnchor, multiplier: 1).isActive = true
 		}
 		else {
-			//secondaryAreaLayoutGuide.leadingAnchor.constraint(equalToSystemSpacingAfter: labelLayoutGuide.trailingAnchor, multiplier: 1).isActive = true // crash
 			secondaryAreaLayoutGuide.leadingAnchor.constraint(equalTo: labelLayoutGuide.trailingAnchor, constant: spacingOfHorizontalAreas).isActive = true
 		}
 	}

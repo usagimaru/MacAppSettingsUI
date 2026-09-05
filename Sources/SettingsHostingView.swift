@@ -9,13 +9,12 @@ import SwiftUI
 
 /// Hosts a SwiftUI view and measures its height against the width it is given
 open class SettingsHostingView<Content: View>: NSView {
-
-	// `NSHostingView` sizes itself from an unspecified proposal, so content whose height follows its
-	// width comes out short. `NSHostingController.sizeThatFits(in:)` is the only API that takes a proposal
-
+	
+	// A hosting view sizes itself from an unspecified proposal, so content whose height follows its width comes out short
+	
 	/// Stands in for an unbounded proposal. Computed, since a generic type takes no static stored property
 	private static var unboundedLength: CGFloat { 10_000 }
-
+	
 	private let hostingController: NSHostingController<Content>
 	private var lastMeasuredWidth: CGFloat = .nan
 	

@@ -8,7 +8,7 @@
 import Cocoa
 import SwiftUI
 
-/// The switch body of `DemoSwitch`. State lives here so SwiftUI can redraw, and changes are reported outward
+/// The SwiftUI body of the demo switch. State lives here so SwiftUI can redraw
 struct DemoSwitchView: View {
 
 	let controlSize: ControlSize
@@ -34,7 +34,7 @@ struct DemoSwitchView: View {
 
 }
 
-/// A switch that honors `controlSize`. NSSwitch carries no NSCell, so it ignores that property and stays 54x24
+/// A switch that honors `controlSize`. NSSwitch carries no NSCell, so it stays 54x24 instead
 final class DemoSwitch: NSHostingView<DemoSwitchView> {
 
 	convenience init(isOn: Bool = false,
@@ -59,7 +59,7 @@ final class DemoSwitch: NSHostingView<DemoSwitchView> {
 
 extension SettingsWindowController {
 
-	/// Hands the animation option to both the window resize and the pane dissolve
+	/// Apply the demo animation option to the window resize and the pane dissolve
 	func applyAnimationOption() {
 		settingsWindow.fittingAnimationEnabled = DemoOptions.animationEnabled
 		tabViewController.paneDissolveAnimationEnabled = DemoOptions.animationEnabled

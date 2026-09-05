@@ -38,7 +38,7 @@ class ExtensionsSettingsPaneViewController: SettingsPaneViewController {
 
 	// Simulates fetching the extension list, so the loading wait is visible in this demo
 	override func loadPaneContent() async throws {
-		// Raised for this pane alone, or the panes that need no wait would flash the label
+		// Raised for this pane alone, or panes with no wait would flash the label
 		tabViewController?.showsLoadingLabel = true
 		defer { tabViewController?.showsLoadingLabel = false }
 
@@ -54,7 +54,7 @@ class ExtensionsSettingsPaneViewController: SettingsPaneViewController {
 	}
 
 	private func buildSections() {
-		// Guards the pane against a rebuild, in case a load is ever cancelled after it got this far
+		// Guards against a rebuild after a cancelled load
 		self.layoutView?.removeFromSuperview()
 
 		let layoutView = SettingsLayoutView()
@@ -146,7 +146,7 @@ extension ExtensionsSettingsPaneViewController: NSTableViewDataSource, NSTableVi
 		label.lineBreakMode = .byTruncatingTail
 		label.translatesAutoresizingMaskIntoConstraints = false
 
-		// A bare label fills the row and draws its text at the top, so it is centered inside a cell view
+		// A bare label draws its text at the top of the row, so it is centered inside a cell view
 		let cellView = NSTableCellView()
 		cellView.addSubview(label)
 		cellView.textField = label
