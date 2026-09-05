@@ -103,20 +103,9 @@ open class SettingsWindow: NSWindow {
 		if animateIfPossible && fittingAnimationEnabled && !reduceMotionIfNeeded {
 			isWindowResizing = true
 			
-			NSAnimationContext.runAnimationGroup { ctx in
-				ctx.allowsImplicitAnimation = true
-				ctx.duration = animationResizeTime(newFrame)
-				if let function = animationTimingFunctionForResizing {
-					ctx.timingFunction = function
-				}
-				else {
-					ctx.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-				}
-				
-				setFrame(newFrame, display: true)
-			} completionHandler: {
-				postprocess()
-			}
+			// A tracked mouse switches the run loop mode and stalls an implicit animation, so this form runs to the end
+			setFrame(newFrame, display: true, animate: true)
+			postprocess()
 		}
 		else {
 			// Flagged here too, so this resize is not mistaken for a user drag

@@ -197,6 +197,13 @@ open class SettingsWindowController: NSWindowController {
 		return true
 	}
 
+	/// Store the window frame where it stands
+	open func storeWindowFrame() {
+		guard let window, !windowFrameAutosaveName.isEmpty else { return }
+
+		window.saveFrame(usingName: windowFrameAutosaveName)
+	}
+
 	/// Close window to press Escape key
 	@objc open func cancel(_ sender: Any?) {
 		// We can use the hidden method `cancel(_:)` to close the window with Escape key or Cmd-PERIOD pressing

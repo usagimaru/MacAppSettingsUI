@@ -137,6 +137,9 @@ open class SettingsTabViewController: NSTabViewController {
 	/// The load in flight per pane
 	private var loadTasks = [SettingsPaneViewController: Task<Void, Never>]()
 	
+	/// The tab a presentation is running for. Selecting it again is turned away
+	private var presentingTabViewItem: NSTabViewItem?
+	
 	/// False until the first appearance
 	private var hasViewAppeared = false
 
@@ -221,6 +224,16 @@ open class SettingsTabViewController: NSTabViewController {
 		tabViewSizes[tabViewItem] = contentSize
 	}
 	
+	/// Keep the size a pane settled on, and store the frame so the next run opens at it
+	private func recordSettledWindowSize(for tabViewItem: NSTabViewItem) {
+		if let contentSize = settingsWindow?.contentView?.frame.size,
+		   contentSize.width > 0, contentSize.height > 0 {
+			tabViewSizes[tabViewItem] = contentSize
+		}
+
+		settingsWindowController?.storeWindowFrame()
+	}
+
 	/// The size the user last left this pane at
 	open func userResizedSize(for pane: SettingsPaneViewController) -> NSSize? {
 		guard let tabViewItem = tabViewItems.first(where: { $0.viewController === pane }) else { return nil }
@@ -408,6 +421,11 @@ open class SettingsTabViewController: NSTabViewController {
 	// MARK: - Tab View and Transition
 	
 	open override func tabView(_ tabView: NSTabView, shouldSelect tabViewItem: NSTabViewItem?) -> Bool {
+		// Repeat clicks would rerun the load and the animations of the tab already on its way
+		if let tabViewItem, presentingTabViewItem === tabViewItem {
+			return false
+		}
+		
 		// Block toolbar interactions during transitions
 		if settingsWindow?.isWindowResizing == true {
 			return false
@@ -448,6 +466,9 @@ open class SettingsTabViewController: NSTabViewController {
 							 animateIfPossible: Bool,
 							 completion: (() -> Void)?)
 	{
+		// Set once the load is left to a later turn, which tells a wait apart from content built on the spot
+		var loadWasDeferred = false
+		
 		let present = { [weak self] in
 			guard let self else {
 				completion?()
@@ -463,14 +484,18 @@ open class SettingsTabViewController: NSTabViewController {
 			self.cacheTabViewSize(for: tabViewItem)
 			
 			// Read here, not at call time, since a slow load can finish after the pane appeared
-			let animates = animateIfPossible || self.hasViewAppeared
+			// The pane the window opens on has nothing to dissolve from, unless the load kept it waiting
+			let dissolves = self.hasViewAppeared || loadWasDeferred
+			let animates = animateIfPossible || dissolves
 
 			// The window settles first, so the dissolve never runs against a moving frame
 			self.fitWindowSize(to: tabViewItem, animateIfPossible: animates) {
 				self.captureMinimumContentWidth(requestedFor: tabViewItem)
 				
 				if let paneContainer, self.loadingView.superview === paneContainer {
-					self.addPaneDissolveTransition(to: paneContainer)
+					if dissolves {
+						self.addPaneDissolveTransition(to: paneContainer)
+					}
 					self.revealPane(of: tabViewItem, in: paneContainer)
 				}
 				
@@ -478,6 +503,7 @@ open class SettingsTabViewController: NSTabViewController {
 				self.setWindowBehavior(with: tabViewItem)
 				// Stored here, so a programmatic selection is remembered even when no delegate callback runs
 				self.settingsWindowController?.storeSelectedTabIdentifier()
+				self.recordSettledWindowSize(for: tabViewItem)
 				completion?()
 			}
 		}
@@ -487,6 +513,7 @@ open class SettingsTabViewController: NSTabViewController {
 
 		if let pane {
 			loadContentIfNeeded(for: pane, completion: present)
+			loadWasDeferred = true
 		}
 		else {
 			present()
@@ -649,6 +676,13 @@ open class SettingsTabViewController: NSTabViewController {
 	
 	/// Select tab, fit window size and update window title
 	open func selectTab(with tabViewItem: NSTabViewItem, animateIfPossible: Bool, completion: (() -> Void)? = nil) {
+		guard presentingTabViewItem !== tabViewItem else {
+			completion?()
+			return
+		}
+		
+		presentingTabViewItem = tabViewItem
+		
 		// A pane the transition never took out has to be taken out here, or it is on screen before the dissolve
 		if let pane = tabViewItem.settingsPaneViewController {
 			presentLoadingView(insteadOf: pane)
@@ -656,8 +690,18 @@ open class SettingsTabViewController: NSTabViewController {
 		
 		presentPane(for: tabViewItem,
 					in: loadingView.superview,
-					animateIfPossible: animateIfPossible,
-					completion: completion)
+					animateIfPossible: animateIfPossible)
+		{ [weak self] in
+			self?.endPresentation(of: tabViewItem)
+			completion?()
+		}
+	}
+	
+	private func endPresentation(of tabViewItem: NSTabViewItem) {
+		// A presentation dropped for another tab has nothing left to release
+		guard presentingTabViewItem === tabViewItem else { return }
+		
+		presentingTabViewItem = nil
 	}
 	
 	/// Find the tab carrying the given identifier
